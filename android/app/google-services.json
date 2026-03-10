@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "244575841502",
+    "project_id": "getir-clone-b8568",
+    "storage_bucket": "getir-clone-b8568.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:244575841502:android:7dcb1f5fce5a60604de64f",
+        "android_client_info": {
+          "package_name": "com.example.getir_clone"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2DMj6MbWH9vtugG5Nb5gdXGcni4dyuWo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:244575841502:android:f9569fe4bfcf04f84de64f",
+        "android_client_info": {
+          "package_name": "com.example.mugt_gelsin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2DMj6MbWH9vtugG5Nb5gdXGcni4dyuWo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

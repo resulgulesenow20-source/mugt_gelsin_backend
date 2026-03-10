@@ -1,0 +1,194 @@
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class LanguageProvider with ChangeNotifier {
+  String _selectedLang = 'TR'; // Varsayılan dil Türkçe
+  
+  String get selectedLang => _selectedLang;
+
+  LanguageProvider() {
+    _loadLanguage();
+  }
+
+  // Kalıcı hafızadan dili yükle
+  Future<void> _loadLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    _selectedLang = prefs.getString('selected_lang') ?? 'TR';
+    notifyListeners();
+  }
+
+  // Dili değiştir ve kaydet
+  Future<void> setLanguage(String langCode) async {
+    _selectedLang = langCode;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selected_lang', langCode);
+  }
+
+  // Çeviri Metinleri
+  static final Map<String, Map<String, String>> translations = {
+    'TR': {
+      'app_name': 'Mugt Gelsin',
+      'tagline': 'Lezzete Bir Adım Uzaklıktasınız',
+      'login_button': 'Giriş Yap',
+      'phone_label': 'Telefon Numarası',
+      'phone_hint': 'Örn: 5551234567',
+      'no_account': 'Hesabınız yok mu?',
+      'signup': 'Kayıt Ol',
+      'address_select': 'Adres Seçin / Ekle',
+      'highlights': 'Öne Çıkanlar',
+      'cheapest': 'En Ucuz Lezzetler',
+      'restaurants': 'Restoranlar',
+      'search_hint': 'Restoran veya yemek arayın...',
+      'nav_home': 'Ana Sayfa',
+      'nav_favorites': 'Favoriler',
+      'nav_cart': 'Sepetim',
+      'nav_profile': 'Profil',
+      'products': 'Ürünler',
+      'no_fav_res': 'Favori restoran bulunamadı!',
+      'no_fav_prod': 'Favori ürün bulunamadı!',
+      'orders': 'Siparişlerim',
+      'addresses': 'Adreslerim',
+      'payment_methods': 'Ödeme Yöntemlerim',
+      'coupons': 'Kuponlarım',
+      'help_support': 'Yardım & Destek',
+      'mugt_support': 'Mugt Destek',
+      'logout': 'Çıkış Yap',
+      'logout_confirm_title': 'Çıkış Yap',
+      'logout_confirm_desc': 'Hesabınızdan çıkış yapmak istediğinize emin misiniz?',
+      'clear_cart': 'Sepeti Boşalt',
+      'clear_cart_confirm': 'Sepetindeki tüm ürünleri silmek istediğine emin misin?',
+      'cancel': 'Vazgeç',
+      'clear': 'Boşalt',
+      'empty_cart_msg': 'Henüz sepetinde ürün yok!',
+      'empty_cart_desc': 'Hemen lezzetli yemeklerden birini seç\nve sepetini doldurmaya başla.',
+      'start_shopping': 'Alışverişe Başla',
+      'subtotal': 'Ara Toplam',
+      'delivery_fee': 'Gönderim Ücreti',
+      'service_fee': 'Hizmet Bedeli',
+      'total_price': 'Toplam Tutar',
+      'complete_order': 'Siparişi Tamamla',
+      'register_title': 'Kayıt Ol',
+      'create_account': 'Yeni Hesap Oluştur',
+      'register_desc': 'Adınızı ve telefon numaranızı girerek kayıt olun.',
+      'full_name': 'Ad Soyad',
+      'already_have_account': 'Zaten hesabınız var mı?',
+      'fill_all_fields': 'Lütfen tüm alanları doldurun',
+      'register_success': 'Kayıt başarılı! Giriş yapılıyor...',
+      'register_failed': 'Kayıt başarısız',
+      'phone_already_registered': 'Bu telefon numarası zaten kayıtlı. Lütfen giriş yapın.',
+      'phone_not_registered': 'Bu numara kayıtlı değil. Lütfen önce kayıt olun.',
+      'error': 'Hata',
+    },
+    'TM': {
+      'app_name': 'Mugt Gelsin',
+      'tagline': 'Tagama Bir Ädim Galdyňyz',
+      'login_button': 'Giriş Et',
+      'phone_label': 'Telefon Belgisi',
+      'phone_hint': 'Meselem: 65123456',
+      'no_account': 'Hasabyňyz ýokmy?',
+      'signup': 'Hasap Aç',
+      'address_select': 'Adres Saýlaň / Goşuň',
+      'highlights': 'Möhüm we Meşhur',
+      'cheapest': 'Iň Arzan Tagamlar',
+      'restaurants': 'Restoranlar',
+      'search_hint': 'Restoran ýa-da tagam gözläň...',
+      'nav_home': 'Baş Sahypa',
+      'nav_favorites': 'Halanlarym',
+      'nav_cart': 'Sebedim',
+      'nav_profile': 'Profilim',
+      'products': 'Önümler',
+      'no_fav_res': 'Halanýan restoran tapylmady!',
+      'no_fav_prod': 'Halanýan önüm tapylmady!',
+      'orders': 'Sargytlarym',
+      'addresses': 'Adreslerim',
+      'payment_methods': 'Töleg usullarym',
+      'coupons': 'Kuponlarym',
+      'help_support': 'Kömek we Goldaw',
+      'mugt_support': 'Mugt Goldaw',
+      'logout': 'Hasapdan çyk',
+      'logout_confirm_title': 'Hasapdan çyk',
+      'logout_confirm_desc': 'Hasabyňyzdan çykmak isleýändigiňize ynanýarsyňyzmy?',
+      'clear_cart': 'Sebedi boşat',
+      'clear_cart_confirm': 'Sebediňizdäki ähli önümleri pozmak isleýändigiňize ynanýarsyňyzmy?',
+      'cancel': 'Bes et',
+      'clear': 'Poz',
+      'empty_cart_msg': 'Sebediňizde entek önüm ýok!',
+      'empty_cart_desc': 'Häzir lezzetli tagamlaryň birini saýlaň\nwe sebediňizi doldurmaga başlaň.',
+      'start_shopping': 'Söwda başla',
+      'subtotal': 'Jemi',
+      'delivery_fee': 'Eltip bermek tölegi',
+      'service_fee': 'Hyzmat tölegi',
+      'total_price': 'Umumy baha',
+      'complete_order': 'Sargydy tamamla',
+      'register_title': 'Hasap Aç',
+      'create_account': 'Täze Hasap Döret',
+      'register_desc': 'Adyňyzy we telefon belgiňizi girizip hasap açyň.',
+      'full_name': 'Adyňyz we Familiýaňyz',
+      'already_have_account': 'Hasabyňyz barmy?',
+      'fill_all_fields': 'Ehlisini dolduryň!',
+      'register_success': 'Hasap açyldy! Giriş edilýär...',
+      'register_failed': 'Hasap açylmady',
+      'phone_already_registered': 'Bu telefon belgisi eýýäm hasaba alnan.',
+      'phone_not_registered': 'Bu telefon belgisi hasaba alynmadyk. Ilki bilen hasap açyň.',
+      'error': 'Säwlik',
+    },
+    'RU': {
+      'app_name': 'Mugt Gelsin',
+      'tagline': 'Вы в одном шаге от вкуса',
+      'login_button': 'Войти',
+      'phone_label': 'Номер телефона',
+      'phone_hint': 'Прим: 5551234567',
+      'no_account': 'Нет аккаунта?',
+      'signup': 'Регистрация',
+      'address_select': 'Выбрать / Добавить адрес',
+      'highlights': 'Рекомендуемое',
+      'cheapest': 'Самые дешевые блюда',
+      'restaurants': 'Рестораны',
+      'search_hint': 'Поиск ресторанов или еды...',
+      'nav_home': 'Главная',
+      'nav_favorites': 'Избранное',
+      'nav_cart': 'Корзина',
+      'nav_profile': 'Профиль',
+      'products': 'Продукты',
+      'no_fav_res': 'Любимых ресторанов не найдено!',
+      'no_fav_prod': 'Любимых продуктов не найдено!',
+      'orders': 'Мои заказы',
+      'addresses': 'Мои адреса',
+      'payment_methods': 'Способы оплаты',
+      'coupons': 'Мои купоны',
+      'help_support': 'Помощь и поддержка',
+      'mugt_support': 'Мугт поддержка',
+      'logout': 'Выйти',
+      'logout_confirm_title': 'Выход',
+      'logout_confirm_desc': 'Вы уверены, что хотите выйти из своего аккаунта?',
+      'clear_cart': 'Очистить корзину',
+      'clear_cart_confirm': 'Вы уверены, что хотите удалить все товары из корзины?',
+      'cancel': 'Отмена',
+      'clear': 'Очистить',
+      'empty_cart_msg': 'В вашей корзине пока нет товаров!',
+      'empty_cart_desc': 'Выберите одно из вкусных блюд прямо сейчас\nand начните наполнять свою корзину.',
+      'start_shopping': 'Начать покупки',
+      'subtotal': 'Подытог',
+      'delivery_fee': 'Стоимость доставки',
+      'service_fee': 'Сервисный сбор',
+      'total_price': 'Итоговая сумма',
+      'complete_order': 'Оформить заказ',
+      'register_title': 'Регистрация',
+      'create_account': 'Создать аккаунт',
+      'register_desc': 'Зарегистрируйтесь, введя свое имя и номер телефона.',
+      'full_name': 'Имя и Фамилия',
+      'already_have_account': 'Уже есть аккаунт?',
+      'fill_all_fields': 'Пожалуйста, заполните все поля',
+      'register_success': 'Регистрация прошла успешно!',
+      'register_failed': 'Ошибка регистрации',
+      'phone_already_registered': 'Этот номер уже зарегистрирован. Пожалуйста, войдите.',
+      'phone_not_registered': 'Этот номер не зарегистрирован. Пожалуйста, сначала зарегистрируйтесь.',
+      'error': 'Ошибка',
+    },
+  };
+
+  String translate(String key) {
+    return translations[_selectedLang]?[key] ?? key;
+  }
+}
