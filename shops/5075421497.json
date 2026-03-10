@@ -1,0 +1,21 @@
+{
+  "id": "5075421497",
+  "menu": [
+    {
+      "name": "saslik",
+      "icon": "🍔saslik",
+      "description": "koze bisen saslik",
+      "price": 120.0,
+      "category": "Ana Yemekler",
+      "imageUrl": "static/uploads/Ekran görüntüsü 2026-01-21 121129.png"
+    }
+  ],
+  "reviews": [],
+  "pending_orders": [],
+  "name": "emir",
+  "imageUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=500",
+  "phone": "5015431497",
+  "address": "xccxc",
+  "minOrderAmount": 50.0,
+  "status": "active"
+}

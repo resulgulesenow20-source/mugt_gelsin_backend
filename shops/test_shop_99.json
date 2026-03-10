@@ -1,0 +1,17 @@
+{
+  "id": "test_shop_99",
+  "menu": [
+    {
+      "name": "Test Item",
+      "price": 10.0,
+      "icon": "🍕",
+      "description": "Test Desc"
+    }
+  ],
+  "reviews": [],
+  "pending_orders": [],
+  "name": "Test Shop 99",
+  "phone": "9999999999",
+  "address": "Test Address",
+  "minOrderAmount": 35.0
+}

@@ -1,0 +1,51 @@
+{
+  "menu_items": [
+    [
+      "🍔",
+      "Özel Burger",
+      "Acılı sos ile",
+      "245 TL"
+    ],
+    [
+      "🍕",
+      "Karışık Pizza",
+      "Ekstra peynir",
+      "310 TL"
+    ],
+    [
+      "🥗",
+      "Sezar Salata",
+      "Taze malzemeler",
+      "185 TL"
+    ],
+    [
+      "🍽️",
+      "doner usta",
+      "patates domates",
+      "120 TL"
+    ]
+  ],
+  "tables": [
+    {
+      "id": 2,
+      "name": "Masa 2",
+      "status": "Boş"
+    },
+    {
+      "id": 3,
+      "name": "Masa 3",
+      "status": "Boş"
+    },
+    {
+      "id": 4,
+      "name": "Masa 4",
+      "status": "Boş"
+    },
+    {
+      "id": 5,
+      "name": "Masa 5",
+      "status": "Boş"
+    }
+  ],
+  "table_orders": {}
+}
