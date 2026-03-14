@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:mugt_gelsin/pages/order/order_tracking_page.dart';
+import 'package:mugt_gelsin/pages/orders/order_tracking_page.dart';
 import 'package:mugt_gelsin/core/constants/app_colors.dart';
 
 class ActiveOrderWidget extends StatelessWidget {
@@ -16,7 +16,7 @@ class ActiveOrderWidget extends StatelessWidget {
       stream: FirebaseFirestore.instance
           .collection('Emirler')
           .where('customerUid', isEqualTo: user.uid)
-          .where('status', whereIn: ['hazırlanıyor', 'yolda', 'yola çıktı', 'onay bekliyor'])
+          .where('status', whereIn: ['hazırlanıyor', 'yolda', 'yola çıktı', 'onay bekliyor', 'onaylanıyor'])
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
@@ -30,11 +30,13 @@ class ActiveOrderWidget extends StatelessWidget {
         }
 
         // Bellekte tarihe göre sıralayalım (orderBy index gerektirdiği için kaldırdık)
-        final docs = snapshot.data!.docs;
+        final docs = snapshot.data!.docs.toList();
         docs.sort((a, b) {
           final aTime = (a.data() as Map<String, dynamic>)['timestamp'];
           final bTime = (b.data() as Map<String, dynamic>)['timestamp'];
-          if (aTime == null || bTime == null) return 0;
+          if (aTime == null && bTime == null) return 0;
+          if (aTime == null) return -1;
+          if (bTime == null) return 1;
           return bTime.toString().compareTo(aTime.toString());
         });
 
@@ -74,12 +76,12 @@ class ActiveOrderWidget extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
                   ],
-                  border: Border.all(color: AppColors.textPrimary.withOpacity(0.2)),
+                  border: Border.all(color: AppColors.textPrimary.withValues(alpha: 0.2)),
                 ),
                 child: Row(
                   children: [
@@ -147,7 +149,7 @@ class ActiveOrderWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         shape: BoxShape.circle,
       ),
       child: Icon(icon, color: color, size: 24),

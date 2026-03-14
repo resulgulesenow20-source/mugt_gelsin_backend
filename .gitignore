@@ -43,3 +43,16 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Backend secrets and logs
+backend/service_account.json
+backend/backend_debug.log
+backend/__pycache__/
+*.pyc
+
+# Temp test files
+test_sync.py
+backend/check_collections.py
+backend/check_doc.py
+backend/check_doc_v2.py
+backend/list_restaurants.py

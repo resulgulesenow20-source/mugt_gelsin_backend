@@ -5,6 +5,8 @@ import 'package:mugt_gelsin/providers/favorite_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:mugt_gelsin/core/constants/app_colors.dart';
 import 'package:mugt_gelsin/providers/navigation_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:mugt_gelsin/presentation/common/widgets/hover_wrapper.dart';
 
 class FoodCard extends StatelessWidget {
   final Food food;
@@ -25,15 +27,13 @@ class FoodCard extends StatelessWidget {
   });
 
   Widget _buildSmartImage(String url) {
-    print("Resim URL: $url"); // Debug için
     if (url.startsWith('http')) {
-      return Image.network(
-        url,
+      return CachedNetworkImage(
+        imageUrl: url,
         width: 80,
         height: 80,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          print("Hata: $error"); // Hata detayını gör
+        errorWidget: (context, url, error) {
           return _errorWidget();
         },
       );
@@ -59,13 +59,13 @@ class FoodCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: AppColors.softShadow,
-      ),
+    return HoverWrapper(
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: Material(
@@ -145,7 +145,7 @@ class FoodCard extends StatelessWidget {
                             child: Container(
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
-                                color: isFavorite ? Colors.red.withOpacity(0.1) : AppColors.surfaceSubtle,
+                                color: isFavorite ? Colors.red.withValues(alpha: 0.1) : AppColors.surfaceSubtle,
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
@@ -191,7 +191,7 @@ class FoodCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primary.withOpacity(0.3),
+                                color: AppColors.primary.withValues(alpha: 0.3),
                                 blurRadius: 8,
                                 offset: const Offset(0, 4),
                               ),
@@ -212,6 +212,7 @@ class FoodCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

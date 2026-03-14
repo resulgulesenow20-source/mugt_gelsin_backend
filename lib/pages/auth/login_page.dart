@@ -3,7 +3,7 @@ import 'package:mugt_gelsin/pages/auth/register_page.dart';
 import 'package:mugt_gelsin/pages/main_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:mugt_gelsin/providers/auth_provider.dart' as app_auth;
-import 'package:firebase_auth/firebase_auth.dart'; // Giriş başarılı olunca gidecek yer
+// Giriş başarılı olunca gidecek yer
 import 'package:mugt_gelsin/providers/language_provider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -183,7 +183,7 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                             filled: true,
-                            fillColor: Colors.white.withOpacity(0.2),
+                            fillColor: Colors.white.withValues(alpha: 0.2),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
                               borderSide: BorderSide.none,
@@ -194,7 +194,7 @@ class _LoginPageState extends State<LoginPage> {
                         Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
+                            color: Colors.white.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(24),
                             border: Border.all(color: Colors.white24),
                           ),
@@ -222,9 +222,9 @@ class _LoginPageState extends State<LoginPage> {
                                 decoration: InputDecoration(
                                   counterText: "",
                                   hintText: "******",
-                                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                                  hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
                                   filled: true,
-                                  fillColor: Colors.white.withOpacity(0.1),
+                                  fillColor: Colors.white.withValues(alpha: 0.1),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(16),
                                     borderSide: BorderSide.none,
@@ -322,7 +322,7 @@ class _LoginPageState extends State<LoginPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white.withOpacity(0.3) : Colors.transparent,
+          color: isSelected ? Colors.white.withValues(alpha: 0.3) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           border: isSelected ? Border.all(color: Colors.white, width: 1.5) : null,
         ),

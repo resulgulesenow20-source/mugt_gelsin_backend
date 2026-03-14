@@ -32,6 +32,7 @@ class OrderModel {
   final OrderStatus status;
   final List<OrderItem> items;
   final String deliveryAddress;
+  final String? courierName;
   final DateTime timestamp;
 
   OrderModel({
@@ -42,6 +43,7 @@ class OrderModel {
     required this.status,
     required this.items,
     required this.deliveryAddress,
+    this.courierName,
     required this.timestamp,
   });
 
@@ -56,6 +58,7 @@ class OrderModel {
           .map((item) => OrderItem.fromMap(Map<String, dynamic>.from(item)))
           .toList(),
       deliveryAddress: data['deliveryAddress'] ?? '',
+      courierName: data['courier_name'],
       timestamp: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
@@ -69,12 +72,13 @@ class OrderModel {
       case 'on_the_way':
       case 'onway':
         return OrderStatus.onWay;
-      case 'teslim_edildi':
-      case 'delivered':
-        return OrderStatus.delivered;
       case 'iptal_edildi':
       case 'cancelled':
         return OrderStatus.cancelled;
+      case 'onaylanıyor':
+      case 'onay bekliyor':
+      case 'onay_bekliyor':
+        return OrderStatus.pending;
       default:
         return OrderStatus.pending;
     }

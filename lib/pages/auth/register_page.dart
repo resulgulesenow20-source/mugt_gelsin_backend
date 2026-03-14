@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mugt_gelsin/providers/auth_provider.dart' as app_auth;
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mugt_gelsin/core/constants/app_colors.dart';
 import 'package:mugt_gelsin/pages/main_screen.dart';
 import 'package:mugt_gelsin/providers/language_provider.dart';
@@ -158,9 +157,9 @@ class _RegisterPageState extends State<RegisterPage> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.05),
+                  color: AppColors.primary.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
                 ),
                 child: Column(
                   children: [

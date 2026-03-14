@@ -53,10 +53,10 @@ class HomeAddressBar extends StatelessWidget {
                   ),
                   if (defaultAddress != null)
                     Text(
-                      "${defaultAddress.district}",
+                      defaultAddress.district,
                       style: TextStyle(
                         fontSize: 10,
-                        color: AppColors.textSecondary.withOpacity(0.7),
+                        color: AppColors.textSecondary.withValues(alpha: 0.7),
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,

@@ -7,7 +7,6 @@ import 'package:mugt_gelsin/providers/address_provider.dart';
 import 'package:mugt_gelsin/providers/payment_provider.dart';
 import 'package:mugt_gelsin/providers/auth_provider.dart' as app_auth;
 import 'package:mugt_gelsin/models/address_model.dart';
-import 'package:mugt_gelsin/pages/order/order_confirm_page.dart';
 import 'package:mugt_gelsin/pages/orders/order_tracking_page.dart';
 import 'package:mugt_gelsin/services/api_service.dart';
 
@@ -111,7 +110,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         'customerPhone': customerPhone,
         'note': orderNote,
         'totalPrice': cart.totalPrice,
-        'status': 'onaylanıyor', // İlk durum: Onay bekliyor/İşleniyor
+        'status': 'onay bekliyor', // İlk durum: Onay bekliyor/İşleniyor
         'paymentMethod': _paymentMethod,
         'cardId': _paymentMethod == 'online_kart' ? _selectedCardId : null,
         'items': cart.items.map((item) => {
@@ -259,7 +258,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
           ),
           if (_isLoading)
             Container(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               child: const Center(
                 child: CircularProgressIndicator(),
               ),
@@ -280,23 +279,23 @@ class _CheckoutPageState extends State<CheckoutPage> {
         fillColor: Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: BorderSide(color: Colors.black.withValues(alpha: 0.15)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: BorderSide(color: Colors.black.withValues(alpha: 0.15)),
         ),
       ),
     );
   }
 
-  Widget _buildAddressCard(selectedAddress) {
+  Widget _buildAddressCard(dynamic selectedAddress) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: Colors.black.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
@@ -345,7 +344,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isSelected ? AppColors.primary : Colors.grey.shade300,
+          color: isSelected ? AppColors.primary : Colors.black.withValues(alpha: 0.1),
           width: isSelected ? 2 : 1,
         ),
       ),
@@ -411,7 +410,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       ? []
                       : [
                           BoxShadow(
-                            color: AppColors.primary.withOpacity(0.3),
+                            color: AppColors.primary.withValues(alpha: 0.3),
                             blurRadius: 12,
                             offset: const Offset(0, 6),
                           ),

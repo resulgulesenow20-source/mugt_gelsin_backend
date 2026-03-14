@@ -35,19 +35,24 @@ class _MyAddressesPageState extends State<MyAddressesPage> {
     final addressProvider = context.watch<AddressProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Adreslerim")),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add, color: AppColors.textPrimary),
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const AddAddressPage()),
-        ),
+      appBar: AppBar(
+        title: const Text("Adreslerim"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add_rounded),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AddAddressPage()),
+            ),
+            tooltip: "Yeni Adres Ekle",
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 150),
               itemCount: addressProvider.addresses.length,
               itemBuilder: (context, index) {
                 final addr = addressProvider.addresses[index];
@@ -76,7 +81,7 @@ class _MyAddressesPageState extends State<MyAddressesPage> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -89,7 +94,7 @@ class _MyAddressesPageState extends State<MyAddressesPage> {
             leading: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(iconData, color: AppColors.textPrimary),
@@ -105,7 +110,7 @@ class _MyAddressesPageState extends State<MyAddressesPage> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: const Text(

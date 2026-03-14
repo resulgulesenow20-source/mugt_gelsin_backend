@@ -91,7 +91,7 @@ class _BannerSliderState extends State<BannerSlider> {
                 borderRadius: BorderRadius.circular(4),
                 color: _currentPage == index 
                   ? AppColors.primary 
-                  : Colors.grey.withOpacity(0.3),
+                  : Colors.grey.withValues(alpha: 0.3),
               ),
             ),
           ),
@@ -110,7 +110,7 @@ class _BannerSliderState extends State<BannerSlider> {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.12),
+              color: Colors.black.withValues(alpha: 0.12),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -133,8 +133,8 @@ class _BannerSliderState extends State<BannerSlider> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Colors.black.withOpacity(0.7),
-                        Colors.black.withOpacity(0.1),
+                        Colors.black.withValues(alpha: 0.7),
+                        Colors.black.withValues(alpha: 0.1),
                       ],
                       begin: Alignment.bottomLeft,
                       end: Alignment.topRight,
@@ -178,7 +178,7 @@ class _BannerSliderState extends State<BannerSlider> {
                     Text(
                       data['desc']!,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.85),
+                        color: Colors.white.withValues(alpha: 0.85),
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                       ),

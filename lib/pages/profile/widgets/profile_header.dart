@@ -1,37 +1,93 @@
 import 'package:flutter/material.dart';
 import 'package:mugt_gelsin/core/constants/app_colors.dart';
 
+import 'package:mugt_gelsin/providers/auth_provider.dart';
+import 'package:provider/provider.dart';
+
 class ProfileHeader extends StatelessWidget {
   const ProfileHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
+    final userData = authProvider.userData;
+    final String name = userData?['name'] ?? "Kullanıcı";
+    final String email = userData?['email'] ?? authProvider.user?.phoneNumber ?? "E-posta/Telefon";
+
     return Column(
       children: [
         Stack(
-          alignment: Alignment.bottomRight,
+          alignment: Alignment.center,
           children: [
-            const CircleAvatar(
-              radius: 50,
-              backgroundColor: AppColors.primary,
-              child: Icon(Icons.person, size: 60, color: Colors.white),
-            ),
+            // Background Decorative Gradient (Subtle)
             Container(
-              padding: const EdgeInsets.all(4),
-              decoration: const BoxDecoration(
-                color: AppColors.secondary,
-                shape: BoxShape.circle,
+              height: 100,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppColors.primary.withValues(alpha: 0.1),
+                    Colors.transparent,
+                  ],
+                ),
               ),
-              child: const Icon(Icons.edit, size: 20, color: AppColors.textPrimary),
+            ),
+            // Avatar
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 4),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const CircleAvatar(
+                radius: 50,
+                backgroundColor: AppColors.primary,
+                child: Icon(Icons.person, size: 60, color: Colors.white),
+              ),
+            ),
+            // Edit Button
+            Positioned(
+              bottom: 0,
+              right: MediaQuery.of(context).size.width / 2 - 50,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppColors.secondary,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                child: const Icon(Icons.edit, size: 16, color: AppColors.textPrimary),
+              ),
             ),
           ],
         ),
-        const SizedBox(height: 12),
-        const Text(
-          "Kullanıcı Adı",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        const SizedBox(height: 16),
+        Text(
+          name,
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+            letterSpacing: -0.5,
+          ),
         ),
-        const Text("kullanici@mail.com", style: TextStyle(color: Colors.grey)),
+        const SizedBox(height: 4),
+        Text(
+          email,
+          style: const TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ],
     );
   }

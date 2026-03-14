@@ -17,7 +17,10 @@ class _CouponsPageState extends State<CouponsPage> {
   void initState() {
     super.initState();
     Future.microtask(
-      () => context.read<CouponProvider>().fetchCoupons(),
+      () {
+        if (!mounted) return;
+        context.read<CouponProvider>().fetchCoupons();
+      },
     );
   }
 
@@ -52,7 +55,7 @@ class _CouponsPageState extends State<CouponsPage> {
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 150),
             itemCount: provider.coupons.length,
             itemBuilder: (context, index) {
               final coupon = provider.coupons[index];
@@ -76,7 +79,7 @@ class _CouponsPageState extends State<CouponsPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -144,7 +147,7 @@ class _CouponsPageState extends State<CouponsPage> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: isUsed ? AppColors.primary.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                                color: isUsed ? AppColors.primary.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(

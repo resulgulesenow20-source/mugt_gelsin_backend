@@ -7,6 +7,7 @@ import 'package:mugt_gelsin/providers/cart_provider.dart';
 import 'package:mugt_gelsin/pages/cart/cart_page.dart';
 import 'package:mugt_gelsin/providers/favorite_provider.dart';
 import 'package:mugt_gelsin/core/constants/app_colors.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class RestaurantDetailPage extends StatefulWidget {
   final Restaurant restaurant;
@@ -21,12 +22,12 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
   Widget _buildSmartImage(String url, {double? width, double? height}) {
     final cleanUrl = url.trim();
     if (cleanUrl.startsWith('http')) {
-      return Image.network(
-        cleanUrl,
+      return CachedNetworkImage(
+        imageUrl: cleanUrl,
         width: width,
         height: height,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) =>
+        errorWidget: (context, url, error) =>
             _errorWidget("Link Bozuk"),
       );
     } else {
@@ -58,42 +59,6 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
     );
   }
 
-  Widget _buildReviewCard(String user, String rating, String comment) {
-    return Container(
-      width: 250,
-      margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(user, style: const TextStyle(fontWeight: FontWeight.bold)),
-              Row(
-                children: [
-                  const Icon(Icons.star, color: Colors.amber, size: 16),
-                  Text(rating, style: const TextStyle(fontSize: 12)),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            comment,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 13),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {

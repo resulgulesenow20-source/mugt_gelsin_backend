@@ -3,9 +3,11 @@ import 'package:mugt_gelsin/core/constants/app_colors.dart';
 import 'package:mugt_gelsin/pages/home/home_page.dart';
 import 'package:mugt_gelsin/pages/cart/cart_page.dart';
 import 'package:mugt_gelsin/pages/profile/profile_page.dart';
+import 'package:mugt_gelsin/pages/profile/orders_page.dart';
 import 'package:mugt_gelsin/pages/favorites/favorites_page.dart';
 import 'package:mugt_gelsin/providers/navigation_provider.dart';
 import 'package:mugt_gelsin/providers/language_provider.dart';
+import 'package:mugt_gelsin/providers/cart_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:add_to_cart_animation/add_to_cart_animation.dart';
 
@@ -20,6 +22,7 @@ class _MainScreenState extends State<MainScreen> {
   // ✅ Her tab için ayrı NavigatorKey tanımlıyoruz
   final GlobalKey<NavigatorState> _homeNavKey = GlobalKey<NavigatorState>();
   final GlobalKey<NavigatorState> _favNavKey = GlobalKey<NavigatorState>();
+  final GlobalKey<NavigatorState> _ordersNavKey = GlobalKey<NavigatorState>();
   final GlobalKey<NavigatorState> _cartNavKey = GlobalKey<NavigatorState>();
   final GlobalKey<NavigatorState> _profileNavKey = GlobalKey<NavigatorState>();
 
@@ -56,14 +59,18 @@ class _MainScreenState extends State<MainScreen> {
         jumpAnimation: const JumpAnimationOptions(),
         createAddToCartAnimation: (runAddToCartAnimation) {
           this.runAddToCartAnimation = runAddToCartAnimation;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.read<NavigationProvider>().setAddToCartAnimationFunction(runAddToCartAnimation);
+          });
         },
         child: Scaffold(
-        extendBody: true, // Body nav barın arkasına geçsin (floating efekti için)
+        extendBody: false, // Body artık nav barın arkasına geçmez, çakışma önlenir
         body: IndexedStack(
           index: selectedIndex,
           children: [
             _buildTabNavigator(_homeNavKey, const HomePage()),
             _buildTabNavigator(_favNavKey, const FavoritesPage()),
+            _buildTabNavigator(_ordersNavKey, const OrdersPage()),
             _buildTabNavigator(_cartNavKey, const CartPage()),
             _buildTabNavigator(_profileNavKey, const ProfilePage()),
           ],
@@ -75,7 +82,7 @@ class _MainScreenState extends State<MainScreen> {
             borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, -5),
               ),
@@ -86,8 +93,9 @@ class _MainScreenState extends State<MainScreen> {
             children: [
               _buildNavItem(0, Icons.home_rounded, Icons.home_outlined, langProvider.translate('nav_home'), selectedIndex, navProvider),
               _buildNavItem(1, Icons.favorite_rounded, Icons.favorite_outline_rounded, langProvider.translate('nav_favorites'), selectedIndex, navProvider),
-              _buildNavItem(2, Icons.shopping_basket_rounded, Icons.shopping_basket_outlined, langProvider.translate('nav_cart'), selectedIndex, navProvider),
-              _buildNavItem(3, Icons.person_rounded, Icons.person_outline_rounded, langProvider.translate('nav_profile'), selectedIndex, navProvider),
+              _buildNavItem(2, Icons.assignment_rounded, Icons.assignment_outlined, langProvider.translate('nav_orders'), selectedIndex, navProvider),
+              _buildNavItem(3, Icons.shopping_basket_rounded, Icons.shopping_basket_outlined, langProvider.translate('nav_cart'), selectedIndex, navProvider),
+              _buildNavItem(4, Icons.person_rounded, Icons.person_outline_rounded, langProvider.translate('nav_profile'), selectedIndex, navProvider),
             ],
           ),
         ),
@@ -110,27 +118,41 @@ class _MainScreenState extends State<MainScreen> {
         duration: const Duration(milliseconds: 300),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
+          color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Handle Cart Icon separately for animation
-            if (index == 2)
-              AddToCartIcon(
-                key: cartKey,
-                icon: Icon(
-                  isSelected ? activeIcon : inactiveIcon,
-                  color: isSelected ? AppColors.primary : AppColors.textSecondary,
-                  size: 26,
-                ),
-                badgeOptions: const BadgeOptions(active: false),
+            if (index == 3)
+              Consumer<CartProvider>(
+                builder: (context, cart, child) {
+                  final int itemCount = cart.items.fold(0, (sum, item) => sum + item.quantity);
+                  return Badge(
+                    label: Text(
+                      itemCount.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                    ),
+                    isLabelVisible: itemCount > 0,
+                    backgroundColor: Colors.red,
+                    offset: const Offset(8, -8),
+                    child: AddToCartIcon(
+                      key: cartKey,
+                      icon: Icon(
+                        isSelected ? activeIcon : inactiveIcon,
+                        color: isSelected ? AppColors.primary : Colors.black, // <-- Koyu siyah dış çizgi
+                        size: 26,
+                      ),
+                      badgeOptions: const BadgeOptions(active: false),
+                    ),
+                  );
+                },
               )
             else
               Icon(
                 isSelected ? activeIcon : inactiveIcon,
-                color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                color: isSelected ? AppColors.primary : Colors.black, // <-- Koyu siyah dış çizgi
                 size: 26,
               ),
             if (isSelected)
@@ -154,8 +176,9 @@ class _MainScreenState extends State<MainScreen> {
     switch (index) {
       case 0: return _homeNavKey;
       case 1: return _favNavKey;
-      case 2: return _cartNavKey;
-      case 3: return _profileNavKey;
+      case 2: return _ordersNavKey;
+      case 3: return _cartNavKey;
+      case 4: return _profileNavKey;
       default: return _homeNavKey;
     }
   }

@@ -13,125 +13,163 @@ import 'package:mugt_gelsin/providers/language_provider.dart';
 import 'package:provider/provider.dart';
 import 'payment_methods_page.dart';
 
+import 'package:mugt_gelsin/core/constants/app_colors.dart';
+import 'package:mugt_gelsin/pages/profile/widgets/profile_stats_card.dart';
+
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final langProvider = context.watch<LanguageProvider>();
+    
+    // Mock values for now, would ideally come from a real provider
+    const double balance = 125.50;
+    const int points = 450;
+    const int activeOrders = 1;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F7),
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: Text(
           langProvider.translate('nav_profile'),
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(fontWeight: FontWeight.w800, letterSpacing: -0.5),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () {
+              // Settings page could be added later
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         child: Column(
           children: [
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
             const ProfileHeader(),
-            const SizedBox(height: 30),
-
-            ProfileMenuItem(
-              icon: Icons.shopping_bag_outlined,
-              title: langProvider.translate('orders'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const OrdersPage()),
-                );
-              },
+            const SizedBox(height: 24),
+            
+            // Statistics Card
+            const ProfileStatsCard(
+              balance: balance,
+              points: points,
+              activeOrders: activeOrders,
             ),
+            const SizedBox(height: 24),
+
+            // SECTION: Hesabım
+            _buildSectionHeader("HESABIM"),
             ProfileMenuItem(
-              icon: Icons.location_on_outlined,
+              icon: Icons.location_on_rounded,
               title: langProvider.translate('addresses'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const MyAddressesPage(),
-                  ),
-                );
-              },
+              color: Colors.blue,
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MyAddressesPage())),
             ),
             ProfileMenuItem(
-              icon: Icons.payment_outlined,
+              icon: Icons.payment_rounded,
               title: langProvider.translate('payment_methods'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const PaymentMethodsPage()),
-                );
-              },
+              color: Colors.purple,
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PaymentMethodsPage())),
             ),
             ProfileMenuItem(
-              icon: Icons.card_giftcard_outlined,
+              icon: Icons.card_giftcard_rounded,
               title: langProvider.translate('coupons'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const CouponsPage()),
-                );
-              },
+              color: Colors.orange,
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CouponsPage())),
             ),
+
+            const SizedBox(height: 16),
+
+            // SECTION: İşlemlerim
+            _buildSectionHeader("İŞLEMLERİM"),
             ProfileMenuItem(
-              icon: Icons.help_outline,
-              title: langProvider.translate('help_support'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HelpSupportPage()),
-                );
-              },
+              icon: Icons.shopping_bag_rounded,
+              title: langProvider.translate('orders'),
+              color: Colors.green,
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const OrdersPage())),
             ),
+
+            const SizedBox(height: 16),
+
+            // SECTION: Destek
+            _buildSectionHeader("DESTEK & YARDIM"),
             ProfileMenuItem(
-              icon: Icons.support_agent,
+              icon: Icons.support_agent_rounded,
               title: langProvider.translate('mugt_support'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LiveSupportPage()),
-                );
-              },
+              color: AppColors.primary,
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LiveSupportPage())),
+            ),
+            ProfileMenuItem(
+              icon: Icons.help_outline_rounded,
+              title: langProvider.translate('help_support'),
+              color: Colors.blueGrey,
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HelpSupportPage())),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
 
+            // Logout
             ProfileMenuItem(
-              icon: Icons.logout,
+              icon: Icons.logout_rounded,
               title: langProvider.translate('logout'),
               isLogout: true,
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => ConfirmationDialog(
-                    title: langProvider.translate('logout_confirm_title'),
-                    content: langProvider.translate('logout_confirm_desc'),
-                    confirmText: langProvider.translate('logout'),
-                    onConfirm: () async {
-                      await Provider.of<app_auth.AuthProvider>(context, listen: false).signOut();
-                      if (context.mounted) {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => const LoginPage()),
-                          (route) => false,
-                        );
-                      }
-                    },
-                  ),
-                );
-              },
+              onTap: () => _showLogoutDialog(context, langProvider),
             ),
-            const SizedBox(height: 110),
+            
+            const SizedBox(height: 40),
+            Text(
+              "v1.0.5",
+              style: TextStyle(color: Colors.grey.shade400, fontSize: 12),
+            ),
+            const SizedBox(height: 120),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 24, bottom: 8, top: 8),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          title,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            color: Colors.grey.shade500,
+            letterSpacing: 1.2,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context, LanguageProvider langProvider) {
+    showDialog(
+      context: context,
+      builder: (context) => ConfirmationDialog(
+        title: langProvider.translate('logout_confirm_title'),
+        content: langProvider.translate('logout_confirm_desc'),
+        confirmText: langProvider.translate('logout'),
+        onConfirm: () async {
+          await Provider.of<app_auth.AuthProvider>(context, listen: false).signOut();
+          if (context.mounted) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginPage()),
+              (route) => false,
+            );
+          }
+        },
       ),
     );
   }

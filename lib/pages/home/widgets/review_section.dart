@@ -219,7 +219,7 @@ class _ReviewSectionState extends State<ReviewSection> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.04),
+            color: AppColors.primary.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

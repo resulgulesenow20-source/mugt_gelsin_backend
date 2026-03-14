@@ -27,6 +27,7 @@ def health_check():
     return {
         "status": "online",
         "message": "Mugt Gelsin Production Backend (Cloud Ready)",
+        "version": "1.0.1 - Menu Sync Fixed",
         "timestamp": datetime.now().isoformat()
     }
 
@@ -45,13 +46,61 @@ def get_restaurants():
         restaurants.append(doc.to_dict())
     return jsonify(restaurants)
 
-@app.route('/api/restaurants/<shop_id>', methods=['GET'])
+@app.route('/api/restaurants/<shop_id>', methods=['GET', 'DELETE'])
 def get_restaurant_details(shop_id):
+    shop_ref = db.collection('restaurants').document(shop_id)
+    
+    if request.method == 'GET':
+        doc = shop_ref.get()
+        if doc.exists:
+            return jsonify(doc.to_dict())
+        return jsonify({"error": "Dükkan bulunamadı"}), 404
+        
+    elif request.method == 'DELETE':
+        shop_ref.delete()
+        return jsonify({"success": True})
+
+@app.route('/api/menu/<shop_id>', methods=['POST'])
+def sync_menu(shop_id):
+    """Updates the menu list for a specific shop"""
+    menu_data = request.json
+    if menu_data is None:
+        return jsonify({"error": "Menü verisi eksik"}), 400
+        
+    shop_ref = db.collection('restaurants').document(shop_id)
+    # Use set with merge=True for reliability
+    shop_ref.set({
+        "menu": menu_data,
+        "lastMenuUpdate": firestore.SERVER_TIMESTAMP
+    }, merge=True)
+    return jsonify({"success": True})
+
+@app.route('/api/profile/<shop_id>', methods=['POST'])
+def sync_profile(shop_id):
+    """Updates the profile details for a specific shop"""
+    profile_data = request.json
+    if not profile_data:
+        return jsonify({"error": "Profil verisi eksik"}), 400
+        
+    shop_ref = db.collection('restaurants').document(shop_id)
+    
+    # Merge profile data
+    shop_ref.set(profile_data, merge=True)
+    shop_ref.set({
+        "lastProfileUpdate": firestore.SERVER_TIMESTAMP,
+        "status": "active" 
+    }, merge=True)
+    return jsonify({"success": True})
+
+@app.route('/api/status/<shop_id>', methods=['GET'])
+def get_shop_status(shop_id):
+    """Returns the approval status of a shop"""
     shop_ref = db.collection('restaurants').document(shop_id)
     doc = shop_ref.get()
     if doc.exists:
-        return jsonify(doc.to_dict())
-    return jsonify({"error": "Dükkan bulunamadı"}), 404
+        data = doc.to_dict()
+        return jsonify({"status": data.get("status", "pending")})
+    return jsonify({"status": "not_found"}), 404
 
 # --- ORDERS ---
 

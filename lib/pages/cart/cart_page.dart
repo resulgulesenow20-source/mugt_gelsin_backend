@@ -5,6 +5,7 @@ import 'package:mugt_gelsin/providers/cart_provider.dart';
 import 'package:mugt_gelsin/providers/navigation_provider.dart';
 import 'package:mugt_gelsin/providers/language_provider.dart';
 import 'package:mugt_gelsin/pages/cart/checkout_page.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
@@ -50,7 +51,7 @@ class CartPage extends StatelessWidget {
                         background: Container(
                           alignment: Alignment.centerRight,
                           padding: const EdgeInsets.only(right: 20),
-                          color: Colors.redAccent.withOpacity(0.1),
+                          color: Colors.redAccent.withValues(alpha: 0.1),
                           child: const Icon(Icons.delete_outline, color: Colors.redAccent),
                         ),
                         onDismissed: (direction) {
@@ -101,23 +102,29 @@ class CartPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(15),
-            child: Image.network(
-              item.food.imageUrl,
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
-            ),
+              child: CachedNetworkImage(
+                imageUrl: item.food.imageUrl,
+                width: 80,
+                height: 80,
+                fit: BoxFit.cover,
+                errorWidget: (context, url, error) => Container(
+                  width: 80,
+                  height: 80,
+                  color: Colors.grey[100],
+                  child: const Icon(Icons.fastfood, color: Colors.grey),
+                ),
+              ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -150,7 +157,7 @@ class CartPage extends StatelessWidget {
                     ),
                     Container(
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
+                        color: AppColors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -201,7 +208,7 @@ class CartPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(40),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -253,7 +260,7 @@ class CartPage extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 20,
             offset: const Offset(0, -5),
           ),

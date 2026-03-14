@@ -149,7 +149,7 @@ class _LiveSupportPageState extends State<LiveSupportPage> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 5,
               offset: const Offset(0, 2),
             ),
@@ -169,7 +169,7 @@ class _LiveSupportPageState extends State<LiveSupportPage> {
             Text(
               time,
               style: TextStyle(
-                color: isMe ? AppColors.textPrimary.withOpacity(0.6) : Colors.grey,
+                color: isMe ? AppColors.textPrimary.withValues(alpha: 0.6) : Colors.grey,
                 fontSize: 10,
               ),
             ),
@@ -186,7 +186,7 @@ class _LiveSupportPageState extends State<LiveSupportPage> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             offset: const Offset(0, -2),
             blurRadius: 10,
           ),

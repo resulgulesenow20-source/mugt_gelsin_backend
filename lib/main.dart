@@ -7,7 +7,6 @@ import 'package:mugt_gelsin/pages/main_screen.dart';
 import 'package:mugt_gelsin/providers/address_provider.dart'; // ✅ Bunu ekle
 import 'package:mugt_gelsin/core/theme/app_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mugt_gelsin/pages/auth/login_page.dart';
 import 'package:mugt_gelsin/providers/payment_provider.dart';
 import 'package:mugt_gelsin/providers/coupon_provider.dart';

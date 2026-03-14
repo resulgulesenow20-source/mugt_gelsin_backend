@@ -171,7 +171,16 @@ class _AddAddressPageState extends State<AddAddressPage> {
         maxLines: maxLines,
         decoration: InputDecoration(
           labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.black.withValues(alpha: 0.15)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.black.withValues(alpha: 0.15)),
+          ),
         ),
         validator: (v) => v!.isEmpty ? "Boş bırakılamaz" : null,
       ),

@@ -6,6 +6,7 @@ import 'package:mugt_gelsin/providers/favorite_provider.dart';
 import 'package:mugt_gelsin/providers/language_provider.dart';
 import 'package:mugt_gelsin/models/restaurant_model.dart';
 import 'package:mugt_gelsin/pages/restaurant/restaurant_detail_page.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class FavoritesPage extends StatelessWidget {
   const FavoritesPage({super.key});
@@ -44,7 +45,7 @@ class FavoritesPage extends StatelessWidget {
                 favProvider.favorites.isEmpty
                     ? _buildEmptyState(context, langProvider.translate('no_fav_res'), Icons.storefront)
                     : ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(0, 10, 0, 110),
+                        padding: const EdgeInsets.fromLTRB(0, 10, 0, 150),
                         itemCount: favProvider.favorites.length,
                         itemBuilder: (context, index) {
                           final restaurant = favProvider.favorites[index];
@@ -56,7 +57,7 @@ class FavoritesPage extends StatelessWidget {
                 favProvider.favoriteFoods.isEmpty
                     ? _buildEmptyState(context, langProvider.translate('no_fav_prod'), Icons.fastfood_outlined)
                     : ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(0, 10, 0, 110),
+                        padding: const EdgeInsets.fromLTRB(0, 10, 0, 150),
                         itemCount: favProvider.favoriteFoods.length,
                         itemBuilder: (context, index) {
                           final foodWithRes = favProvider.favoriteFoods[index];
@@ -89,23 +90,23 @@ class FavoritesPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
           ],
-          border: Border.all(color: Colors.grey.withOpacity(0.1)),
+          border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
         ),
         child: Row(
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(15),
-              child: Image.network(
-                restaurant.imageUrl,
+              child: CachedNetworkImage(
+                imageUrl: restaurant.imageUrl,
                 width: 70,
                 height: 70,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
+                errorWidget: (context, url, error) => Container(
                   width: 70,
                   height: 70,
                   color: Colors.grey[100],
@@ -176,23 +177,23 @@ class FavoritesPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
           ],
-          border: Border.all(color: Colors.grey.withOpacity(0.1)),
+          border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
         ),
         child: Row(
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(15),
-              child: Image.network(
-                item.food.imageUrl,
+              child: CachedNetworkImage(
+                imageUrl: item.food.imageUrl,
                 width: 70,
                 height: 70,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
+                errorWidget: (context, url, error) => Container(
                   width: 70,
                   height: 70,
                   color: Colors.grey[100],

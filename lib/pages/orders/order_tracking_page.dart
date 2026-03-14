@@ -37,7 +37,7 @@ class OrderTrackingPage extends StatelessWidget {
               children: [
                 _buildHeader(order),
                 const SizedBox(height: 24),
-                _buildStatusTimeline(order.status),
+                _buildStatusTimeline(order),
                 const SizedBox(height: 24),
                 _buildOrderDetails(order),
                 const SizedBox(height: 40),
@@ -63,7 +63,7 @@ class OrderTrackingPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.shopping_bag_rounded, color: AppColors.primary),
@@ -99,7 +99,8 @@ class OrderTrackingPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusTimeline(OrderStatus status) {
+  Widget _buildStatusTimeline(OrderModel order) {
+    final status = order.status;
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -127,7 +128,9 @@ class OrderTrackingPage extends StatelessWidget {
           _buildTimelineDivider(status.index > OrderStatus.preparing.index),
           _buildTimelineStep(
             "Yolda",
-            "Kurye siparişinizi getirmek için yola çıktı",
+            order.status == OrderStatus.onWay && order.courierName != null
+                ? "${order.shopName} kuryesi ${order.courierName} siparişinizi getirmek için yola çıktı"
+                : "Kurye siparişinizi getirmek için yola çıktı",
             Icons.delivery_dining_rounded,
             status.index >= OrderStatus.onWay.index,
             status.index == OrderStatus.onWay.index,
@@ -152,7 +155,7 @@ class OrderTrackingPage extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: color, size: 24),
@@ -181,7 +184,7 @@ class OrderTrackingPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Text("Şu an", style: TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold)),

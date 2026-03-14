@@ -9,7 +9,7 @@ class AuthProvider with ChangeNotifier {
 
   User? _user;
   Map<String, dynamic>? _userData;
-  bool _isAutoLoggingIn = false;
+  final bool _isAutoLoggingIn = false;
   bool _isInitialized = false;
   String? _verificationId;
 

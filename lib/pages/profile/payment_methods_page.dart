@@ -39,21 +39,24 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
         title: const Text("Ödeme Yöntemlerim"),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textPrimary,
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add, color: AppColors.textPrimary),
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => AddCardPage()),
-        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add_rounded),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AddCardPage()),
+            ),
+            tooltip: "Yeni Kart Ekle",
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : paymentProvider.cards.isEmpty
               ? _buildEmptyState()
               : ListView.builder(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 150),
                   itemCount: paymentProvider.cards.length,
                   itemBuilder: (context, index) {
                     final card = paymentProvider.cards[index];
@@ -84,14 +87,14 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
+          colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
+            color: AppColors.primary.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

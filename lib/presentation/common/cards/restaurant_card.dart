@@ -4,6 +4,7 @@ import 'package:mugt_gelsin/core/constants/app_colors.dart';
 import 'package:mugt_gelsin/pages/restaurant/restaurant_detail_page.dart';
 import 'package:provider/provider.dart';
 import 'package:mugt_gelsin/providers/favorite_provider.dart';
+import 'package:mugt_gelsin/presentation/common/widgets/hover_wrapper.dart';
 
 class RestaurantCard extends StatelessWidget {
   final Restaurant res;
@@ -29,18 +30,11 @@ class RestaurantCard extends StatelessWidget {
         );
       },
       borderRadius: BorderRadius.circular(16),
-      child: Container(
+      child: HoverWrapper(
+        child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 10,
-              offset: const Offset(0, 4), // changes position of shadow
-            ),
-          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,7 +50,7 @@ class RestaurantCard extends StatelessWidget {
                     height: imageHeight ?? 120,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                    errorBuilder: (context, error, stackTrace) => Container(
                       height: imageHeight ?? 120,
                       color: Colors.grey[200],
                       child: const Icon(
@@ -110,7 +104,7 @@ class RestaurantCard extends StatelessWidget {
                       Icon(
                         Icons.restaurant_menu,
                         size: 14,
-                        color: AppColors.primary.withOpacity(0.7),
+                        color: AppColors.primary.withValues(alpha: 0.7),
                       ),
                       const SizedBox(width: 4),
                       Expanded(
@@ -169,8 +163,9 @@ class RestaurantCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildRatingBadge(dynamic rating) {
     return Container(
@@ -197,7 +192,7 @@ class RestaurantCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: Colors.white.withValues(alpha: 0.9),
         shape: BoxShape.circle,
          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
       ),
