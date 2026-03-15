@@ -8,7 +8,7 @@ import json
 import threading
 import time
 
-API_BASE = "https://mugt-gelsin-backend.onrender.com/api/reviews"
+API_BASE = "https://mugt-gelsin-backend-1.onrender.com/api/reviews"
 
 def show_reviews_screen(user_phone, shop_name):
     clear_window()

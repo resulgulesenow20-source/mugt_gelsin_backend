@@ -8,7 +8,7 @@ import json
 import threading
 import time
 
-API_BASE = "https://mugt-gelsin-backend.onrender.com/api/support"
+API_BASE = "https://mugt-gelsin-backend-1.onrender.com/api/support"
 
 def show_customer_service_screen(user_phone, shop_name):
     clear_window()

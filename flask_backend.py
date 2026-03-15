@@ -65,7 +65,7 @@ def upload_file():
         return jsonify({
             "success": True, 
             "url": relative_path,
-            "full_url": f"https://mugt-gelsin-backend.onrender.com/{relative_path}"
+            "full_url": f"https://mugt-gelsin-backend-1.onrender.com/{relative_path}"
         })
 
 # Dükkan verilerinin saklanacağı klasör
