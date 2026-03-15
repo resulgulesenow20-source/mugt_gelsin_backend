@@ -269,38 +269,40 @@ def to_firestore_value(val):
 def sync_shop_to_firestore(shop_id, shop_data):
     """Dükkan verilerini Firestore'a (Bulut) doğrudan yansıtır"""
     try:
-        print(f">>> Firestore Senkronizasyonu Başlıyor: {shop_id}")
-        
+        if shop_id == "None" or not shop_id:
+            print(">>> Hata: Geçersiz shop_id (None). Senkronizasyon iptal edildi.")
+            return
+
         # 1. Profil ve Durum Senkronizasyonu (Restoranlar koleksiyonu)
         from datetime import datetime
-        now_str = datetime.now().strftime("%d Mart %Y, %H:%M:%S")
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
         firestore_payload = {
             "fields": {
                 "id": {"stringValue": str(shop_id)},
-                "İsim": {"stringValue": shop_data.get("name", "Mugt Dükkan")},
-                "telefon": {"stringValue": shop_data.get("phone", str(shop_id))},
-                "Adres": {"stringValue": shop_data.get("address", "")},
+                "name": {"stringValue": shop_data.get("name", "Mugt Dükkan")},
+                "phone": {"stringValue": shop_data.get("phone", str(shop_id))},
+                "address": {"stringValue": shop_data.get("address", "")},
                 "imageUrl": {"stringValue": shop_data.get("imageUrl", "")},
                 "minOrderAmount": {"doubleValue": float(shop_data.get("minOrderAmount", 50.0))},
-                "Durum": {"stringValue": shop_data.get("status", "active")},
-                "güncellendiAt": {"stringValue": now_str}
+                "status": {"stringValue": shop_data.get("status", "active")},
+                "updatedAt": {"stringValue": now_str}
             }
         }
         
         # Firestore REST API (Projeye özel: mugt-gelsin)
         api_url = f"https://firestore.googleapis.com/v1/projects/mugt-gelsin/databases/(default)/documents/Restoranlar/{shop_id}"
         
-        # Alanları güncelleme maskesi
+        # Alanları güncelleme maskesi (ASCII karakterler kullanılmalı)
         params = {
-            "updateMask.fieldPaths": ["İsim", "telefon", "Adres", "imageUrl", "minOrderAmount", "Durum", "güncellendiAt", "id"]
+            "updateMask.fieldPaths": ["name", "phone", "address", "imageUrl", "minOrderAmount", "status", "updatedAt", "id"]
         }
         
         print(f">>> Firestore'a Yazılıyor: {api_url}")
         resp = requests.patch(api_url, params=params, json=firestore_payload, timeout=10)
         
         if resp.status_code == 200:
-            print(f">>> Başarılı: {shop_id} Firestore'a (Restoranlar) yazıldı.")
+            print(f">>> Başarılı: {shop_id} Firestore'a yazıldı.")
         else:
             print(f">>> Firestore Hatası ({resp.status_code}): {resp.text}")
 

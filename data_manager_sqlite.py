@@ -18,7 +18,7 @@ else:
 DB_FILE = os.path.join(BASE_DIR, "restaurant.db")
 # BAĞLANTI AYARLARI
 PROJECT_ID = "mugt-gelsin"
-BASE_URL = "https://mugt-gelsin-backend.onrender.com" 
+BASE_URL = "https://mugt-gelsin-backend-1.onrender.com" 
 
 def get_db_connection():
     conn = sqlite3.connect(DB_FILE)
@@ -711,9 +711,11 @@ def get_setting(key, default=""):
 
 def update_setting(key, value):
     global _settings_cache
-    _settings_cache[key] = value
+    # None değerini "None" stringi olarak kaydetmeyi engelle
+    db_value = str(value) if value is not None else ""
+    _settings_cache[key] = db_value
     conn = get_db_connection()
-    conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)", (key, str(value)))
+    conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)", (key, db_value))
     conn.commit()
     conn.close()
 
