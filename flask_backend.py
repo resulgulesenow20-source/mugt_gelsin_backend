@@ -9,8 +9,8 @@ import urllib.parse
 from datetime import datetime, timezone
 
 # --- CONFIGURATION ---
-RENDER_URL = "https://mugt-gelsin-backend.onrender.com"
-VERSION = "1.0.5" # Takip için
+RENDER_URL = "https://mugt-gelsin-backend-1.onrender.com"
+VERSION = "1.0.6" # Sürüm kontrolü
 # ---------------------
 
 # Prevent UnicodeEncodeError on Windows consoles when printing Turkish characters
