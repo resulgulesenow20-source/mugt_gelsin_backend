@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 
 # --- CONFIGURATION ---
 RENDER_URL = "https://mugt-gelsin-backend.onrender.com"
+VERSION = "1.0.5" # Takip için
 # ---------------------
 
 # Prevent UnicodeEncodeError on Windows consoles when printing Turkish characters
@@ -92,6 +93,7 @@ def health_check():
     shop_files = [f for f in os.listdir(SHOPS_DIR) if f.endswith('.json')]
     return {
         "status": "online",
+        "version": VERSION,
         "message": "Mugt_Gelsin Çoklu Dükkan Sistemi Aktif",
         "registered_shops": len(shop_files)
     }
@@ -262,6 +264,9 @@ def to_firestore_value(val):
     if isinstance(val, (int, float)):
         return {"doubleValue": float(val)}
     if isinstance(val, str):
+        # Görsel URL'lerini tam adrese çevir (Mobil uygulama için)
+        if val.startswith("static/uploads/"):
+            val = f"{RENDER_URL}/{val}"
         return {"stringValue": val}
     if isinstance(val, list):
         return {"arrayValue": {"values": [to_firestore_value(v) for v in val]}}
@@ -330,9 +335,9 @@ def sync_shop_to_firestore(shop_id, shop_data):
         resp = requests.patch(api_url, params=params, json=firestore_payload, timeout=10)
         
         if resp.status_code == 200:
-            print(f">>> Başarılı: {shop_id} Firestore'a (Tam Uyumlu) yazıldı.")
+            print(f">>> [v{VERSION}] Başarılı: {shop_id} Firestore'a (Tam Uyumlu) yazıldı.")
         else:
-            print(f">>> Firestore Hatası ({resp.status_code}): {resp.text}")
+            print(f">>> [v{VERSION}] Firestore Hatası ({resp.status_code}): {resp.text}")
 
         # 2. Menü Senkronizasyonu (Ayrı koleksiyon olarak - Yedek)
         if "menu" in shop_data and shop_data["menu"]:
@@ -348,8 +353,9 @@ def sync_shop_to_firestore(shop_id, shop_data):
             requests.patch(menu_url, params=menu_params, json=menu_payload, timeout=10)
             
     except Exception as e:
-        # Removed the specific "Kritik Hata" print line as requested.
-        pass
+        import traceback
+        print(f">>> [v{VERSION}] Firestore Sync KRİTİK HATA: {str(e)}")
+        print(traceback.format_exc())
 
 @app.route('/api/orders', methods=['POST'])
 def place_order():
