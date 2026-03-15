@@ -79,12 +79,45 @@ if not os.path.exists(SHOPS_DIR):
 def get_shop_file(shop_id):
     return os.path.join(SHOPS_DIR, f"{shop_id}.json")
 
+def from_firestore_value(f_val):
+    """Firestore REST API formatını Python verisine dönüştürür"""
+    if "stringValue" in f_val: return f_val["stringValue"]
+    if "doubleValue" in f_val: return float(f_val["doubleValue"])
+    if "integerValue" in f_val: return int(f_val["integerValue"])
+    if "booleanValue" in f_val: return f_val["booleanValue"]
+    if "arrayValue" in f_val:
+        return [from_firestore_value(v) for v in f_val["arrayValue"].get("values", [])]
+    if "mapValue" in f_val:
+        return {k: from_firestore_value(v) for k, v in f_val["mapValue"].get("fields", {}).items()}
+    if "nullValue" in f_val: return None
+    return str(f_val)
+
 def load_shop_data(shop_id):
-    """Belirli bir dükkanın verilerini yükler"""
+    """Belirli bir dükkanın verilerini yükler (Firestore öncelikli)"""
     file_path = get_shop_file(shop_id)
+    
+    # 1. Önce yerel dosyaya bak
     if os.path.exists(file_path):
         with open(file_path, "r", encoding="utf-8") as f:
             return json.load(f)
+            
+    # 2. Yerelde yoksa (Render restart atmış olabilir) Firestore'dan çek
+    print(f">>> [v{VERSION}] {shop_id} yerelde yok, Firestore'dan yükleniyor...")
+    api_url = f"https://firestore.googleapis.com/v1/projects/mugt-gelsin/databases/(default)/documents/Restoranlar/{shop_id}"
+    try:
+        resp = requests.get(api_url, timeout=5)
+        if resp.status_code == 200:
+            doc = resp.json()
+            fields = doc.get("fields", {})
+            data = {k: from_firestore_value(v) for k, v in fields.items()}
+            
+            # Yerel dosyayı oluştur ki bir sonrakinde hızlı gelsin
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            return data
+    except Exception as e:
+        print(f">>> Firestore yükleme hatası: {e}")
+        
     return None
 
 @app.route('/', methods=['GET'])
