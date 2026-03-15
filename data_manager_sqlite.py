@@ -5,6 +5,9 @@ import requests
 import shutil
 
 import sys
+import io
+
+# UTF-8 handling is now centralized in main.py
 
 # EXE'nin bulunduğu klasörü bul (PyInstaller uyumlu)
 if getattr(sys, 'frozen', False):
@@ -14,9 +17,8 @@ else:
 
 DB_FILE = os.path.join(BASE_DIR, "restaurant.db")
 # BAĞLANTI AYARLARI
-# Yerel test için kendi IP'nizi kullanın: 172.20.10.2
-# Buluta geçince burayı güncelleyeceğiz: https://mugtgelsin.pythonanywhere.com
-BASE_URL = "http://localhost:5000" 
+PROJECT_ID = "mugt-gelsin"
+BASE_URL = "https://mugt-gelsin-backend.onrender.com" 
 
 def get_db_connection():
     conn = sqlite3.connect(DB_FILE)
@@ -105,6 +107,24 @@ def initialize_db():
              c.execute("ALTER TABLE orders ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP")
         except:
              pass # Already exists or other error
+             
+    # Check if orders has payment_method
+    try:
+        c.execute("SELECT payment_method FROM orders LIMIT 1")
+    except:
+        try:
+             c.execute("ALTER TABLE orders ADD COLUMN payment_method TEXT DEFAULT 'Bilinmiyor'")
+        except:
+             pass
+             
+    # Check if orders has courier_name
+    try:
+        c.execute("SELECT courier_name FROM orders LIMIT 1")
+    except:
+        try:
+             c.execute("ALTER TABLE orders ADD COLUMN courier_name TEXT")
+        except:
+             pass
     
     conn.commit()
     conn.close()
@@ -311,7 +331,8 @@ def sync_profile_to_remote(shop_id):
                 "phone": phone,
                 "address": address,
                 "imageUrl": image_url,
-                "minOrderAmount": float(min_order) if min_order.replace('.','',1).isdigit() else 50.0
+                "minOrderAmount": float(min_order) if min_order.replace('.','',1).isdigit() else 50.0,
+                "deliveryTime": get_setting("avg_delivery_time", "20 dk")
             }
             
             API_URL = f"{BASE_URL}/api/profile/{shop_id}"
@@ -419,7 +440,7 @@ def get_all_active_orders_grouped():
         grouped[tid].append(o_dict)
     return grouped
 
-def add_order_item(table_id, product_name, price, quantity=1, status="Hazırlanıyor", customer_name="", customer_phone="", customer_address="", note="", firestore_id=None):
+def add_order_item(table_id, product_name, price, quantity=1, status="Hazırlanıyor", customer_name="", customer_phone="", customer_address="", note="", firestore_id=None, payment_method="Bilinmiyor", courier_name=None):
     conn = get_db_connection()
     # If table_id is provided, it groups by that (which can be a ticket number now)
     # Check if we should merge with existing item? Only if pure product add.
@@ -435,9 +456,9 @@ def add_order_item(table_id, product_name, price, quantity=1, status="Hazırlan�
         conn.execute("UPDATE orders SET quantity = ? WHERE id = ?", (new_qty, existing["id"]))
     else:
         conn.execute('''INSERT INTO orders 
-                     (table_id, product_name, price, quantity, status, customer_name, customer_phone, customer_address, note, firestore_id) 
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                     (table_id, product_name, price, quantity, status, customer_name, customer_phone, customer_address, note, firestore_id))
+                     (table_id, product_name, price, quantity, status, customer_name, customer_phone, customer_address, note, firestore_id, payment_method, courier_name) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                     (table_id, product_name, price, quantity, status, customer_name, customer_phone, customer_address, note, firestore_id, payment_method, courier_name))
     
     # We don't need to update 'tables' table status anymore if we are moving away from it, 
     # but to keep backward compatibility or dashboard count working:
@@ -452,26 +473,28 @@ def add_order_item(table_id, product_name, price, quantity=1, status="Hazırlan�
     conn.close()
 
 
-def update_order_status(order_id, new_status):
+def update_order_status(order_id, new_status, courier_name=None):
     conn = get_db_connection()
     # Önce firestore_id'yi alalım
     cur = conn.execute("SELECT firestore_id FROM orders WHERE id = ?", (order_id,))
     row = cur.fetchone()
     firestore_id = row[0] if row else None
     
-    conn.execute("UPDATE orders SET status = ? WHERE id = ?", (new_status, order_id))
+    if courier_name:
+        conn.execute("UPDATE orders SET status = ?, courier_name = ? WHERE id = ?", (new_status, courier_name, order_id))
+    else:
+        conn.execute("UPDATE orders SET status = ? WHERE id = ?", (new_status, order_id))
     
     # Eğer bu bir Firebase siparişi ise (firestore_id varsa) Firestore'u da güncelle
     if firestore_id:
-        update_firestore_status(firestore_id, new_status)
+        update_firestore_status(firestore_id, new_status, courier_name)
         
     conn.commit()
     conn.close()
 
-def update_firestore_status(firestore_id, status):
+def update_firestore_status(firestore_id, status, courier_name=None):
     """Firestore REST API kullanarak sipariş durumunu günceller"""
     PROJECT_ID = "mugt-gelsin" 
-    URL = f"https://firestore.googleapis.com/v1/projects/{PROJECT_ID}/databases/(default)/documents/Emirler/{firestore_id}?updateMask.fieldPaths=status"
     
     # Flutter uygulamasının beklediği durum isimlerine eşleyelim
     status_map = {
@@ -487,8 +510,14 @@ def update_firestore_status(firestore_id, status):
         }
     }
     
+    if courier_name:
+        payload["fields"]["courier_name"] = {"stringValue": courier_name}
+        URL = f"https://firestore.googleapis.com/v1/projects/{PROJECT_ID}/databases/(default)/documents/Emirler/{firestore_id}?updateMask.fieldPaths=status&updateMask.fieldPaths=courier_name"
+    else:
+        URL = f"https://firestore.googleapis.com/v1/projects/{PROJECT_ID}/databases/(default)/documents/Emirler/{firestore_id}?updateMask.fieldPaths=status"
+    
     try:
-        # Patch metodu ile sadece status alanını güncelliyoruz
+        # Patch metodu ile güncelliyoruz
         res = requests.patch(URL, json=payload, timeout=5)
         if res.status_code == 200:
             print(f"Firestore status updated: {firestore_id} -> {target_status}")
@@ -564,6 +593,7 @@ def fetch_remote_orders(shop_id):
                 customer_address = remote_order.get("deliveryAddress", remote_order.get("customer_address", "Mobil Sipariş"))
                 note = remote_order.get("note", "")
                 firestore_id = remote_order.get("firestore_id") # Flutter'dan gelen ID
+                payment_method = remote_order.get("paymentMethod", "Bilinmiyor") # Kapıda Nakit, vb.
                 
                 # Menü kalemlerini ekle
                 items = remote_order.get("items", [])
@@ -578,7 +608,8 @@ def fetch_remote_orders(shop_id):
                         customer_phone=customer_phone,
                         customer_address=customer_address,
                         note=note,
-                        firestore_id=firestore_id
+                        firestore_id=firestore_id,
+                        payment_method=payment_method
                     )
             return True # Yeni siparişler başarıyla eklendi
     except Exception as e:
@@ -638,10 +669,15 @@ def initialize_settings_defaults():
                 "address": "",
                 "theme": "light",
                 "is_profile_setup": "0",
-                "min_order_amount": "50.0"
+                "min_order_amount": "50.0",
+                "couriers": "Ahmet,Mehmet,Ayhan"
             }
             for k, v in defaults.items():
                 conn.execute("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", (k, v))
+            conn.commit()
+        else:
+            # Sadece couriers kolonunu ekleyelim eğer yoksa (eski veri güncellemesi için)
+            conn.execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('couriers', 'Ahmet,Mehmet,Ayhan')")
             conn.commit()
     except:
         pass
@@ -787,6 +823,97 @@ def get_top_products(limit=5):
         conn.close()
         return [(r[0], r[1]) for r in rows]
     except:
+        conn.close()
+        return []
+
+def get_today_courier_stats():
+    """Bugün teslim edilen veya tamamlanan siparişlerin ciro ve sayı bilgilerini kuryeye ve ödeme yöntemine göre gruplar"""
+    conn = get_db_connection()
+    try:
+        cur = conn.execute("""
+            SELECT COALESCE(courier_name, 'Atanmadı') as courier_name, payment_method, SUM(price * quantity) as total_amount, COUNT(DISTINCT table_id) as package_count
+            FROM orders 
+            WHERE (status = 'Teslim Edildi' OR status = 'Tamamlandı') 
+              AND date(created_at) = date('now')
+            GROUP BY courier_name, payment_method
+        """)
+        rows = cur.fetchall()
+        conn.close()
+        
+        # stats yapısı: {
+        #   "global": {"kapida_nakit": 0, "kapida_kart": 0, "online_kart": 0, "total_packages": 0},
+        #   "couriers": {
+        #        "Ahmet": {"kapida_nakit": 0, "kapida_kart": 0, "online_kart": 0, "total_packages": 0}
+        #   }
+        # }
+        stats = {
+            "global": {
+                "kapida_nakit": 0.0,
+                "kapida_kart": 0.0,
+                "online_kart": 0.0,
+                "total_packages": 0
+            },
+            "couriers": {}
+        }
+        
+        # Package count'ları tablo başına grupladığımız için, kurye başına benzersiz sayıyı 
+        # bulmak adına ufak bir workaround (çünkü aynı siparişteki kalemler aynı kuryededir genelde).
+        # Şimdilik direkt satırdan package_count'u toplayıp globale ekliyoruz ancak global packages
+        # tekilleştirilmiş olması için farklı bir sorgu veya set mantığı gerekir. 
+        # Fakat GROUP BY courier_name, table_id, payment_method'dan count çekmek yerine
+        # mevcut yapı üzerinden ilerleyelim, sadece toplama yapsak yeter.
+        
+        for r in rows:
+            c_name = r['courier_name']
+            pm = r['payment_method']
+            amount = r['total_amount']
+            pkgs = r['package_count']
+            
+            if c_name not in stats["couriers"]:
+                stats["couriers"][c_name] = {"kapida_nakit": 0.0, "kapida_kart": 0.0, "online_kart": 0.0, "total_packages": 0}
+                
+            stats["couriers"][c_name]["total_packages"] += pkgs
+            stats["global"]["total_packages"] += pkgs
+            
+            # Global ve Kurye bazlı eklemeler
+            if pm == "kapida_nakit":
+                stats["global"]["kapida_nakit"] += amount
+                stats["couriers"][c_name]["kapida_nakit"] += amount
+            elif pm == "kapida_kart":
+                stats["global"]["kapida_kart"] += amount
+                stats["couriers"][c_name]["kapida_kart"] += amount
+            elif pm == "online_kart":
+                stats["global"]["online_kart"] += amount
+                stats["couriers"][c_name]["online_kart"] += amount
+            else:
+                stats["global"]["kapida_nakit"] += amount
+                stats["couriers"][c_name]["kapida_nakit"] += amount
+                
+        return stats
+    except Exception as e:
+        print(f"Stats error: {e}")
+        conn.close()
+        return {"kapida_nakit": 0.0, "kapida_kart": 0.0, "online_kart": 0.0, "total_packages": 0}
+
+def get_today_delivered_packages():
+    """Bugün teslim edilen siparişlerin listesini döner"""
+    conn = get_db_connection()
+    conn.row_factory = sqlite3.Row
+    try:
+        cur = conn.execute("""
+            SELECT table_id, MAX(created_at) as order_time, customer_name, customer_address, 
+                   payment_method, courier_name, SUM(price * quantity) as total_amount
+            FROM orders 
+            WHERE (status = 'Teslim Edildi' OR status = 'Tamamlandı') 
+              AND date(created_at) = date('now')
+            GROUP BY table_id
+            ORDER BY order_time DESC
+        """)
+        rows = cur.fetchall()
+        conn.close()
+        return [dict(r) for r in rows]
+    except Exception as e:
+        print(f"Delivered packages error: {e}")
         conn.close()
         return []
 

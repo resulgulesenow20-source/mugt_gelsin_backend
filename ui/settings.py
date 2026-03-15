@@ -13,12 +13,12 @@ def show_settings_screen(user_phone, shop_name):
     ui.utils.root.geometry("1100x850")
     ui.utils.root.configure(bg=ui.utils.bg_main)
     
-    # Üst Navigasyon
-    ui.utils.create_top_nav_bar(ui.utils.root, shop_name, user_phone, "settings")
+    # Sağ Yan Menü (Sidebar)
+    ui.utils.create_sidebar(ui.utils.root, shop_name, user_phone, "settings")
     
     # Ana İçerik Alanı (Kaydırılabilir)
     main_container = tk.Frame(ui.utils.root, bg=ui.utils.bg_main)
-    main_container.pack(fill="both", expand=True)
+    main_container.pack(side="left", fill="both", expand=True)
     
     canvas = tk.Canvas(main_container, bg=ui.utils.bg_main, highlightthickness=0)
     canvas.pack(side="left", fill="both", expand=True, padx=40, pady=20)
@@ -35,50 +35,56 @@ def show_settings_screen(user_phone, shop_name):
         canvas.itemconfig(1, width=event.width)
     canvas.bind('<Configure>', on_configure)
 
-    # Üst Başlık ve Master Switch Alanı
+    # Mouse Wheel Support
+    def _on_mousewheel(event):
+        # -1 indicates scrolling down when wheel is rolled down
+        canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        
+    canvas.bind_all("<MouseWheel>", _on_mousewheel)
+
+    # Header
     header_frame = tk.Frame(content, bg=ui.utils.bg_main)
     header_frame.pack(fill="x", pady=(0, 25))
     
-    tk.Label(header_frame, text="⚙️ Mağaza Yönetim Merkezi", font=("Arial", 26, "bold"), bg=ui.utils.bg_main, fg=ui.utils.TEXT_MAIN).pack(side="left")
+    tk.Label(header_frame, text="⚙️ Mağaza Yönetimi", font=("Inter", 24, "bold"), bg=ui.utils.bg_main, fg=ui.utils.TEXT_MAIN).pack(side="left")
     
     # MASTER SWITCH (Restoran Durumu)
     def toggle_master():
         current = data_manager.get_setting("shop_status", "AÇIK")
         new_val = "KAPALI" if current == "AÇIK" else "AÇIK"
         data_manager.update_setting("shop_status", new_val)
-        data_manager.sync_profile_to_remote()
+        data_manager.sync_profile_to_remote(user_phone)
         show_settings_screen(user_phone, shop_name)
 
     shop_status = data_manager.get_setting("shop_status", "AÇIK")
     ms_bg = ui.utils.ACCENT_GREEN if shop_status == "AÇIK" else ui.utils.TEXT_DIM
-    ms_btn = tk.Button(header_frame, text=f"RESTORAN {shop_status}", font=("Arial", 12, "bold"), 
+    ms_btn = tk.Button(header_frame, text=f"DÜKKAN {shop_status}", font=("Inter", 11, "bold"), 
                       bg=ms_bg, fg="white", bd=0, padx=25, pady=10, cursor="hand2", command=toggle_master)
     ms_btn.pack(side="right")
 
     def create_section(parent, title, icon=""):
-        frame = tk.Frame(parent, bg=ui.utils.CARD_BG, padx=30, pady=30, bd=0)
-        frame.pack(fill="x", pady=12)
+        frame = tk.Frame(parent, bg="white", padx=30, pady=30, highlightthickness=1, highlightbackground=ui.utils.BORDER_COLOR)
+        frame.pack(fill="x", pady=10)
         
-        title_frame = tk.Frame(frame, bg=ui.utils.CARD_BG)
+        title_frame = tk.Frame(frame, bg="white")
         title_frame.pack(fill="x", pady=(0, 20))
         
-        tk.Label(title_frame, text=f"{icon} {title}", font=("Arial", 16, "bold"), bg=ui.utils.CARD_BG, fg=ui.utils.NAV_ACTIVE).pack(side="left")
-        tk.Frame(frame, bg=ui.utils.bg_main, height=2).pack(fill="x", pady=(0, 20))
+        tk.Label(title_frame, text=f"{icon} {title}", font=("Inter", 14, "bold"), bg="white", fg=ui.utils.NAV_ACTIVE).pack(side="left")
         return frame
 
     def create_input(parent, label, value, help_text=""):
-        f = tk.Frame(parent, bg=ui.utils.CARD_BG)
+        f = tk.Frame(parent, bg="white")
         f.pack(fill="x", pady=10)
         
-        lbl_f = tk.Frame(f, bg=ui.utils.CARD_BG)
+        lbl_f = tk.Frame(f, bg="white")
         lbl_f.pack(fill="x")
-        tk.Label(lbl_f, text=label, font=("Arial", 10, "bold"), bg=ui.utils.CARD_BG, fg=ui.utils.TEXT_MAIN).pack(side="left")
+        tk.Label(lbl_f, text=label, font=("Inter", 9, "bold"), bg="white", fg=ui.utils.TEXT_MAIN).pack(side="left")
         if help_text:
-            tk.Label(lbl_f, text=f"({help_text})", font=("Arial", 9), bg=ui.utils.CARD_BG, fg=ui.utils.TEXT_DIM).pack(side="left", padx=10)
+            tk.Label(lbl_f, text=f"({help_text})", font=("Inter", 8), bg="white", fg=ui.utils.TEXT_DIM).pack(side="left", padx=10)
             
-        e = tk.Entry(f, font=("Arial", 12), bg=ui.utils.bg_main, fg=ui.utils.TEXT_MAIN, bd=0, relief="flat", 
-                     highlightthickness=1, highlightbackground="#ced6e0", highlightcolor=ui.utils.NAV_ACTIVE, insertbackground="black")
-        e.pack(fill="x", ipady=10, pady=5)
+        e = tk.Entry(f, font=("Inter", 11), bg="#f8f9fa", fg=ui.utils.TEXT_MAIN, bd=0, relief="flat", 
+                     highlightthickness=1, highlightbackground=ui.utils.BORDER_COLOR, highlightcolor=ui.utils.NAV_ACTIVE, insertbackground="black")
+        e.pack(fill="x", ipady=12, pady=5)
         e.insert(0, value)
         return e
 
@@ -133,6 +139,19 @@ def show_settings_screen(user_phone, shop_name):
     tk.Button(f_auto, text=auto_val, bg=ui.utils.NAV_ACTIVE if auto_val=="AÇIK" else ui.utils.TEXT_DIM, 
               fg="white", font=("Arial", 9, "bold"), bd=0, padx=15, pady=5, command=toggle_auto).pack(side="right")
 
+    # Sipariş Ses Bildirimi
+    def toggle_sound():
+        current = data_manager.get_setting("sound_notifications", "AÇIK")
+        data_manager.update_setting("sound_notifications", "KAPALI" if current == "AÇIK" else "AÇIK")
+        show_settings_screen(user_phone, shop_name)
+    
+    sound_val = data_manager.get_setting("sound_notifications", "AÇIK")
+    f_sound = tk.Frame(ops_sec, bg=ui.utils.CARD_BG)
+    f_sound.pack(fill="x", pady=10)
+    tk.Label(f_sound, text="Sipariş Bildirim Sesi (Çın Çın)", font=("Arial", 11, "bold"), bg=ui.utils.CARD_BG, fg=ui.utils.TEXT_MAIN).pack(side="left")
+    tk.Button(f_sound, text=sound_val, bg=ui.utils.BRAND_COLOR if sound_val=="AÇIK" else ui.utils.TEXT_DIM, 
+              fg="white", font=("Arial", 9, "bold"), bd=0, padx=15, pady=5, command=toggle_sound).pack(side="right")
+
     e_min_order = create_input(ops_sec, "Minimum Sipariş Tutarı", data_manager.get_setting("min_order_amount", "50.0"), "₺ cinsinden")
     
     # Teslimat Süresi Dropdown simülasyonu
@@ -151,6 +170,9 @@ def show_settings_screen(user_phone, shop_name):
         btn_fg = "white" if t_val == t else ui.utils.TEXT_DIM
         tk.Button(t_btn_f, text=t, bg=btn_c, fg=btn_fg, bd=0, padx=10, pady=3, font=("Arial", 9, "bold"),
                   command=lambda v=t: set_delivery_time(v)).pack(side="left", padx=2)
+
+    # Aktif Kuryeler
+    e_couriers = create_input(ops_sec, "Aktif Kuryeler", data_manager.get_setting("couriers", "Ahmet,Mehmet,Ayhan"), "Virgülle ayırın (Örn: Ahmet,Mehmet)")
 
     # 3. MARKA VE LOGO
     brand_sec = create_section(content, "Marka ve Görünüm", "🖼️")
@@ -179,6 +201,7 @@ def show_settings_screen(user_phone, shop_name):
         data_manager.update_setting("shop_website", e_website.get())
         data_manager.update_setting("shop_logo_path", current_logo_path.get())
         data_manager.update_setting("min_order_amount", e_min_order.get())
+        data_manager.update_setting("couriers", e_couriers.get())
         data_manager.sync_profile_to_remote(user_phone)
         messagebox.showinfo("Başarılı ✨", "Kurumsal profiliniz ve mağaza ayarlarınız güncellendi! 🚀")
         show_settings_screen(e_phone.get(), e_shop_name.get())
@@ -224,11 +247,12 @@ def show_settings_screen(user_phone, shop_name):
         tk.Button(confirm_modal, text="💥 KALICI OLARAK SİL", command=final_delete, bg="#d63031", fg="white", 
                   font=("Arial", 10, "bold"), pady=10).pack(pady=10, fill="x", padx=40)
 
-    tk.Button(danger_sec, text="❌ HESABIMI VE TÜM VERİLERİ SİL", command=confirm_delete, 
-              bg="white", fg="#d63031", font=("Arial", 10, "bold"), bd=1, relief="solid", padx=20, pady=8, cursor="hand2").pack(anchor="w", pady=10)
+    tk.Button(danger_sec, text="❌ HESABIMI SİL", command=confirm_delete, 
+              bg="white", fg=ui.utils.ACCENT_RED, font=("Inter", 10, "bold"), bd=1, relief="solid", padx=20, pady=10, cursor="hand2").pack(anchor="w", pady=10)
 
-    save_btn = tk.Button(content, text="🚀 TÜM DEĞİŞİKLİKLERİ KAYDET", command=save_all, bg=ui.utils.BRAND_COLOR, fg="white", font=("Arial", 16, "bold"), bd=0, pady=20, cursor="hand2")
+    save_btn = tk.Button(content, text="🚀 AYARLARI GÜNCELLE", command=save_all, bg=ui.utils.BRAND_COLOR, fg="white", font=("Inter", 14, "bold"), bd=0, pady=20, cursor="hand2")
     save_btn.pack(fill="x", pady=(30, 50))
+    ui.utils.add_hover_effect(save_btn, "#FF8C00", ui.utils.BRAND_COLOR)
 
     # 4. GÜVENLİK VE ÇIKIŞ
     danger_sec = create_section(content, "Güvenlik ve Oturum", "🔒")

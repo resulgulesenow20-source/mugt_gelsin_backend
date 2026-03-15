@@ -1,90 +1,26 @@
 {
   "id": "python_admin_1",
-  "name": "popayes",
-  "imageUrl": "static/uploads/Ekran görüntüsü 2026-01-21 120132.png",
+  "name": "Test Dükkan Güncellendi",
+  "imageUrl": "https://via.placeholder.com/150",
   "rating": "5.0",
   "deliveryTime": "0-5 dk",
   "category": "Admin",
   "menu": [
     {
-      "name": "Özel Burger",
-      "icon": "🍔",
-      "description": "Acılı sos ile",
-      "price": 245.0,
-      "category": "Diğer",
-      "imageUrl": "static/uploads/Ekran görüntüsü 2026-01-21 120223.png"
-    },
-    {
-      "name": "Karışık Pizza",
-      "icon": "🍕",
-      "description": "Ekstra peynir",
-      "price": 310.0,
-      "category": "Diğer",
-      "imageUrl": "static/uploads/Ekran görüntüsü 2026-01-21 123922.png"
-    },
-    {
-      "name": "gamburger",
-      "icon": "🥗",
-      "description": "Taze malzemeler",
-      "price": 185.0,
-      "category": "Diğer",
-      "imageUrl": "static/uploads/Ekran görüntüsü 2026-01-21 120026.png"
-    },
-    {
-      "name": "doner usta",
-      "icon": "🍽️",
-      "description": "patates domates",
+      "name": "Döner",
+      "icon": "🌯",
+      "description": "Lezzetli et döner",
       "price": 120.0,
-      "category": "Diğer",
-      "imageUrl": "static/uploads/Ekran görüntüsü 2026-01-21 100302.png"
+      "category": "Ana Yemekler",
+      "imageUrl": "https://via.placeholder.com/150"
     },
     {
-      "name": "etli gamburger",
-      "icon": "🍔",
-      "description": "et kartoska hyyar pamidor salat sosu",
-      "price": 120.0,
-      "category": "Diğer",
-      "imageUrl": "static/uploads/Ekran görüntüsü 2026-01-21 115619.png"
-    },
-    {
-      "name": "italyan pizza ",
-      "icon": "🍽️",
-      "description": "tursu ozel sos marul kiyme",
-      "price": 200.0,
-      "category": "Diğer",
-      "imageUrl": "static/uploads/Ekran görüntüsü 2026-01-21 120652.png"
-    },
-    {
-      "name": "kola",
-      "icon": "🍽️",
-      "description": "zero",
-      "price": 50.0,
-      "category": "Diğer",
-      "imageUrl": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400"
-    },
-    {
-      "name": "Test Product",
-      "icon": "🍔",
-      "description": "Test Description",
-      "price": 99.9,
-      "category": "Diğer",
-      "imageUrl": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400"
-    },
-    {
-      "name": "Test 2",
-      "icon": "🍔",
-      "description": "Desc 2",
-      "price": 50.0,
-      "category": "Diğer",
-      "imageUrl": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400"
-    },
-    {
-      "name": "tatli",
-      "icon": "🍔",
-      "description": "cok guzel tatli",
-      "price": 120.0,
-      "category": "Tatlılar",
-      "imageUrl": "static/uploads/Ekran görüntüsü 2026-01-21 121527.png"
+      "name": "Ayran",
+      "icon": "🥛",
+      "description": "Soğuk ayran",
+      "price": 20.0,
+      "category": "İçecekler",
+      "imageUrl": "https://via.placeholder.com/150"
     }
   ],
   "pending_orders": [
@@ -815,7 +751,7 @@
       "replyDate": "2026-02-23 12:19:52"
     }
   ],
-  "phone": "5528595745",
-  "address": "100 yil mh",
-  "minOrderAmount": 100.0
+  "phone": "5551234567",
+  "address": "İstanbul, Türkiye",
+  "minOrderAmount": 75.0
 }

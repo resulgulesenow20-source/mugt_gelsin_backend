@@ -8,7 +8,7 @@ import json
 import threading
 import time
 
-API_BASE = "http://localhost:5000/api/support"
+API_BASE = "https://mugt-gelsin-backend.onrender.com/api/support"
 
 def show_customer_service_screen(user_phone, shop_name):
     clear_window()
@@ -16,19 +16,19 @@ def show_customer_service_screen(user_phone, shop_name):
     ui.utils.root.geometry("1100x700")
     ui.utils.root.configure(bg="#f5f5f5")
     
-    # Üst Navigasyon
-    ui.utils.create_top_nav_bar(ui.utils.root, shop_name, user_phone, "support")
+    # Sağ Yan Menü (Sidebar)
+    ui.utils.create_sidebar(ui.utils.root, shop_name, user_phone, "customer_service")
     
     # Main Content
     main_content = tk.Frame(ui.utils.root, bg="#f5f5f5")
-    main_content.pack(side="right", fill="both", expand=True)
+    main_content.pack(side="left", fill="both", expand=True)
     
     # Left Panel: Customer List
     left_panel = tk.Frame(main_content, bg="white", width=300, bd=1, relief="solid")
     left_panel.pack(side="left", fill="y")
     left_panel.pack_propagate(False)
     
-    tk.Label(left_panel, text="📩 Mesajlar", font=("Arial", 16, "bold"), bg="white", pady=15).pack(fill="x")
+    tk.Label(left_panel, text="📩 Mesajlar", font=("Inter", 14, "bold"), bg="white", pady=20).pack(fill="x")
     
     chat_list_frame = tk.Frame(left_panel, bg="white")
     chat_list_frame.pack(fill="both", expand=True)
@@ -41,8 +41,8 @@ def show_customer_service_screen(user_phone, shop_name):
     chat_header.pack(fill="x")
     chat_header.pack_propagate(False)
     
-    selected_user_label = tk.Label(chat_header, text="Bir sohbet seçin", font=("Arial", 14, "bold"), bg="white")
-    selected_user_label.pack(side="left", padx=20, pady=15)
+    selected_user_label = tk.Label(chat_header, text="Bir sohbet seçin", font=("Inter", 12, "bold"), bg="white", fg=ui.utils.TEXT_MAIN)
+    selected_user_label.pack(side="left", padx=25, pady=15)
     
     chat_display = scrolledtext.ScrolledText(right_panel, bg="#f5f5f5", font=("Arial", 12), state='disabled', bd=0)
     chat_display.pack(fill="both", expand=True, padx=20, pady=10)
@@ -71,9 +71,10 @@ def show_customer_service_screen(user_phone, shop_name):
             refresh_chat(uid)
         except: pass
 
-    send_btn = tk.Button(input_frame, text="GÖNDER", font=("Arial", 12, "bold"), bg="#5D3EBD", fg="white",
-                        padx=20, bd=0, cursor="hand2", command=send_reply)
+    send_btn = tk.Button(input_frame, text="GÖNDER", font=("Inter", 10, "bold"), bg=ui.utils.NAV_ACTIVE, fg="white",
+                        padx=30, pady=12, bd=0, cursor="hand2", command=send_reply)
     send_btn.pack(side="right", padx=20, pady=15)
+    ui.utils.add_hover_effect(send_btn, "#FF8C00", ui.utils.NAV_ACTIVE)
     
     msg_entry.bind("<Return>", send_reply)
 
@@ -140,12 +141,14 @@ def show_customer_service_screen(user_phone, shop_name):
                 
                 bg_color = "#f0f0ff" if current_selected_uid[0] == uid else "white"
                 
-                btn = tk.Button(chat_list_frame, text=f"{name}\n{last_msg[:20]}...", 
-                               font=("Arial", 10), bg=bg_color, anchor="w", justify="left",
-                               relief="flat", pady=10, padx=15, cursor="hand2",
+                btn = tk.Button(chat_list_frame, text=f"{name}\n{last_msg[:25]}...", 
+                               font=("Inter", 9, "bold" if current_selected_uid[0] == uid else "normal"), 
+                               bg=bg_color, fg=ui.utils.NAV_ACTIVE if current_selected_uid[0] == uid else ui.utils.TEXT_MAIN,
+                               anchor="w", justify="left",
+                               relief="flat", pady=15, padx=20, cursor="hand2",
                                command=lambda u=uid, n=name: select_chat(u, n))
                 btn.pack(fill="x")
-                tk.Frame(chat_list_frame, bg="#eee", height=1).pack(fill="x")
+                tk.Frame(chat_list_frame, bg=ui.utils.BORDER_COLOR, height=1).pack(fill="x")
             
             # Poll new messages if a chat is selected
             if current_selected_uid[0]:
@@ -158,5 +161,5 @@ def show_customer_service_screen(user_phone, shop_name):
 
     # Start polling
     # Set current page tracking (ensure ui.utils supports it or it's added)
-    ui.utils.current_page = "support"
+    ui.utils.current_page = "customer_service"
     update_chat_list()

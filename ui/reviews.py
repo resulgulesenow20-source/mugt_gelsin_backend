@@ -8,7 +8,7 @@ import json
 import threading
 import time
 
-API_BASE = "http://localhost:5000/api/reviews"
+API_BASE = "https://mugt-gelsin-backend.onrender.com/api/reviews"
 
 def show_reviews_screen(user_phone, shop_name):
     clear_window()
@@ -16,18 +16,26 @@ def show_reviews_screen(user_phone, shop_name):
     ui.utils.root.geometry("1100x700")
     ui.utils.root.configure(bg="#f5f5f5")
     
-    # Üst Navigasyon
-    ui.utils.create_top_nav_bar(ui.utils.root, shop_name, user_phone, "reviews")
+    # Sağ Yan Menü (Sidebar)
+    ui.utils.create_sidebar(ui.utils.root, shop_name, user_phone, "reviews")
     
     # Main Content Area
     main_content = tk.Frame(ui.utils.root, bg="#f5f5f5")
-    main_content.pack(side="right", fill="both", expand=True)
+    main_content.pack(side="left", fill="both", expand=True)
     
-    # Header
-    header = tk.Frame(main_content, bg="white", height=60, bd=1, relief="flat")
+    # Header with premium title
+    header = tk.Frame(main_content, bg="white", height=90)
     header.pack(fill="x")
     header.pack_propagate(False)
-    tk.Label(header, text="⭐ Müşteri Yorumları", font=("Arial", 22, "bold"), bg="white", fg="#333").pack(side="left", padx=30, pady=15)
+    
+    title_frame = tk.Frame(header, bg="white")
+    title_frame.pack(side="left", padx=40, pady=20)
+    tk.Label(title_frame, text="⭐", font=("Inter", 22), bg="white").pack(side="left")
+    
+    text_f = tk.Frame(title_frame, bg="white")
+    text_f.pack(side="left", padx=10)
+    tk.Label(text_f, text="Müşteri Değerlendirmeleri", font=("Inter", 18, "bold"), bg="white", fg=ui.utils.TEXT_MAIN).pack(anchor="w")
+    tk.Label(text_f, text="Müşterilerinizin dükkanınız hakkındaki görüşleri", font=("Inter", 9), bg="white", fg=ui.utils.TEXT_DIM).pack(anchor="w")
 
     # Scrollable Container for Reviews
     container = tk.Frame(main_content, bg="#f5f5f5")
@@ -100,8 +108,8 @@ def show_reviews_screen(user_phone, shop_name):
                 return
                 
             for r in reviews:
-                card = tk.Frame(list_frame, bg="white", bd=1, relief="solid", pady=15, padx=20)
-                card.pack(fill="x", pady=10)
+                card = tk.Frame(list_frame, bg="white", highlightthickness=1, highlightbackground=ui.utils.BORDER_COLOR, padx=25, pady=20)
+                card.pack(fill="x", pady=8)
                 
                 # Header: Name and Stars
                 top_f = tk.Frame(card, bg="white")
@@ -129,8 +137,10 @@ def show_reviews_screen(user_phone, shop_name):
                     if r.get("replyDate"):
                         tk.Label(reply_f, text=r.get("replyDate"), font=("Arial", 9), bg="#f0f0ff", fg="#999").pack(anchor="e")
                 else:
-                    tk.Button(card, text="💬 Cevapla", font=("Arial", 11, "bold"), bg="#5D3EBD", fg="white", bd=0, padx=15, pady=5, cursor="hand2",
-                             command=lambda rid=r['id'], comm=r['comment']: open_reply_modal(rid, comm)).pack(anchor="e")
+                    btn = tk.Button(card, text="💬 Cevapla", font=("Inter", 10, "bold"), bg=ui.utils.NAV_ACTIVE_LIGHT, fg=ui.utils.NAV_ACTIVE, bd=0, padx=20, pady=8, cursor="hand2",
+                             command=lambda rid=r['id'], comm=r['comment']: open_reply_modal(rid, comm))
+                    btn.pack(anchor="e")
+                    ui.utils.add_hover_effect(btn, "#FFEFD5", ui.utils.NAV_ACTIVE_LIGHT)
 
         threading.Thread(target=task, daemon=True).start()
 

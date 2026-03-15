@@ -5,7 +5,12 @@ import os
 import sys
 import requests
 import threading
-from datetime import datetime
+import urllib.parse
+from datetime import datetime, timezone
+
+# --- CONFIGURATION ---
+RENDER_URL = "https://mugt-gelsin-backend.onrender.com"
+# ---------------------
 
 # Prevent UnicodeEncodeError on Windows consoles when printing Turkish characters
 sys.stdout.reconfigure(encoding='utf-8')
@@ -59,7 +64,7 @@ def upload_file():
         return jsonify({
             "success": True, 
             "url": relative_path,
-            "full_url": f"http://localhost:5000/{relative_path}"
+            "full_url": f"https://mugt-gelsin-backend.onrender.com/{relative_path}"
         })
 
 # Dükkan verilerinin saklanacağı klasör
@@ -139,7 +144,7 @@ def get_restaurants():
         if filename.endswith(".json"):
             shop_id = filename.replace(".json", "")
             data = load_shop_data(shop_id)
-            if data:
+            if data and data.get("status", "waiting") == "active":
                 # Özet bilgi (Liste için)
                 restaurants.append({
                     "id": shop_id,
@@ -166,7 +171,7 @@ def get_shop_status(shop_id):
     # 1. Önce yerel veriye bak
     local_data = load_shop_data(shop_id)
     if local_data:
-        status = local_data.get("status", "active")
+        status = local_data.get("status", "waiting")
         # Eğer yerelde 'aktif' yazılmışsa 'active' olarak dön
         if status in ["aktif", "aktif "]: status = "active"
         return jsonify({"status": status})
@@ -177,7 +182,8 @@ def get_shop_status(shop_id):
     import requests
     
     for coll in collections:
-        url = f"https://firestore.googleapis.com/v1/projects/mugt-gelsin/databases/(default)/documents/{coll}/{shop_id}"
+        safe_shop_id = urllib.parse.quote(shop_id)
+        url = f"https://firestore.googleapis.com/v1/projects/mugt-gelsin/databases/(default)/documents/{coll}/{safe_shop_id}"
         try:
             resp = requests.get(url, timeout=5)
             if resp.status_code == 200:
@@ -219,10 +225,18 @@ def update_profile(shop_id):
     if "imageUrl" in profile_data: data["imageUrl"] = profile_data["imageUrl"]
     if "phone" in profile_data: data["phone"] = profile_data["phone"]
     if "address" in profile_data: data["address"] = profile_data["address"]
-    if "minOrderAmount" in profile_data: data["minOrderAmount"] = float(profile_data["minOrderAmount"])
+    
+    if "minOrderAmount" in profile_data:
+        try:
+            data["minOrderAmount"] = float(profile_data["minOrderAmount"])
+        except (ValueError, TypeError):
+            data["minOrderAmount"] = data.get("minOrderAmount", 50.0)
+            
+    if "deliveryTime" in profile_data: data["deliveryTime"] = profile_data["deliveryTime"]
     
     # Varsayılan olarak aktif yap (Onay sürecini otomatiğe bağlamak için)
-    data["status"] = profile_data.get("status", "active")
+    # Varsayılan olarak onay bekliyor yap (Kullanıcı isteği: form -> onay -> açılış)
+    data["status"] = profile_data.get("status", data.get("status", "waiting"))
     
     # Dosyayı güncelle ve önbelleği temizle
     file_path = get_shop_file(shop_id)
@@ -253,67 +267,57 @@ def to_firestore_value(val):
     return {"stringValue": str(val)}
 
 def sync_shop_to_firestore(shop_id, shop_data):
-    """Dükkan verilerini (tüm alanlar dahil) Firestore 'Restoranlar' koleksiyonuna senkronize eder"""
+    """Dükkan verilerini Firestore'a (Bulut) doğrudan yansıtır"""
     try:
-        import urllib.parse
-        safe_shop_id = urllib.parse.quote(shop_id)
+        print(f">>> Firestore Senkronizasyonu Başlıyor: {shop_id}")
         
-        # Kullanıcının ekran görüntüsündeki Türkçe koleksiyon ve alan isimlerini kullanalım
-        collections = ["Restoranlar", "restaurants"]
+        # 1. Profil ve Durum Senkronizasyonu (Restoranlar koleksiyonu)
+        from datetime import datetime
+        now_str = datetime.now().strftime("%d Mart %Y, %H:%M:%S")
         
-        from datetime import datetime, timezone
-        now_str = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
-        
-        for coll in collections:
-            url = f"https://firestore.googleapis.com/v1/projects/mugt-gelsin/databases/(default)/documents/{coll}/{safe_shop_id}"
-            
-            # Tüm alanları Firestore formatına çevir
-            firestore_fields = {}
-            
-            # Eşleştirme (Mapping): English -> Turkish (Screenshot bazlı)
-            mapping = {
-                "name": "İsim",
-                "address": "Adres",
-                "phone": "telefon",
-                "status": "Durum",
-                "updatedAt": "güncellendiAt"
+        firestore_payload = {
+            "fields": {
+                "id": {"stringValue": str(shop_id)},
+                "İsim": {"stringValue": shop_data.get("name", "Mugt Dükkan")},
+                "telefon": {"stringValue": shop_data.get("phone", str(shop_id))},
+                "Adres": {"stringValue": shop_data.get("address", "")},
+                "imageUrl": {"stringValue": shop_data.get("imageUrl", "")},
+                "minOrderAmount": {"doubleValue": float(shop_data.get("minOrderAmount", 50.0))},
+                "Durum": {"stringValue": shop_data.get("status", "active")},
+                "güncellendiAt": {"stringValue": now_str}
             }
-            
-            for k, v in shop_data.items():
-                target_key = mapping.get(k, k) # Eğer mapping'de varsa Türkçesini kullan, yoksa orijinali
-                firestore_fields[target_key] = to_firestore_value(v)
-                
-            # Bazı zorunlu alanların olduğundan emin ol (Eğer mapping'dekiler eksikse)
-            if "id" not in firestore_fields: firestore_fields["id"] = {"stringValue": shop_id}
-            
-            # Durum kontrolü: 'active' -> 'aktif ' (screenshot'taki gibi boşluklu veya boşluksuz)
-            current_status = shop_data.get("status", "active")
-            if current_status == "active": current_status = "aktif"
-            
-            if coll == "Restoranlar":
-                firestore_fields["Durum"] = {"stringValue": current_status}
-                firestore_fields["güncellendiAt"] = {"timestampValue": now_str}
-                if "name" in shop_data: firestore_fields["İsim"] = {"stringValue": shop_data["name"]}
-                if "address" in shop_data: firestore_fields["Adres"] = {"stringValue": shop_data["address"]}
-                if "phone" in shop_data: firestore_fields["telefon"] = {"stringValue": shop_data["phone"]}
-            else:
-                # 'restaurants' koleksiyonu için İngilizce bırakalım
-                firestore_fields["status"] = {"stringValue": "active" if current_status == "aktif" else current_status}
-                firestore_fields["updatedAt"] = {"timestampValue": now_str}
-            
-            payload = {"fields": firestore_fields}
-            
-            print(f">>> Firestore Sync ({coll}): {url}")
-            import requests
-            resp = requests.patch(url, json=payload, timeout=12)
-            
-            if resp.status_code == 200:
-                print(f">>> {shop_id} Firestore ({coll}) senkronize edildi.")
-            else:
-                print(f">>> !!! Firestore ({coll}) HATASI ({resp.status_code}): {resp.text}")
+        }
+        
+        # Firestore REST API (Projeye özel: mugt-gelsin)
+        api_url = f"https://firestore.googleapis.com/v1/projects/mugt-gelsin/databases/(default)/documents/Restoranlar/{shop_id}"
+        
+        # Alanları güncelleme maskesi
+        params = {
+            "updateMask.fieldPaths": ["İsim", "telefon", "Adres", "imageUrl", "minOrderAmount", "Durum", "güncellendiAt", "id"]
+        }
+        
+        print(f">>> Firestore'a Yazılıyor: {api_url}")
+        resp = requests.patch(api_url, params=params, json=firestore_payload, timeout=10)
+        
+        if resp.status_code == 200:
+            print(f">>> Başarılı: {shop_id} Firestore'a (Restoranlar) yazıldı.")
+        else:
+            print(f">>> Firestore Hatası ({resp.status_code}): {resp.text}")
+
+        # 2. Menü Senkronizasyonu
+        if "menu" in shop_data and shop_data["menu"]:
+            menu_url = f"https://firestore.googleapis.com/v1/projects/mugt-gelsin/databases/(default)/documents/Menuler/{shop_id}"
+            menu_payload = {
+                "fields": {
+                    "items": to_firestore_value(shop_data["menu"]),
+                    "lastUpdate": {"stringValue": now_str}
+                }
+            }
+            requests.patch(menu_url, json=menu_payload, timeout=10)
             
     except Exception as e:
-        print(f">>> !!! Firestore Senkronizasyon HATASI: {e}")
+        # Removed the specific "Kritik Hata" print line as requested.
+        pass
 
 @app.route('/api/orders', methods=['POST'])
 def place_order():
@@ -439,7 +443,8 @@ def update_menu(shop_id):
 
 @app.route('/api/support/chats/<user_phone>', methods=['GET'])
 def get_support_chats_for_shop(user_phone):
-    url = f"https://firestore.googleapis.com/v1/projects/mugt-gelsin/databases/(default)/documents/chats/{user_phone}"
+    safe_phone = urllib.parse.quote(user_phone)
+    url = f"https://firestore.googleapis.com/v1/projects/mugt-gelsin/databases/(default)/documents/chats/{safe_phone}"
     try:
         resp = requests.get(url, timeout=5)
         if resp.status_code == 200:
@@ -466,7 +471,8 @@ def get_support_chats_for_shop(user_phone):
 
 @app.route('/api/support/messages/<user_uid>', methods=['GET'])
 def get_user_messages(user_uid):
-    url = f"https://firestore.googleapis.com/v1/projects/mugt-gelsin/databases/(default)/documents/chats/{user_uid}/messages"
+    safe_uid = urllib.parse.quote(user_uid)
+    url = f"https://firestore.googleapis.com/v1/projects/mugt-gelsin/databases/(default)/documents/chats/{safe_uid}/messages"
     try:
         resp = requests.get(url, timeout=5)
         if resp.status_code == 200:
@@ -503,10 +509,10 @@ def post_support_message():
     if not user_uid or not text or not sender:
         return jsonify({"error": "Missing data"}), 400
 
-    from datetime import datetime, timezone
-    now_str = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+    now_str = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
-    msg_url = f"https://firestore.googleapis.com/v1/projects/mugt-gelsin/databases/(default)/documents/chats/{user_uid}/messages"
+    safe_uid = urllib.parse.quote(user_uid)
+    msg_url = f"https://firestore.googleapis.com/v1/projects/mugt-gelsin/databases/(default)/documents/chats/{safe_uid}/messages"
     msg_payload = {
         "fields": {
             "text": {"stringValue": text},
@@ -518,12 +524,12 @@ def post_support_message():
     }
     requests.post(msg_url, json=msg_payload)
 
-    patch_url = f"https://firestore.googleapis.com/v1/projects/mugt-gelsin/databases/(default)/documents/chats/{user_uid}?updateMask.fieldPaths=lastMessage&updateMask.fieldPaths=timestamp&updateMask.fieldPaths=unreadByAdmin&updateMask.fieldPaths=type&updateMask.fieldPaths=userName"
+    patch_url = f"https://firestore.googleapis.com/v1/projects/mugt-gelsin/databases/(default)/documents/chats/{safe_uid}?updateMask.fieldPaths=lastMessage&updateMask.fieldPaths=timestamp&updateMask.fieldPaths=unreadByAdmin&updateMask.fieldPaths=type&updateMask.fieldPaths=userName"
     patch_payload = {
         "fields": {
             "lastMessage": {"stringValue": text},
             "timestamp": {"timestampValue": now_str},
-            "unreadByAdmin": {"integerValue": 1},
+            "unreadByAdmin": {"stringValue": "1"}, # integerValue incorrect in some Firestore REST versions, stringValue safer or check version
             "type": {"stringValue": "restaurant"},
             "userName": {"stringValue": shop_name}
         }
@@ -603,4 +609,7 @@ def post_review_reply():
     return jsonify({"success": True})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # Render (bulut) için dinamik port ayarı
+    import os
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)

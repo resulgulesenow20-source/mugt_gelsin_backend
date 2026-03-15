@@ -17,13 +17,13 @@ def show_orders_screen(user_phone, shop_name):
     ui.utils.root.geometry("1200x800")
     ui.utils.root.configure(bg=ui.utils.bg_main)
     
-    # Yeni Üst Navigasyon
-    ui.utils.create_top_nav_bar(ui.utils.root, shop_name, user_phone, "orders")
+    # Sağ Yan Menü (Sidebar)
+    ui.utils.create_sidebar(ui.utils.root, shop_name, user_phone, "orders")
     ui.utils.current_page = "orders"
     
-    # Ana İçerik Alanı (Kaydırılabilir olabilir)
+    # Ana İçerik Alanı
     main_content = tk.Frame(ui.utils.root, bg=ui.utils.bg_main)
-    main_content.pack(fill="both", expand=True)
+    main_content.pack(side="left", fill="both", expand=True)
     
     # Operasyonel Kontrol Paneli
     _setup_operational_controls(main_content, user_phone, shop_name)
@@ -45,46 +45,101 @@ def show_orders_screen(user_phone, shop_name):
     _start_sync_loop(ui.utils.root, user_phone, shop_name)
 
 def _setup_operational_controls(parent, user_phone, shop_name):
-    controls_frame = tk.Frame(parent, bg=ui.utils.CARD_BG, pady=15, bd=0, relief="flat")
-    controls_frame.pack(fill="x", padx=20, pady=10)
+    controls_frame = tk.Frame(parent, bg=ui.utils.NAV_BG, pady=20, bd=0)
+    controls_frame.pack(fill="x", padx=20, pady=(10, 20))
     
     def toggle_setting(key, current_val, options):
         new_val = options[1] if current_val == options[0] else options[0]
         data_manager.update_setting(key, new_val)
         if key == "shop_status":
-            data_manager.sync_profile_to_remote()
+            data_manager.sync_profile_to_remote(user_phone)
         show_orders_screen(user_phone, shop_name)
 
     def create_control(label, key, options, active_color):
         current_val = data_manager.get_setting(key, options[0])
         is_active = (current_val == options[0])
         
-        f = tk.Frame(controls_frame, bg=ui.utils.CARD_BG)
-        f.pack(side="left", padx=15)
-        tk.Label(f, text=label, font=("Arial", 9, "bold"), bg=ui.utils.CARD_BG, fg=ui.utils.TEXT_DIM).pack(anchor="w")
+        f = tk.Frame(controls_frame, bg="white", padx=15, pady=5)
+        f.pack(side="left", padx=10)
+        tk.Label(f, text=label, font=("Inter", 9, "bold"), bg="white", fg=ui.utils.TEXT_DIM).pack(anchor="w")
         
-        btn_color = active_color if is_active else "#dfe4ea"
-        btn = tk.Button(f, text=f"{current_val}  ▼", font=("Arial", 10, "bold"), 
-                       bg=btn_color, fg="white", bd=0, padx=20, pady=7, cursor="hand2",
+        btn_color = active_color if is_active else "#E9ECEF"
+        btn_fg = "white" if is_active else ui.utils.TEXT_MAIN
+        btn = tk.Button(f, text=f"{current_val}  ▼", font=("Inter", 10, "bold"), 
+                       bg=btn_color, fg=btn_fg, bd=0, padx=20, pady=10, cursor="hand2",
                        command=lambda: toggle_setting(key, current_val, options))
-        btn.pack(pady=2)
+        btn.pack(pady=5)
+        ui.utils.add_hover_effect(btn, "#F1F2F6" if not is_active else active_color, btn_color)
 
-    create_control("Restoran Durumu", "shop_status", ["AÇIK", "KAPALI"], ui.utils.ACCENT_GREEN)
-    create_control("Otomatik Onay", "auto_confirm", ["AÇIK", "KAPALI"], ui.utils.NAV_ACTIVE)
-    create_control("Yola Çıkar/Teslim Et", "dispatch_mode", ["AÇIK", "KAPALI"], ui.utils.ACCENT_GREEN)
+    create_control("Dükkan Durumu", "shop_status", ["AÇIK", "KAPALI"], ui.utils.ACCENT_GREEN)
+    create_control("Otomatik Onay", "auto_confirm", ["AÇIK", "KAPALI"], ui.utils.BRAND_COLOR)
+    create_control("Dağıtım Modu", "dispatch_mode", ["AÇIK", "KAPALI"], ui.utils.ACCENT_GREEN)
     
-    # Ortalama Teslimat Süresi (Basit Seçim)
-    def set_delivery_time():
+    # Ortalama Teslimat Süresi (Gelişmiş Seçim - Kaydırmalı)
+    def open_delivery_time_selector():
+        modal = tk.Toplevel(ui.utils.root)
+        modal.title("Teslimat Süresi Seç")
+        modal.geometry("320x450")
+        modal.configure(bg="white")
+        modal.transient(ui.utils.root)
+        modal.grab_set()
+        
+        tk.Label(modal, text="Teslimat Süresi Seç", font=("Arial", 14, "bold"), bg="white", pady=15).pack()
+        
+        # Kaydırma Alanı (Canvas + Scrollbar)
+        container = tk.Frame(modal, bg="white")
+        container.pack(fill="both", expand=True, padx=20)
+        
+        canvas = tk.Canvas(container, bg="white", highlightthickness=0)
+        scrollbar = tk.Scrollbar(container, orient="vertical", command=canvas.yview)
+        scroll_frame = tk.Frame(canvas, bg="white")
+        
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+            
+        canvas.bind_all("<MouseWheel>", _on_mousewheel)
+        
+        scroll_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        canvas.create_window((0, 0), window=scroll_frame, anchor="nw", width=260)
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        # Daha fazla seçenek ve 120 dk dahil
+        times = ["10 dk", "15 dk", "20 dk", "25 dk", "30 dk", "35 dk", "40 dk", "45 dk", "50 dk", "60 dk", "75 dk", "90 dk", "105 dk", "120 dk"]
         current = data_manager.get_setting("avg_delivery_time", "20 dk")
-        new_time = "30 dk" if current == "20 dk" else "20 dk"
-        data_manager.update_setting("avg_delivery_time", new_time)
-        show_orders_screen(user_phone, shop_name)
+        
+        def select_time(t):
+            canvas.unbind_all("<MouseWheel>") # Temizle
+            data_manager.update_setting("avg_delivery_time", t)
+            data_manager.sync_profile_to_remote(user_phone)
+            modal.destroy()
+            show_orders_screen(user_phone, shop_name)
+
+        def on_close():
+            canvas.unbind_all("<MouseWheel>")
+            modal.destroy()
+
+        modal.protocol("WM_DELETE_WINDOW", on_close)
+
+        for t in times:
+            is_active = (t == current)
+            btn = tk.Button(scroll_frame, text=t, font=("Arial", 11, "bold" if is_active else "normal"),
+                            bg=ui.utils.ACCENT_ORANGE if is_active else "#f1f2f6",
+                            fg="white" if is_active else "#2d3436",
+                            padx=20, pady=8, bd=0, cursor="hand2",
+                            command=lambda val=t: select_time(val))
+            btn.pack(fill="x", pady=3)
+            
+        tk.Button(modal, text="İPTAL", font=("Arial", 10, "bold"), bg="#dfe4ea", fg="#57606f", 
+                  bd=0, pady=10, command=on_close).pack(fill="x", padx=40, pady=15)
 
     f_time = tk.Frame(controls_frame, bg=ui.utils.CARD_BG)
     f_time.pack(side="left", padx=15)
     tk.Label(f_time, text="Ort. Teslimat Süresi", font=("Arial", 9, "bold"), bg=ui.utils.CARD_BG, fg=ui.utils.TEXT_DIM).pack(anchor="w")
     tk.Button(f_time, text=f"{data_manager.get_setting('avg_delivery_time', '20 dk')}  ▼", font=("Arial", 10, "bold"),
-              bg=ui.utils.ACCENT_ORANGE, fg="white", bd=0, padx=20, pady=7, cursor="hand2", command=set_delivery_time).pack(pady=2)
+              bg=ui.utils.ACCENT_ORANGE, fg="white", bd=0, padx=20, pady=7, cursor="hand2", command=open_delivery_time_selector).pack(pady=2)
 
     # Kurye Firması
     f_courier = tk.Frame(controls_frame, bg=ui.utils.CARD_BG)
@@ -103,14 +158,16 @@ def _setup_new_orders_section(parent):
     section_frame = tk.Frame(parent, bg=ui.utils.bg_main)
     section_frame.pack(fill="x", pady=(0, 20))
     
-    tk.Label(section_frame, text="Yeni Sipariş", font=("Arial", 11, "bold"), bg=ui.utils.bg_main, fg=ui.utils.BRAND_COLOR).pack(anchor="w")
+    tk.Label(section_frame, text="⚡ Yeni Siparişler", font=("Inter", 13, "bold"), bg=ui.utils.bg_main, fg=ui.utils.BRAND_COLOR, pady=10).pack(anchor="w")
     
-    header_f = tk.Frame(section_frame, bg="#f1f2f6")
+    header_f = tk.Frame(section_frame, bg="white", highlightthickness=1, highlightbackground=ui.utils.BORDER_COLOR)
     header_f.pack(fill="x")
     
-    headers = ["Platform", "Müşteri", "Km/Adres", "Tabela", "S. Türü", "Tutar", "Ödeme", "Tarihi", "Durumu", "Detay"]
-    for h in headers:
-        tk.Label(header_f, text=h, font=("Arial", 9, "bold"), bg="#f1f2f6", fg=ui.utils.TEXT_DIM, width=12).pack(side="left", padx=2, pady=8)
+    headers = ["Platform", "Müşteri", "Adres/Özet", "İletişim", "Tutar", "Ödeme", "Zaman", "Durumu", "İşlem"]
+    widths = [12, 16, 25, 12, 10, 10, 10, 12, 12]
+    
+    for i, h in enumerate(headers):
+        tk.Label(header_f, text=h, font=("Inter", 9, "bold"), bg="white", fg=ui.utils.TEXT_DIM, width=widths[i]).pack(side="left", padx=2, pady=12)
 
     # Örnek boş satır mesajı
     tk.Label(section_frame, text="Şu an yeni sipariş bulunmuyor.", bg=ui.utils.CARD_BG, fg=ui.utils.TEXT_DIM, pady=10).pack(fill="x")
@@ -142,38 +199,93 @@ def _setup_to_deliver_section(parent, user_phone, shop_name):
 
 def _create_order_card(parent, tid, items, mode, user_phone, shop_name):
     first = items[0]
-    # Kartın arkasına daha belirgin bir gölge hissi
-    shadow_frame = tk.Frame(parent, bg="#d1ccc0", pady=2)
-    shadow_frame.pack(fill="x", pady=8)
     
-    card = tk.Frame(shadow_frame, bg=ui.utils.CARD_BG, pady=15, bd=0)
-    card.pack(fill="x")
+    # Premium Card Container with soft border
+    card = tk.Frame(parent, bg="white", highlightthickness=1, highlightbackground=ui.utils.BORDER_COLOR)
+    card.pack(fill="x", pady=6)
     
-    # Sol: Platform Logo (Canlı renkler)
-    platform = "Mugt Gelsin" 
+    # Status Accent Bar (Left side)
     p_color = ui.utils.BRAND_COLOR if mode == "SHIP" else ui.utils.NAV_ACTIVE
+    accent = tk.Frame(card, bg=p_color, width=5)
+    accent.pack(side="left", fill="y")
     
-    tk.Label(card, text=platform, font=("Arial", 12, "bold italic"), fg=p_color, bg=ui.utils.CARD_BG, width=15).pack(side="left", padx=15)
+    # Sol: Platform Info
+    platform_f = tk.Frame(card, bg="white", width=120)
+    platform_f.pack(side="left", padx=15)
+    platform_f.pack_propagate(False)
     
-    # Orta Bilgiler (Daha temiz fontlar)
-    info_f = tk.Frame(card, bg=ui.utils.CARD_BG)
-    info_f.pack(side="left", expand=True, fill="x")
+    tk.Label(platform_f, text="Mugt Gelsin", font=("Inter", 11, "bold italic"), fg=p_color, bg="white").pack(pady=10)
     
-    tk.Label(info_f, text=first.get('customer_name', 'Bilinmiyor'), font=("Arial", 11, "bold"), bg=ui.utils.CARD_BG, fg=ui.utils.TEXT_MAIN).grid(row=0, column=0, sticky="w")
-    tk.Label(info_f, text=f"{items[0].get('customer_address', '')[:40]}...", font=("Arial", 10), bg=ui.utils.CARD_BG, fg=ui.utils.TEXT_DIM).grid(row=1, column=0, sticky="w")
+    # Orta: Müşteri & Adres
+    info_f = tk.Frame(card, bg="white")
+    info_f.pack(side="left", expand=True, fill="both", padx=10, pady=12)
     
-    # Sağ: Fiyat ve Butonlar
+    tk.Label(info_f, text=first.get('customer_name', 'Bilinmiyor'), font=("Inter", 11, "bold"), bg="white", fg=ui.utils.TEXT_MAIN, anchor="w").pack(fill="x")
+    tk.Label(info_f, text=f"📍 {first.get('customer_address', '')[:60]}...", font=("Inter", 9), bg="white", fg=ui.utils.TEXT_DIM, anchor="w").pack(fill="x", pady=(2,0))
+    
+    # Sağ: Fiyat & Ödeme
     total = sum(i['price'] * i['quantity'] for i in items)
-    tk.Label(card, text=f"₺{total:.2f}", font=("Arial", 14, "bold"), bg=ui.utils.CARD_BG, fg=ui.utils.TEXT_MAIN).pack(side="left", padx=20)
+    pm = first.get('payment_method', 'Bilinmiyor')
+    if pm == 'kapida_nakit':
+        pm_text, pm_color = "Nakit", "#27ae60"
+    elif pm == 'kapida_kart':
+        pm_text, pm_color = "POS", "#f39c12"
+    elif pm == 'online_kart':
+        pm_text, pm_color = "Online", ui.utils.NAV_ACTIVE
+    else:
+        pm_text, pm_color = "Belirsiz", "#95a5a6"
+        
+    price_frame = tk.Frame(card, bg="white", width=100)
+    price_frame.pack(side="left", padx=20)
+    
+    tk.Label(price_frame, text=f"₺{total:.2f}", font=("Inter", 14, "bold"), bg="white", fg=ui.utils.TEXT_MAIN).pack(anchor="e")
+    
+    pm_badge = tk.Label(price_frame, text=pm_text, font=("Inter", 8, "bold"), bg="#f8f9fa", fg=pm_color, padx=8, pady=2, bd=1, relief="solid", highlightthickness=0)
+    pm_badge.pack(anchor="e", pady=(4,0))
     
     btn_frame = tk.Frame(card, bg=ui.utils.CARD_BG)
     btn_frame.pack(side="right", padx=15)
     
     def update_status():
         new_status = "Yola Çıktı" if mode == "SHIP" else "Teslim Edildi"
-        for item in items:
-            data_manager.update_order_status(item['id'], new_status)
-        show_orders_screen(user_phone, shop_name)
+        
+        if mode == "SHIP":
+            # Show courier selector
+            _show_courier_selector(items, user_phone, shop_name)
+        else:
+            for item in items:
+                data_manager.update_order_status(item['id'], new_status)
+            show_orders_screen(user_phone, shop_name)
+
+    def _show_courier_selector(items, user_phone, shop_name):
+        couriers_str = data_manager.get_setting("couriers", "Ahmet,Mehmet,Ayhan")
+        courier_list = [c.strip() for c in couriers_str.split(",") if c.strip()]
+        
+        if not courier_list:
+            messagebox.showwarning("Hata", "Lütfen ayarlar sayfasından kurye tanımlayın.")
+            return
+
+        modal = tk.Toplevel(ui.utils.root)
+        modal.title("Kurye Seç")
+        modal.geometry("300x400")
+        modal.configure(bg="white")
+        modal.transient(ui.utils.root)
+        modal.grab_set()
+
+        tk.Label(modal, text="Kurye Seçin", font=("Arial", 14, "bold"), bg="white", pady=15).pack()
+
+        for cname in courier_list:
+            def assign_and_ship(name=cname):
+                for item in items:
+                    data_manager.update_order_status(item['id'], "Yola Çıktı", courier_name=name)
+                modal.destroy()
+                show_orders_screen(user_phone, shop_name)
+
+            tk.Button(modal, text=name, font=("Arial", 11, "bold"), bg="#f1f2f6", fg=ui.utils.TEXT_MAIN,
+                      bd=0, padx=20, pady=10, cursor="hand2", command=assign_and_ship).pack(fill="x", padx=30, pady=5)
+
+        tk.Button(modal, text="İPTAL", font=("Arial", 10, "bold"), bg="#dfe4ea", fg="#57606f", 
+                  bd=0, pady=10, command=modal.destroy).pack(fill="x", padx=60, pady=15)
 
     tk.Button(btn_frame, text="İptal Et", bg=ui.utils.BRAND_COLOR, fg="white", bd=0, padx=12, pady=5, font=("Arial", 9, "bold"), cursor="hand2").pack(side="left", padx=5)
     
@@ -209,10 +321,12 @@ def _start_sync_loop(root, user_phone, shop_name):
             # Eğer dükkan sahibi hala siparişler ekranındaysa ve yeni sipariş geldiyse UI'ı güncelle
             if new_arrived and hasattr(ui.utils, "current_page") and ui.utils.current_page == "orders":
                 # Sipariş sesi çal
-                if sys.platform == "win32":
+                sound_setting = data_manager.get_setting("sound_notifications", "AÇIK")
+                if sound_setting == "AÇIK" and sys.platform == "win32":
                     try:
                         # Play a standard Windows notification sound asynchronously
-                        winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS | winsound.SND_ASYNC)
+                        # Use "Notification.Default" for a clear chime sound in modern Windows
+                        winsound.PlaySound("Notification.Default", winsound.SND_ALIAS | winsound.SND_ASYNC)
                     except:
                         pass
                 

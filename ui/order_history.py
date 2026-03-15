@@ -10,19 +10,26 @@ def show_order_history_screen(user_phone, shop_name):
     ui.utils.root.geometry("1100x700")
     ui.utils.root.configure(bg="#f5f5f5")
     
-    # Üst Navigasyon
-    ui.utils.create_top_nav_bar(ui.utils.root, shop_name, user_phone, "history")
+    # Sağ Yan Menü (Sidebar)
+    ui.utils.create_sidebar(ui.utils.root, shop_name, user_phone, "history")
     
     # Main Content
     main_content = tk.Frame(ui.utils.root, bg="#f5f5f5")
-    main_content.pack(side="right", fill="both", expand=True)
+    main_content.pack(side="left", fill="both", expand=True)
     
     # Header
-    header = tk.Frame(main_content, bg="white", height=60)
+    header = tk.Frame(main_content, bg="white", height=90)
     header.pack(fill="x")
     header.pack_propagate(False)
     
-    tk.Label(header, text="📋 Sipariş Geçmişi", font=("Arial", 26, "bold"), bg="white", fg="#333").pack(side="left", padx=30, pady=15)
+    title_frame = tk.Frame(header, bg="white")
+    title_frame.pack(side="left", padx=40, pady=20)
+    tk.Label(title_frame, text="📜", font=("Inter", 22), bg="white").pack(side="left")
+    
+    text_f = tk.Frame(title_frame, bg="white")
+    text_f.pack(side="left", padx=10)
+    tk.Label(text_f, text="Geçmiş Siparişler", font=("Inter", 18, "bold"), bg="white", fg=ui.utils.TEXT_MAIN).pack(anchor="w")
+    tk.Label(text_f, text="Tamamlanmış tüm siparişlerin dökümü", font=("Inter", 9), bg="white", fg=ui.utils.TEXT_DIM).pack(anchor="w")
     
     content = tk.Frame(main_content, bg="#f5f5f5")
     content.pack(fill="both", expand=True, padx=30, pady=20)
@@ -74,8 +81,8 @@ def show_order_history_screen(user_phone, shop_name):
         items = grouped_history[key]
         first_item = items[0]
         
-        card = tk.Frame(scroll_content, bg="white", bd=1, relief="solid", padx=8, pady=4)
-        card.pack(fill="x", pady=2)
+        card = tk.Frame(scroll_content, bg="white", highlightthickness=1, highlightbackground=ui.utils.BORDER_COLOR, padx=15, pady=15)
+        card.pack(fill="x", pady=5)
         
         # Header Info
         header_f = tk.Frame(card, bg="white")
@@ -88,8 +95,8 @@ def show_order_history_screen(user_phone, shop_name):
         title_text = f"👤 {cust_name}"
         if cust_phone: title_text += f" | 📞 {cust_phone}"
         
-        tk.Label(header_f, text=title_text, font=("Arial", 12, "bold"), bg="white", fg="#333").pack(side="left")
-        tk.Label(header_f, text=time_str, font=("Arial", 10), bg="white", fg="#666").pack(side="right")
+        tk.Label(header_f, text=title_text, font=("Inter", 11, "bold"), bg="white", fg=ui.utils.TEXT_MAIN).pack(side="left")
+        tk.Label(header_f, text=time_str, font=("Inter", 9), bg="white", fg=ui.utils.TEXT_DIM).pack(side="right")
         
         # Total
         total_price = sum(i['price'] * i['quantity'] for i in items)
