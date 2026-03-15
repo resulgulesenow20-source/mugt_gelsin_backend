@@ -111,14 +111,14 @@ def create_sidebar(parent, shop_name, user_phone, active_page):
     from ui.reports import show_reports_screen
     from ui.settings import show_settings_screen
     from ui.courier import show_courier_screen
-    from ui.support import show_support_screen
+    from ui.customer_service import show_customer_service_screen
 
     add_nav_item("🏠", "Ana Sayfa", "dashboard", lambda: show_main_dashboard(user_phone, shop_name))
     add_nav_item("📋", "Siparişler", "orders", lambda: show_orders_screen(user_phone, shop_name))
     add_nav_item("🍔", "Menü Yönetimi", "menu", lambda: show_menu_screen(user_phone, shop_name))
     add_nav_item("🛵", "Kurye Yönetimi", "courier", lambda: show_courier_screen(user_phone, shop_name))
     add_nav_item("📊", "Raporlar", "reports", lambda: show_reports_screen(user_phone, shop_name))
-    add_nav_item("💬", "Canlı Destek", "support", lambda: show_support_screen(user_phone, shop_name))
+    add_nav_item("💬", "Canlı Destek", "support", lambda: show_customer_service_screen(user_phone, shop_name))
     add_nav_item("⚙️", "Ayarlar", "settings", lambda: show_settings_screen(user_phone, shop_name))
 
     # Logout Button

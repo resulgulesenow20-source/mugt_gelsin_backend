@@ -289,7 +289,8 @@ def sync_shop_to_firestore(shop_id, shop_data):
                 "imageUrl": {"stringValue": shop_data.get("imageUrl", "")},
                 "minOrderAmount": {"doubleValue": float(shop_data.get("minOrderAmount", 50.0))},
                 "status": {"stringValue": shop_data.get("status", "active")},
-                "updatedAt": {"stringValue": now_str}
+                "updatedAt": {"stringValue": now_str},
+                "menu": to_firestore_value(shop_data.get("menu", []))
             }
         }
         
@@ -298,7 +299,7 @@ def sync_shop_to_firestore(shop_id, shop_data):
         
         # Alanları güncelleme maskesi (ASCII karakterler kullanılmalı)
         params = {
-            "updateMask.fieldPaths": ["name", "phone", "address", "imageUrl", "minOrderAmount", "status", "updatedAt", "id"]
+            "updateMask.fieldPaths": ["name", "phone", "address", "imageUrl", "minOrderAmount", "status", "updatedAt", "id", "menu"]
         }
         
         print(f">>> Firestore'a Yazılıyor: {api_url}")
@@ -309,7 +310,7 @@ def sync_shop_to_firestore(shop_id, shop_data):
         else:
             print(f">>> Firestore Hatası ({resp.status_code}): {resp.text}")
 
-        # 2. Menü Senkronizasyonu
+        # 2. Menü Senkronizasyonu (Ayrı koleksiyon olarak - Yedek)
         if "menu" in shop_data and shop_data["menu"]:
             menu_url = f"https://firestore.googleapis.com/v1/projects/mugt-gelsin/databases/(default)/documents/Menuler/{shop_id}"
             menu_payload = {
@@ -318,7 +319,9 @@ def sync_shop_to_firestore(shop_id, shop_data):
                     "lastUpdate": {"stringValue": now_str}
                 }
             }
-            requests.patch(menu_url, json=menu_payload, timeout=10)
+            # Maske ekle
+            menu_params = {"updateMask.fieldPaths": ["items", "lastUpdate"]}
+            requests.patch(menu_url, params=menu_params, json=menu_payload, timeout=10)
             
     except Exception as e:
         # Removed the specific "Kritik Hata" print line as requested.
