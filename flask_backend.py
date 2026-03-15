@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 
 # --- CONFIGURATION ---
 RENDER_URL = "https://mugt-gelsin-backend-1.onrender.com"
-VERSION = "1.0.6" # Sürüm kontrolü
+VERSION = "1.0.7" # Otomatik onay devrede
 # ---------------------
 
 # Prevent UnicodeEncodeError on Windows consoles when printing Turkish characters
@@ -259,7 +259,13 @@ def update_profile(shop_id):
         data = {"id": shop_id, "menu": [], "reviews": [], "pending_orders": []}
         
     # Güncellenecek alanları aktar
-    if "name" in profile_data: data["name"] = profile_data["name"]
+    # Eğer isim numara olarak gelmişse veya boşsa 'Mugt Dükkan' yapalım (Hatalı veriyi temizlemek için)
+    incoming_name = profile_data.get("name", "").strip()
+    if not incoming_name or incoming_name == shop_id:
+        data["name"] = data.get("name", "Mugt Dükkan")
+    else:
+        data["name"] = incoming_name
+
     if "imageUrl" in profile_data: data["imageUrl"] = profile_data["imageUrl"]
     if "phone" in profile_data: data["phone"] = profile_data["phone"]
     if "address" in profile_data: data["address"] = profile_data["address"]
@@ -272,9 +278,13 @@ def update_profile(shop_id):
             
     if "deliveryTime" in profile_data: data["deliveryTime"] = profile_data["deliveryTime"]
     
-    # Varsayılan olarak aktif yap (Onay sürecini otomatiğe bağlamak için)
-    # Varsayılan olarak onay bekliyor yap (Kullanıcı isteği: form -> onay -> açılış)
-    data["status"] = profile_data.get("status", data.get("status", "waiting"))
+    # KULLANICI İÇİN ÖNEMLİ: Yeni dükkanları otomatik onaylanmış yap
+    # Eğer dükkan yeni oluşturulmuşsa veya durumu yoksa 'active' yap
+    if not data.get("status") or data["status"] == "waiting":
+        data["status"] = "active"
+    else:
+        # Gelen veride status varsa onu kullan (Eğer explicitly gönderilmişse)
+        data["status"] = profile_data.get("status", data["status"])
     
     # Dosyayı güncelle ve önbelleği temizle
     file_path = get_shop_file(shop_id)
