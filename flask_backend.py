@@ -266,7 +266,26 @@ def to_firestore_value(val):
     if isinstance(val, list):
         return {"arrayValue": {"values": [to_firestore_value(v) for v in val]}}
     if isinstance(val, dict):
-        return {"mapValue": {"fields": {k: to_firestore_value(v) for k, v in val.items()}}}
+        # Menü ürünleri ve genel sözlükler için hem İngilizce hem Türkçe alanlar ekle
+        fields = {}
+        # Kritik alan eşleşmeleri
+        mapping = {
+            "name": "İsim",
+            "price": "Fiyat",
+            "description": "Açıklama",
+            "category": "Kategori",
+            "imageUrl": "Resim",
+            "icon": "İkon",
+            "id": "ÜrünNo"
+        }
+        
+        for k, v in val.items():
+            fields[k] = to_firestore_value(v)
+            # Eğer anahtarın Türkçe karşılığı varsa ve henüz eklenmemişse ekle
+            if k in mapping and mapping[k] not in val:
+                fields[mapping[k]] = to_firestore_value(v)
+        
+        return {"mapValue": {"fields": fields}}
     return {"stringValue": str(val)}
 
 def sync_shop_to_firestore(shop_id, shop_data):
@@ -284,29 +303,34 @@ def sync_shop_to_firestore(shop_id, shop_data):
             "fields": {
                 "id": {"stringValue": str(shop_id)},
                 "name": {"stringValue": shop_data.get("name", "Mugt Dükkan")},
+                "İsim": {"stringValue": shop_data.get("name", "Mugt Dükkan")}, # Çift dilli destek
                 "phone": {"stringValue": shop_data.get("phone", str(shop_id))},
+                "telefon": {"stringValue": shop_data.get("phone", str(shop_id))},
                 "address": {"stringValue": shop_data.get("address", "")},
+                "Adres": {"stringValue": shop_data.get("address", "")},
                 "imageUrl": {"stringValue": shop_data.get("imageUrl", "")},
                 "minOrderAmount": {"doubleValue": float(shop_data.get("minOrderAmount", 50.0))},
                 "status": {"stringValue": shop_data.get("status", "active")},
+                "Durum": {"stringValue": shop_data.get("status", "active")},
                 "updatedAt": {"stringValue": now_str},
+                "güncellendiAt": {"stringValue": now_str},
                 "menu": to_firestore_value(shop_data.get("menu", []))
             }
         }
         
-        # Firestore REST API (Projeye özel: mugt-gelsin)
-        api_url = f"https://firestore.googleapis.com/v1/projects/mugt-gelsin/databases/(default)/documents/Restoranlar/{shop_id}"
-        
-        # Alanları güncelleme maskesi (ASCII karakterler kullanılmalı)
+        # Alanları güncelleme maskesi
+        # NOT: Türkçe karakterli alanlar bazen REST API'de sorun çıkarabilir, 
+        # bu yüzden en kritik olanları ASCII (name, status vb.) olarak maskeliyoruz.
         params = {
-            "updateMask.fieldPaths": ["name", "phone", "address", "imageUrl", "minOrderAmount", "status", "updatedAt", "id", "menu"]
+            "updateMask.fieldPaths": ["name", "phone", "address", "imageUrl", "minOrderAmount", "status", "updatedAt", "id", "menu", "İsim", "telefon", "Adres", "Durum", "güncellendiAt"]
         }
         
-        print(f">>> Firestore'a Yazılıyor: {api_url}")
+        api_url = f"https://firestore.googleapis.com/v1/projects/mugt-gelsin/databases/(default)/documents/Restoranlar/{shop_id}"
+        print(f">>> Firestore'a Yazılıyor (Çift Dilli): {shop_id}")
         resp = requests.patch(api_url, params=params, json=firestore_payload, timeout=10)
         
         if resp.status_code == 200:
-            print(f">>> Başarılı: {shop_id} Firestore'a yazıldı.")
+            print(f">>> Başarılı: {shop_id} Firestore'a (Tam Uyumlu) yazıldı.")
         else:
             print(f">>> Firestore Hatası ({resp.status_code}): {resp.text}")
 
