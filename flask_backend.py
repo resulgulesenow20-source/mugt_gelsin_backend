@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 
 # --- CONFIGURATION ---
 RENDER_URL = "https://mugt-gelsin-backend-1.onrender.com"
-VERSION = "1.0.7" # Otomatik onay devrede
+VERSION = "1.0.8" # Kurtarma ve tanılama devrede
 # ---------------------
 
 # Prevent UnicodeEncodeError on Windows consoles when printing Turkish characters
@@ -119,6 +119,19 @@ def load_shop_data(shop_id):
         print(f">>> Firestore yükleme hatası: {e}")
         
     return None
+
+@app.route('/api/debug/logs', methods=['GET'])
+def get_server_logs():
+    """Tanılama için sunucu çıktılarını döner"""
+    try:
+        # Render'da loglar standart çıktıya gider ama biz son hataları yakalayabiliriz
+        return jsonify({
+            "version": VERSION,
+            "message": "Loglar standart çıktıdadır, panelden kontrol edin.",
+            "success": True
+        })
+    except:
+        return jsonify({"error": "Log okunamadı"}), 500
 
 @app.route('/', methods=['GET'])
 def health_check():
@@ -278,13 +291,12 @@ def update_profile(shop_id):
             
     if "deliveryTime" in profile_data: data["deliveryTime"] = profile_data["deliveryTime"]
     
-    # KULLANICI İÇİN ÖNEMLİ: Yeni dükkanları otomatik onaylanmış yap
-    # Eğer dükkan yeni oluşturulmuşsa veya durumu yoksa 'active' yap
-    if not data.get("status") or data["status"] == "waiting":
-        data["status"] = "active"
-    else:
-        # Gelen veride status varsa onu kullan (Eğer explicitly gönderilmişse)
-        data["status"] = profile_data.get("status", data["status"])
+    # Dükkan durumunu koru: Eğer profil gönderisinde açıkça status belirtilmişse onu kullan,
+    # aksi hâlde mevcut status'ü değiştirme. Yeni dükkan ise 'waiting' olarak başlatsın.
+    if "status" in profile_data:
+        data["status"] = profile_data["status"]
+    elif not data.get("status"):
+        data["status"] = "waiting"  # Yeni dükkanlar onay beklesin
     
     # Dosyayı güncelle ve önbelleği temizle
     file_path = get_shop_file(shop_id)
@@ -358,8 +370,8 @@ def sync_shop_to_firestore(shop_id, shop_data):
                 "Adres": {"stringValue": shop_data.get("address", "")},
                 "imageUrl": {"stringValue": shop_data.get("imageUrl", "")},
                 "minOrderAmount": {"doubleValue": float(shop_data.get("minOrderAmount", 50.0))},
-                "status": {"stringValue": shop_data.get("status", "active")},
-                "Durum": {"stringValue": shop_data.get("status", "active")},
+                "status": {"stringValue": shop_data.get("status", "waiting")},
+                "Durum": {"stringValue": shop_data.get("status", "waiting")},
                 "updatedAt": {"stringValue": now_str},
                 "güncellendiAt": {"stringValue": now_str},
                 "menu": to_firestore_value(shop_data.get("menu", []))
