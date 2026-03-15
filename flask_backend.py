@@ -165,21 +165,18 @@ def get_restaurants():
 
 @app.route('/api/status/<shop_id>', methods=['GET'])
 def get_shop_status(shop_id):
-    """Dükkanın onay durumunu sorgular (Önce yerel, sonra Firestore)"""
+    """Dükkanın onay durumunu sorgular (Firestore öncelikli)"""
     print(f">>> {shop_id} için durum sorgulanıyor...")
     
-    # 1. Önce yerel veriye bak
+    # 1. Önce yerel veriye bak (Eğer zaten aktifse hızlıca dön)
     local_data = load_shop_data(shop_id)
-    if local_data:
-        status = local_data.get("status", "waiting")
-        # Eğer yerelde 'aktif' yazılmışsa 'active' olarak dön
-        if status in ["aktif", "aktif "]: status = "active"
-        return jsonify({"status": status})
+    if local_data and local_data.get("status") == "active":
+        return jsonify({"status": "active"})
         
-    # 2. Yerelde yoksa Firestore'dan sorgula
-    # Hem 'restaurants' hem 'Restoranlar' koleksiyonlarına bakabiliriz
-    collections = ["Restoranlar", "restaurants"]
+    # 2. Yerelde aktif değilse veya dosya yoksa EN GÜNCEL Firestore verisine bak
     import requests
+    import urllib.parse
+    collections = ["Restoranlar", "restaurants"]
     
     for coll in collections:
         safe_shop_id = urllib.parse.quote(shop_id)
@@ -190,22 +187,28 @@ def get_shop_status(shop_id):
                 doc = resp.json()
                 fields = doc.get("fields", {})
                 
-                # Hem 'status' hem 'Durum' alanlarına bak
-                status = "unknown"
+                # 'Durum' veya 'status' alanını kontrol et
+                val = ""
                 if "Durum" in fields:
-                    status = fields.get("Durum", {}).get("stringValue", "unknown")
+                    val = fields.get("Durum", {}).get("stringValue", "")
                 elif "status" in fields:
-                    status = fields.get("status", {}).get("stringValue", "unknown")
+                    val = fields.get("status", {}).get("stringValue", "")
                 
-                # Değeri normalize et ("aktif " veya "aktif" -> "active")
-                if status.strip().lower() in ["aktif", "active"]:
-                    status = "active"
-                    
-                return jsonify({"status": status})
+                # Onaylanmışsa yerel dosyayı da güncelle
+                if val.strip().lower() in ["aktif", "active"]:
+                    if local_data:
+                        local_data["status"] = "active"
+                        file_path = get_shop_file(shop_id)
+                        with open(file_path, "w", encoding="utf-8") as f:
+                            json.dump(local_data, f, ensure_ascii=False, indent=2)
+                    return jsonify({"status": "active"})
+                
+                return jsonify({"status": "waiting"})
         except Exception as e:
-            print(f">>> Status check error ({coll}): {e}")
+            print(f">>> Firestore status check error ({coll}): {e}")
             
-    return jsonify({"status": "not_found"}), 404
+    # Hiçbir yerde bulunamadıysa 'waiting' dön (Kayıt yeni yapılmış olabilir)
+    return jsonify({"status": "waiting"})
 
 @app.route('/api/profile/<shop_id>', methods=['POST'])
 def update_profile(shop_id):

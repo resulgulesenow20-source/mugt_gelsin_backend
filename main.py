@@ -59,7 +59,8 @@ def main():
         saved_phone = data_manager.get_last_login()
         
         def initial_check():
-            if saved_phone:
+            # "None" stringi veya boş değer kontrolü
+            if saved_phone and str(saved_phone).strip() != "None" and str(saved_phone).strip() != "":
                 is_setup = data_manager.get_setting("is_profile_setup", "0")
                 shop_name = data_manager.get_setting("shop_name", "Mugt Gelsin")
                 

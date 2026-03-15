@@ -700,13 +700,18 @@ _settings_cache = {}
 def get_setting(key, default=""):
     global _settings_cache
     if key in _settings_cache:
-        return _settings_cache[key]
-        
-    conn = get_db_connection()
-    cur = conn.execute("SELECT value FROM settings WHERE key = ?", (key,))
-    row = cur.fetchone()
-    val = row[0] if row else default
-    _settings_cache[key] = val
+        val = _settings_cache[key]
+    else:
+        conn = get_db_connection()
+        cur = conn.execute("SELECT value FROM settings WHERE key = ?", (key,))
+        row = cur.fetchone()
+        val = row[0] if row else default
+        conn.close()
+        _settings_cache[key] = val
+    
+    # "None" string koruması
+    if val == "None":
+        return default
     return val
 
 def update_setting(key, value):
