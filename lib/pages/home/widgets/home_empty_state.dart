@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/presentation/common/buttons/primary_button.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/presentation/common/buttons/primary_button.dart';
 
 class HomeEmptyState extends StatelessWidget {
   final VoidCallback onRetry;
@@ -15,7 +15,7 @@ class HomeEmptyState extends StatelessWidget {
           Icon(Icons.restaurant_menu, size: 80, color: Colors.grey[300]),
           const SizedBox(height: 16),
           const Text(
-            "Henüz hiç restoran veya yemek yok.",
+            "HenÃ¼z hiÃ§ restoran veya yemek yok.",
             style: TextStyle(color: Colors.grey, fontSize: 16),
           ),
           const Text(
@@ -32,3 +32,4 @@ class HomeEmptyState extends StatelessWidget {
     );
   }
 }
+

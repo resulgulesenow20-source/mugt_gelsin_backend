@@ -1,4 +1,4 @@
-{
+﻿{
   "project_info": {
     "project_number": "244575841502",
     "project_id": "getir-clone-b8568",
@@ -28,7 +28,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:244575841502:android:f9569fe4bfcf04f84de64f",
         "android_client_info": {
-          "package_name": "com.example.mugt_gelsin"
+          "package_name": "com.example.mugut_gelsin"
         }
       },
       "oauth_client": [],

@@ -1,13 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
-import 'package:mugt_gelsin/pages/home/home_page.dart';
-import 'package:mugt_gelsin/pages/cart/cart_page.dart';
-import 'package:mugt_gelsin/pages/profile/profile_page.dart';
-import 'package:mugt_gelsin/pages/profile/orders_page.dart';
-import 'package:mugt_gelsin/pages/favorites/favorites_page.dart';
-import 'package:mugt_gelsin/providers/navigation_provider.dart';
-import 'package:mugt_gelsin/providers/language_provider.dart';
-import 'package:mugt_gelsin/providers/cart_provider.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
+import 'package:mugut_gelsin/pages/home/home_page.dart';
+import 'package:mugut_gelsin/pages/cart/cart_page.dart';
+import 'package:mugut_gelsin/pages/profile/profile_page.dart';
+import 'package:mugut_gelsin/pages/profile/orders_page.dart';
+import 'package:mugut_gelsin/pages/favorites/favorites_page.dart';
+import 'package:mugut_gelsin/providers/navigation_provider.dart';
+import 'package:mugut_gelsin/providers/language_provider.dart';
+import 'package:mugut_gelsin/providers/cart_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:add_to_cart_animation/add_to_cart_animation.dart';
 
@@ -19,7 +19,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  // ✅ Her tab için ayrı NavigatorKey tanımlıyoruz
+  // âœ… Her tab iÃ§in ayrÄ± NavigatorKey tanÄ±mlÄ±yoruz
   final GlobalKey<NavigatorState> _homeNavKey = GlobalKey<NavigatorState>();
   final GlobalKey<NavigatorState> _favNavKey = GlobalKey<NavigatorState>();
   final GlobalKey<NavigatorState> _ordersNavKey = GlobalKey<NavigatorState>();
@@ -64,7 +64,7 @@ class _MainScreenState extends State<MainScreen> {
           });
         },
         child: Scaffold(
-        extendBody: false, // Body artık nav barın arkasına geçmez, çakışma önlenir
+        extendBody: false, // Body artÄ±k nav barÄ±n arkasÄ±na geÃ§mez, Ã§akÄ±ÅŸma Ã¶nlenir
         body: IndexedStack(
           index: selectedIndex,
           children: [
@@ -141,7 +141,7 @@ class _MainScreenState extends State<MainScreen> {
                       key: cartKey,
                       icon: Icon(
                         isSelected ? activeIcon : inactiveIcon,
-                        color: isSelected ? AppColors.primary : Colors.black, // <-- Koyu siyah dış çizgi
+                        color: isSelected ? AppColors.primary : Colors.black, // <-- Koyu siyah dÄ±ÅŸ Ã§izgi
                         size: 26,
                       ),
                       badgeOptions: const BadgeOptions(active: false),
@@ -152,7 +152,7 @@ class _MainScreenState extends State<MainScreen> {
             else
               Icon(
                 isSelected ? activeIcon : inactiveIcon,
-                color: isSelected ? AppColors.primary : Colors.black, // <-- Koyu siyah dış çizgi
+                color: isSelected ? AppColors.primary : Colors.black, // <-- Koyu siyah dÄ±ÅŸ Ã§izgi
                 size: 26,
               ),
             if (isSelected)
@@ -192,3 +192,4 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 }
+

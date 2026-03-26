@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:mugt_gelsin/models/order_model.dart';
+import 'package:mugut_gelsin/models/order_model.dart';
 
 class OrderTrackingProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -23,7 +23,7 @@ class OrderTrackingProvider with ChangeNotifier {
     return _firestore
         .collection('Emirler')
         .where('customerUid', isEqualTo: uid)
-        .where('status', whereIn: ['pending', 'hazırlanıyor', 'yolda', 'onaylanıyor', 'on_the_way'])
+        .where('status', whereIn: ['pending', 'hazÄ±rlanÄ±yor', 'yolda', 'onaylanÄ±yor', 'on_the_way'])
         .snapshots()
         .map((snapshot) {
       return snapshot.docs
@@ -32,3 +32,4 @@ class OrderTrackingProvider with ChangeNotifier {
     });
   }
 }
+

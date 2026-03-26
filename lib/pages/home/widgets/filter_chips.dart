@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
 
 class FilterChips extends StatefulWidget {
   const FilterChips({super.key});
@@ -25,8 +25,8 @@ class _FilterChipsState extends State<FilterChips> {
   Widget build(BuildContext context) {
     final filters = [
       {"label": "Filtrele", "icon": Icons.tune_rounded, "isMain": true},
-      {"label": "Teslimat Süresi", "icon": Icons.access_time_rounded, "isMain": false},
-      {"label": "Restoran Puanı", "icon": Icons.star_rounded, "isMain": false},
+      {"label": "Teslimat SÃ¼resi", "icon": Icons.access_time_rounded, "isMain": false},
+      {"label": "Restoran PuanÄ±", "icon": Icons.star_rounded, "isMain": false},
       {"label": "Mutfak", "icon": Icons.restaurant_menu_rounded, "isMain": false},
     ];
 
@@ -52,7 +52,7 @@ class _FilterChipsState extends State<FilterChips> {
                 if (!isMain) {
                   _toggleFilter(label);
                 } else {
-                  // Filtrele butonuna tıklandığında yapılacaklar buraya eklenebilir
+                  // Filtrele butonuna tÄ±klandÄ±ÄŸÄ±nda yapÄ±lacaklar buraya eklenebilir
                 }
               },
               borderRadius: BorderRadius.circular(22),
@@ -91,3 +91,4 @@ class _FilterChipsState extends State<FilterChips> {
     );
   }
 }
+

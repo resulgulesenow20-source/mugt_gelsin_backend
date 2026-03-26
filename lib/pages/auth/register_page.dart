@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:mugt_gelsin/providers/auth_provider.dart' as app_auth;
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
-import 'package:mugt_gelsin/pages/main_screen.dart';
-import 'package:mugt_gelsin/providers/language_provider.dart';
+import 'package:mugut_gelsin/providers/auth_provider.dart' as app_auth;
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
+import 'package:mugut_gelsin/pages/main_screen.dart';
+import 'package:mugut_gelsin/providers/language_provider.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -46,7 +46,7 @@ class _RegisterPageState extends State<RegisterPage> {
               _isLoading = false;
             });
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Doğrulama kodu gönderildi.")),
+              const SnackBar(content: Text("DoÄŸrulama kodu gÃ¶nderildi.")),
             );
           },
           onError: (error) {
@@ -59,7 +59,7 @@ class _RegisterPageState extends State<RegisterPage> {
       } else {
         // Step 2: Verify OTP
         if (_codeController.text.isEmpty) {
-          throw "Lütfen doğrulama kodunu girin.";
+          throw "LÃ¼tfen doÄŸrulama kodunu girin.";
         }
         await authProvider.signInWithOTP(
           _codeController.text.trim(),
@@ -122,7 +122,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             const SizedBox(height: 32),
 
-            // Kayıt Alanları
+            // KayÄ±t AlanlarÄ±
             if (!_codeSent) ...[
               _buildTextField(
                 controller: _nameController,
@@ -166,7 +166,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     const Icon(Icons.sms_outlined, color: AppColors.primary, size: 48),
                     const SizedBox(height: 16),
                     const Text(
-                      "Kodu Doğrula",
+                      "Kodu DoÄŸrula",
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -175,7 +175,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      "$_countryCode${_phoneController.text} numarasına bir SMS kodu gönderdik.",
+                      "$_countryCode${_phoneController.text} numarasÄ±na bir SMS kodu gÃ¶nderdik.",
                       textAlign: TextAlign.center,
                       style: const TextStyle(color: AppColors.textSecondary),
                     ),
@@ -213,7 +213,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ],
             const SizedBox(height: 32),
 
-            // Kayıt Ol Butonu
+            // KayÄ±t Ol Butonu
             SizedBox(
               width: double.infinity,
               height: 56,
@@ -229,7 +229,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
-                        _codeSent ? "DOĞRULA VE KAYIT OL" : langProvider.translate('register_title'),
+                        _codeSent ? "DOÄžRULA VE KAYIT OL" : langProvider.translate('register_title'),
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -241,11 +241,11 @@ class _RegisterPageState extends State<RegisterPage> {
             if (_codeSent)
               TextButton(
                 onPressed: () => setState(() => _codeSent = false),
-                child: const Text("Bilgileri Düzenle", style: TextStyle(color: AppColors.textSecondary)),
+                child: const Text("Bilgileri DÃ¼zenle", style: TextStyle(color: AppColors.textSecondary)),
               ),
             const SizedBox(height: 16),
 
-            // Giriş Yap Linki
+            // GiriÅŸ Yap Linki
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -316,8 +316,8 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildCountryOption(context, "Türkiye", "+90"),
-              _buildCountryOption(context, "Türkmenistan", "+993"),
+              _buildCountryOption(context, "TÃ¼rkiye", "+90"),
+              _buildCountryOption(context, "TÃ¼rkmenistan", "+993"),
               _buildCountryOption(context, "Rusya", "+7"),
             ],
           ),
@@ -339,3 +339,4 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
+

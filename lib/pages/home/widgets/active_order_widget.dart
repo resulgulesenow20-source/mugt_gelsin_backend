@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:mugt_gelsin/pages/orders/order_tracking_page.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
+import 'package:mugut_gelsin/pages/orders/order_tracking_page.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
 
 class ActiveOrderWidget extends StatelessWidget {
   const ActiveOrderWidget({super.key});
@@ -16,7 +16,7 @@ class ActiveOrderWidget extends StatelessWidget {
       stream: FirebaseFirestore.instance
           .collection('Emirler')
           .where('customerUid', isEqualTo: user.uid)
-          .where('status', whereIn: ['hazırlanıyor', 'yolda', 'yola çıktı', 'onay bekliyor', 'onaylanıyor'])
+          .where('status', whereIn: ['hazÄ±rlanÄ±yor', 'yolda', 'yola Ã§Ä±ktÄ±', 'onay bekliyor', 'onaylanÄ±yor'])
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
@@ -25,11 +25,11 @@ class ActiveOrderWidget extends StatelessWidget {
         }
 
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          debugPrint("ActiveOrderWidget: Aktif sipariş bulunamadı (Uid: ${user.uid})");
+          debugPrint("ActiveOrderWidget: Aktif sipariÅŸ bulunamadÄ± (Uid: ${user.uid})");
           return const SizedBox.shrink();
         }
 
-        // Bellekte tarihe göre sıralayalım (orderBy index gerektirdiği için kaldırdık)
+        // Bellekte tarihe gÃ¶re sÄ±ralayalÄ±m (orderBy index gerektirdiÄŸi iÃ§in kaldÄ±rdÄ±k)
         final docs = snapshot.data!.docs.toList();
         docs.sort((a, b) {
           final aTime = (a.data() as Map<String, dynamic>)['timestamp'];
@@ -42,20 +42,19 @@ class ActiveOrderWidget extends StatelessWidget {
 
         final orderDoc = docs.first;
         final orderData = orderDoc.data() as Map<String, dynamic>;
-        final String status = orderData['status'] ?? 'hazırlanıyor';
+        final String status = orderData['status'] ?? 'hazÄ±rlanÄ±yor';
         final String shopName = orderData['shop_name'] ?? 'Restoran';
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
               child: Text(
-                "Siparişini Takip Et",
-                style: TextStyle(
+                "Track Your Order",
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
                   fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
                 ),
               ),
             ),
@@ -69,19 +68,19 @@ class ActiveOrderWidget extends StatelessWidget {
                 );
               },
               child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+                      color: AppColors.primary.withValues(alpha: 0.08),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
                     ),
                   ],
-                  border: Border.all(color: AppColors.textPrimary.withValues(alpha: 0.2)),
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.1), width: 1.5),
                 ),
                 child: Row(
                   children: [
@@ -93,26 +92,35 @@ class ActiveOrderWidget extends StatelessWidget {
                         children: [
                           Text(
                             shopName,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                            style: GoogleFonts.outfit(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 16,
+                              color: AppColors.textPrimary,
+                              letterSpacing: -0.4,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 2),
+                          const SizedBox(height: 4),
                           Text(
                             _getStatusText(status),
-                            style: TextStyle(
+                            style: GoogleFonts.outfit(
                               color: _getStatusColor(status),
+                              fontWeight: FontWeight.w700,
                               fontSize: 13,
-                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceSubtle,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppColors.textPrimary),
+                    ),
                   ],
                 ),
               ),
@@ -129,28 +137,28 @@ class ActiveOrderWidget extends StatelessWidget {
 
     switch (status.toLowerCase()) {
       case 'onay bekliyor':
-        icon = Icons.access_time;
-        color = AppColors.textPrimary;
+        icon = Icons.access_time_rounded;
+        color = AppColors.warning;
         break;
-      case 'hazırlanıyor':
-        icon = Icons.restaurant;
-        color = AppColors.textPrimary;
+      case 'hazÄ±rlanÄ±yor':
+        icon = Icons.restaurant_rounded;
+        color = AppColors.primary;
         break;
       case 'yolda':
-      case 'yola çıktı':
-        icon = Icons.delivery_dining;
-        color = Colors.blue;
+      case 'yola Ã§Ä±ktÄ±':
+        icon = Icons.delivery_dining_rounded;
+        color = Colors.blueAccent;
         break;
       default:
-        icon = Icons.shopping_bag;
+        icon = Icons.shopping_bag_rounded;
         color = AppColors.primary;
     }
 
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        shape: BoxShape.circle,
+        borderRadius: BorderRadius.circular(15),
       ),
       child: Icon(icon, color: color, size: 24),
     );
@@ -159,26 +167,29 @@ class ActiveOrderWidget extends StatelessWidget {
   String _getStatusText(String status) {
     switch (status.toLowerCase()) {
       case 'onay bekliyor':
-        return "Sipariş onay bekliyor...";
-      case 'hazırlanıyor':
-        return "Siparişiniz hazırlanıyor...";
+        return "SipariÅŸ onay bekliyor...";
+      case 'hazÄ±rlanÄ±yor':
+        return "SipariÅŸiniz hazÄ±rlanÄ±yor...";
       case 'yolda':
-      case 'yola çıktı':
-        return "Kurye yola çıktı!";
+      case 'yola Ã§Ä±ktÄ±':
+        return "Kurye yola Ã§Ä±ktÄ±!";
       default:
-        return "Siparişiniz işleniyor";
+        return "SipariÅŸiniz iÅŸleniyor";
     }
   }
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'yolda':
-      case 'yola çıktı':
-        return Colors.blue;
+      case 'yola Ã§Ä±ktÄ±':
+        return Colors.blueAccent;
       case 'onay bekliyor':
-        return AppColors.textPrimary;
+        return AppColors.warning;
+      case 'hazÄ±rlanÄ±yor':
+        return AppColors.primary;
       default:
         return AppColors.textPrimary;
     }
   }
 }
+

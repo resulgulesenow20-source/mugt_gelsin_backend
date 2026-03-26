@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,7 +7,7 @@ import '../models/restaurant_model.dart';
 class ApiService {
   // --- PRODUCTION CONFIGURATION ---
   // Once deployed to Cloud Run, replace this with your Cloud Run URL
-  static const String _productionBaseUrl = 'https://mugt-gelsin-backend.onrender.com';
+  static const String _productionBaseUrl = 'https://mugut-gelsin-backend.onrender.com';
   
   static String get baseUrl => _productionBaseUrl;
 
@@ -15,10 +15,10 @@ class ApiService {
     try {
       debugPrint('ApiService: Fetching restaurants from Firestore...');
       
-      // 'restaurants' veya 'Restoranlar' koleksiyonlarına bakabiliriz.
-      // Python koduna göre, masaüstü uygulaması 'Restoranlar' koleksiyonunu kullanıyor gibi görünüyor,
-      // ancak emin olmak için her iki koleksiyon yapısını da yönetebilecek bir fallback sistemi kurmalıyız.
-      // Şimdilik standart Firestore sorgumuzu yapıyoruz.
+      // 'restaurants' veya 'Restoranlar' koleksiyonlarÄ±na bakabiliriz.
+      // Python koduna gÃ¶re, masaÃ¼stÃ¼ uygulamasÄ± 'Restoranlar' koleksiyonunu kullanÄ±yor gibi gÃ¶rÃ¼nÃ¼yor,
+      // ancak emin olmak iÃ§in her iki koleksiyon yapÄ±sÄ±nÄ± da yÃ¶netebilecek bir fallback sistemi kurmalÄ±yÄ±z.
+      // Åžimdilik standart Firestore sorgumuzu yapÄ±yoruz.
       
       QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('Restoranlar').get();
       
@@ -47,7 +47,7 @@ class ApiService {
 
       return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
-      debugPrint('ApiService: Sipariş gönderilemedi: $e');
+      debugPrint('ApiService: SipariÅŸ gÃ¶nderilemedi: $e');
       return false;
     }
   }
@@ -61,7 +61,7 @@ class ApiService {
       );
       return response.statusCode == 200;
     } catch (e) {
-      debugPrint("Destek mesajı gönderme hatası: $e");
+      debugPrint("Destek mesajÄ± gÃ¶nderme hatasÄ±: $e");
       return false;
     }
   }
@@ -75,7 +75,7 @@ class ApiService {
         return jsonDecode(response.body);
       }
     } catch (e) {
-      debugPrint("Destek mesajları çekme hatası: $e");
+      debugPrint("Destek mesajlarÄ± Ã§ekme hatasÄ±: $e");
     }
     return [];
   }
@@ -89,7 +89,7 @@ class ApiService {
         return jsonDecode(response.body);
       }
     } catch (e) {
-      debugPrint("Yorumları çekme hatası: $e");
+      debugPrint("YorumlarÄ± Ã§ekme hatasÄ±: $e");
     }
     return [];
   }
@@ -103,33 +103,33 @@ class ApiService {
       );
       return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
-      debugPrint("Yorum gönderme hatası: $e");
+      debugPrint("Yorum gÃ¶nderme hatasÄ±: $e");
       return false;
     }
   }
 
   Restaurant _mapFirestoreToRestaurant(Map<String, dynamic> data, String docId) {
-    // Firestore'da menü (yemekler) genellikle bir liste olarak tutulur.
+    // Firestore'da menÃ¼ (yemekler) genellikle bir liste olarak tutulur.
     List<Food> parsedMenu = [];
     
-    // Menü alanlarını dönüştürme: Hem 'menu' hem de Türkçe isimlendirme olan 'Menü' kontrolü
-    var menuData = data['menu'] ?? data['Menü'];
+    // MenÃ¼ alanlarÄ±nÄ± dÃ¶nÃ¼ÅŸtÃ¼rme: Hem 'menu' hem de TÃ¼rkÃ§e isimlendirme olan 'MenÃ¼' kontrolÃ¼
+    var menuData = data['menu'] ?? data['MenÃ¼'];
     if (menuData is List) {
       parsedMenu = menuData.map<Food>((item) {
         if (item is Map) {
           return Food(
              id: item['id']?.toString() ?? item['name']?.toString().toLowerCase().replaceAll(' ', '_') ?? 'unknown_food',
-             name: item['name'] ?? item['İsim'] ?? '',
-             description: item['description'] ?? item['Açıklama'] ?? '',
+             name: item['name'] ?? item['Ä°sim'] ?? '',
+             description: item['description'] ?? item['AÃ§Ä±klama'] ?? '',
              price: (item['price'] ?? item['Fiyat'] as num?)?.toDouble() ?? 0.0,
              imageUrl: item['imageUrl'] ?? item['Resim'] ?? '',
           );
         }
-        return Food(id: 'unknown', name: 'Bilinmeyen Ürün', description: '', price: 0.0, imageUrl: '');
+        return Food(id: 'unknown', name: 'Bilinmeyen ÃœrÃ¼n', description: '', price: 0.0, imageUrl: '');
       }).toList();
     }
 
-    // Görüntü URL'si
+    // GÃ¶rÃ¼ntÃ¼ URL'si
     String imageUrl = data['imageUrl'] ?? data['Resim'] ?? "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400";
     if (imageUrl.startsWith('static/')) {
         imageUrl = '$_productionBaseUrl/$imageUrl';
@@ -137,13 +137,14 @@ class ApiService {
 
     return Restaurant(
       id: data['id']?.toString() ?? docId,
-      name: data['name'] ?? data['İsim'] ?? 'Bilinmeyen Restoran',
+      name: data['name'] ?? data['Ä°sim'] ?? 'Bilinmeyen Restoran',
       imageUrl: imageUrl,
       rating: data['rating']?.toString() ?? data['Puan']?.toString() ?? '0.0',
-      deliveryTime: data['deliveryTime']?.toString() ?? data['Teslimat Süresi']?.toString() ?? '30-45dk',
+      deliveryTime: data['deliveryTime']?.toString() ?? data['Teslimat SÃ¼resi']?.toString() ?? '30-45dk',
       category: data['category'] ?? data['Kategori'] ?? 'Genel',
-      minOrderAmount: (data['minOrderAmount'] ?? data['Minimum Sipariş Tutarı'] as num?)?.toDouble() ?? 50.0,
+      minOrderAmount: (data['minOrderAmount'] ?? data['Minimum SipariÅŸ TutarÄ±'] as num?)?.toDouble() ?? 50.0,
       menu: parsedMenu,
     );
   }
 }
+

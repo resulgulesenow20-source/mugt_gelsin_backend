@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/models/restaurant_model.dart';
-import 'package:mugt_gelsin/presentation/common/cards/restaurant_card.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/models/restaurant_model.dart';
+import 'package:mugut_gelsin/presentation/common/cards/restaurant_card.dart';
 
 class HorizontalRestaurantList extends StatelessWidget {
   final List<Restaurant> restaurants;
@@ -10,9 +10,9 @@ class HorizontalRestaurantList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 210, // Increased height to prevent overflow
+      height: 235, // Increased height to prevent overflow and add breathing room
       child: ListView.builder(
-        scrollDirection: Axis.horizontal, // SİHİR BURADA: Yana kaymayı sağlar
+        scrollDirection: Axis.horizontal, // SÄ°HÄ°R BURADA: Yana kaymayÄ± saÄŸlar
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), // Add vertical padding for shadow
         itemCount: restaurants.length,
         itemBuilder: (context, index) {
@@ -30,3 +30,4 @@ class HorizontalRestaurantList extends StatelessWidget {
     );
   }
 }
+

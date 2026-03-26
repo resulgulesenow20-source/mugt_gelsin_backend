@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
-import 'package:mugt_gelsin/providers/language_provider.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
+import 'package:mugut_gelsin/providers/language_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:mugt_gelsin/providers/address_provider.dart';
-import 'package:mugt_gelsin/pages/profile/my_addresses_page.dart';
+import 'package:mugut_gelsin/providers/address_provider.dart';
+import 'package:mugut_gelsin/pages/profile/my_addresses_page.dart';
 
 class HomeAddressBar extends StatelessWidget {
   const HomeAddressBar({super.key});
@@ -72,3 +72,4 @@ class HomeAddressBar extends StatelessWidget {
     );
   }
 }
+

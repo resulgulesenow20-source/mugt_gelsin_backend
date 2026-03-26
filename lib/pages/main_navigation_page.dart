@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/pages/home/home_page.dart';
-import 'package:mugt_gelsin/pages/profile/profile_page.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/pages/home/home_page.dart';
+import 'package:mugut_gelsin/pages/profile/profile_page.dart';
 import 'cart/cart_page.dart'; // Bu importu ekle
 
 class MainNavigationPage extends StatefulWidget {
@@ -17,7 +17,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   final List<Widget> _pages = [
     const HomePage(),
     const Center(child: Text("Arama")),
-    const CartPage(), // Burayı güncelledik
+    const CartPage(), // BurayÄ± gÃ¼ncelledik
     const ProfilePage(),
   ];
 
@@ -48,3 +48,4 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     );
   }
 }
+

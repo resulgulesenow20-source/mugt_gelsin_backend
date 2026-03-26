@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/presentation/common/inputs/custom_search_field.dart';
-import 'package:mugt_gelsin/pages/profile/live_support_page.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
-import 'package:mugt_gelsin/providers/language_provider.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/presentation/common/inputs/custom_search_field.dart';
+import 'package:mugut_gelsin/pages/profile/live_support_page.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
+import 'package:mugut_gelsin/providers/language_provider.dart';
 import 'package:provider/provider.dart';
 
 class HomeSearchBar extends StatelessWidget {
@@ -28,7 +28,7 @@ class HomeSearchBar extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        // ✅ DESTEK SAYFASINA GİDEN BUTON
+        // âœ… DESTEK SAYFASINA GÄ°DEN BUTON
         InkWell(
           onTap: () {
             Navigator.push(
@@ -61,4 +61,5 @@ class HomeSearchBar extends StatelessWidget {
     );
   }
 }
+
 

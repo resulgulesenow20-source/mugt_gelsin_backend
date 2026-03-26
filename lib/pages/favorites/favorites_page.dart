@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
 import 'package:provider/provider.dart';
-import 'package:mugt_gelsin/utils/dummy_data.dart';
-import 'package:mugt_gelsin/providers/favorite_provider.dart';
-import 'package:mugt_gelsin/providers/language_provider.dart';
-import 'package:mugt_gelsin/models/restaurant_model.dart';
-import 'package:mugt_gelsin/pages/restaurant/restaurant_detail_page.dart';
+import 'package:mugut_gelsin/utils/dummy_data.dart';
+import 'package:mugut_gelsin/providers/favorite_provider.dart';
+import 'package:mugut_gelsin/providers/language_provider.dart';
+import 'package:mugut_gelsin/models/restaurant_model.dart';
+import 'package:mugut_gelsin/pages/restaurant/restaurant_detail_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class FavoritesPage extends StatelessWidget {
@@ -53,7 +53,7 @@ class FavoritesPage extends StatelessWidget {
                         },
                       ),
 
-                // ÜRÜNLER TAB
+                // ÃœRÃœNLER TAB
                 favProvider.favoriteFoods.isEmpty
                     ? _buildEmptyState(context, langProvider.translate('no_fav_prod'), Icons.fastfood_outlined)
                     : ListView.builder(
@@ -224,7 +224,7 @@ class FavoritesPage extends StatelessWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          "• ${item.restaurantName}",
+                          "â€¢ ${item.restaurantName}",
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(color: Colors.grey[500], fontSize: 12),
@@ -270,10 +270,10 @@ class FavoritesPage extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             Provider.of<LanguageProvider>(context, listen: false).selectedLang == 'TR' 
-              ? "Favorilerine eklediklerin burada görünecek."
+              ? "Favorilerine eklediklerin burada gÃ¶rÃ¼necek."
               : Provider.of<LanguageProvider>(context, listen: false).selectedLang == 'TM'
-                ? "Halanlaryňyz bu ýerde peýda bolar."
-                : "Ваше избранное появится здесь.",
+                ? "HalanlaryÅˆyz bu Ã½erde peÃ½da bolar."
+                : "Ð’Ð°ÑˆÐµ Ð¸Ð·Ð±Ñ€Ð°Ð½Ð½Ð¾Ðµ Ð¿Ð¾ÑÐ²Ð¸Ñ‚ÑÑ Ð·Ð´ÐµÑÑŒ.",
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey[600], fontSize: 14),
           ),
@@ -282,3 +282,4 @@ class FavoritesPage extends StatelessWidget {
     );
   }
 }
+

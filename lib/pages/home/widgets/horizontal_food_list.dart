@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/models/restaurant_model.dart';
-import 'package:mugt_gelsin/presentation/common/cards/compact_food_card.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/models/restaurant_model.dart';
+import 'package:mugut_gelsin/presentation/common/cards/compact_food_card.dart';
 
 class HorizontalFoodList extends StatelessWidget {
   final List<FoodWithRestaurant> items;
@@ -11,7 +11,7 @@ class HorizontalFoodList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 200,
+      height: 225, // Increased height for better shadow and spacing
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -29,3 +29,4 @@ class HorizontalFoodList extends StatelessWidget {
     );
   }
 }
+

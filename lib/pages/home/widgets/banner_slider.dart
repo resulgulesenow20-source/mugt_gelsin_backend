@@ -1,6 +1,6 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
 
 class BannerSlider extends StatefulWidget {
   const BannerSlider({super.key});
@@ -15,17 +15,17 @@ class _BannerSliderState extends State<BannerSlider> {
   Timer? _timer;
 
   final List<Map<String, String>> _bannerData = [
-    {'image': 'assets/images/banner_user.jpg', 'title': 'Mugt Gelsin Keyfi', 'desc': 'yüreğinde rahatlyk her demde MUGT sade we lezzetli'},
-    {'image': 'assets/images/banner_1.png', 'title': 'Gurme Burgerler', 'desc': '%20 İndirim Fırsatını Kaçırmayın!'},
-    {'image': 'assets/images/banner_2.png', 'title': 'Sıcak Pizzalar', 'desc': 'İkinci Pizzada %50 İndirim!'},
-    {'image': 'assets/images/banner_3.png', 'title': 'Taze Suşiler', 'desc': 'Uzak Doğu Esintisi Kapınızda.'},
-    {'image': 'assets/images/banner_4.png', 'title': 'İtalyan Makarnaları', 'desc': 'Gerçek İtalyan Lezzeti.'},
-    {'image': 'assets/images/banner_5.png', 'title': 'Efsane Tatlılar', 'desc': 'Gününüzü Tatlandırın.'},
-    {'image': 'assets/images/banner_6.png', 'title': 'Taze Salatalar', 'desc': 'Sağlıklı ve Hafif Seçenekler.'},
-    {'image': 'assets/images/banner_7.png', 'title': 'Zengin Kahvaltı', 'desc': 'Güne Güzel Bir Başlangıç Yapın.'},
-    {'image': 'assets/images/banner_8.png', 'title': 'Nisbet Kebap', 'desc': 'Gerçek Kebap Keyfi Burada.'},
-    {'image': 'assets/images/banner_9.png', 'title': 'Serinleten Dondurma', 'desc': 'Her Mevsim Ferahlık.'},
-    {'image': 'assets/images/banner_10.png', 'title': 'Özel Kahveler', 'desc': 'Kahve Molanız Keyfe Dönüşsün.'},
+    {'image': 'assets/images/banner_user.jpg', 'title': 'mugut Gelsin Keyfi', 'desc': 'yÃ¼reÄŸinde rahatlyk her demde mugut sade we lezzetli'},
+    {'image': 'assets/images/banner_1.png', 'title': 'Gurme Burgerler', 'desc': '%20 Ä°ndirim FÄ±rsatÄ±nÄ± KaÃ§Ä±rmayÄ±n!'},
+    {'image': 'assets/images/banner_2.png', 'title': 'SÄ±cak Pizzalar', 'desc': 'Ä°kinci Pizzada %50 Ä°ndirim!'},
+    {'image': 'assets/images/banner_3.png', 'title': 'Taze SuÅŸiler', 'desc': 'Uzak DoÄŸu Esintisi KapÄ±nÄ±zda.'},
+    {'image': 'assets/images/banner_4.png', 'title': 'Ä°talyan MakarnalarÄ±', 'desc': 'GerÃ§ek Ä°talyan Lezzeti.'},
+    {'image': 'assets/images/banner_5.png', 'title': 'Efsane TatlÄ±lar', 'desc': 'GÃ¼nÃ¼nÃ¼zÃ¼ TatlandÄ±rÄ±n.'},
+    {'image': 'assets/images/banner_6.png', 'title': 'Taze Salatalar', 'desc': 'SaÄŸlÄ±klÄ± ve Hafif SeÃ§enekler.'},
+    {'image': 'assets/images/banner_7.png', 'title': 'Zengin KahvaltÄ±', 'desc': 'GÃ¼ne GÃ¼zel Bir BaÅŸlangÄ±Ã§ YapÄ±n.'},
+    {'image': 'assets/images/banner_8.png', 'title': 'Nisbet Kebap', 'desc': 'GerÃ§ek Kebap Keyfi Burada.'},
+    {'image': 'assets/images/banner_9.png', 'title': 'Serinleten Dondurma', 'desc': 'Her Mevsim FerahlÄ±k.'},
+    {'image': 'assets/images/banner_10.png', 'title': 'Ã–zel Kahveler', 'desc': 'Kahve MolanÄ±z Keyfe DÃ¶nÃ¼ÅŸsÃ¼n.'},
   ];
 
   @override
@@ -193,3 +193,4 @@ class _BannerSliderState extends State<BannerSlider> {
     );
   }
 }
+

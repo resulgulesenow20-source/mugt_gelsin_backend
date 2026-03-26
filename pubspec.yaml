@@ -1,4 +1,4 @@
-name: mugt_gelsin
+﻿name: mugut_gelsin
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -43,6 +43,7 @@ dependencies:
   shared_preferences: ^2.5.4
   add_to_cart_animation: ^2.0.4
   cached_network_image: ^3.4.1
+  google_fonts: ^6.1.0
   
 
 dev_dependencies:
@@ -104,3 +105,4 @@ flutter:
   
     
   
+

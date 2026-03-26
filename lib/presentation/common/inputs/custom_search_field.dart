@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
 
 class CustomSearchField extends StatelessWidget {
   final Function(String) onChanged;
@@ -8,7 +8,7 @@ class CustomSearchField extends StatelessWidget {
   const CustomSearchField({
     super.key,
     required this.onChanged,
-    this.hintText = "Arama yapın...",
+    this.hintText = "Arama yapÄ±n...",
   });
 
   @override
@@ -38,3 +38,4 @@ class CustomSearchField extends StatelessWidget {
     );
   }
 }
+

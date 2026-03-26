@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/models/restaurant_model.dart';
-import 'package:mugt_gelsin/presentation/common/cards/restaurant_card.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/models/restaurant_model.dart';
+import 'package:mugut_gelsin/presentation/common/cards/restaurant_card.dart';
 
 class RestaurantGrid extends StatelessWidget {
   final List<Restaurant> restaurants;
@@ -18,7 +18,7 @@ class RestaurantGrid extends StatelessWidget {
         crossAxisCount: 2,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
-        mainAxisExtent: 215, // Sabit yükseklik belirleyerek alttaki fazla boşluğu alıyoruz
+        mainAxisExtent: 215, // Sabit yÃ¼kseklik belirleyerek alttaki fazla boÅŸluÄŸu alÄ±yoruz
       ),
       itemBuilder: (context, index) {
         final res = restaurants[index];
@@ -27,5 +27,6 @@ class RestaurantGrid extends StatelessWidget {
     );
   }
 }
+
 
 

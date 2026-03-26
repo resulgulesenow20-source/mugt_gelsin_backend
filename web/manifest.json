@@ -1,6 +1,6 @@
-{
-    "name": "mugt_gelsin",
-    "short_name": "mugt_gelsin",
+﻿{
+    "name": "mugut_gelsin",
+    "short_name": "mugut_gelsin",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
@@ -33,3 +33,4 @@
         }
     ]
 }
+

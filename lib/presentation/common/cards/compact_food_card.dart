@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/models/restaurant_model.dart';
-import 'package:mugt_gelsin/providers/cart_provider.dart';
-import 'package:mugt_gelsin/providers/favorite_provider.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/models/restaurant_model.dart';
+import 'package:mugut_gelsin/providers/cart_provider.dart';
+import 'package:mugut_gelsin/providers/favorite_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
-import 'package:mugt_gelsin/providers/navigation_provider.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
+import 'package:mugut_gelsin/providers/navigation_provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:mugt_gelsin/presentation/common/widgets/hover_wrapper.dart';
+import 'package:mugut_gelsin/presentation/common/widgets/hover_wrapper.dart';
 
 class CompactFoodCard extends StatelessWidget {
   final Food food;
@@ -116,10 +116,11 @@ class CompactFoodCard extends StatelessWidget {
                       food.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
                         color: AppColors.textTitle,
+                        letterSpacing: -0.3,
                       ),
                     ),
                     if (restaurantName != null) ...[
@@ -128,10 +129,10 @@ class CompactFoodCard extends StatelessWidget {
                         restaurantName!,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: GoogleFonts.outfit(
                           color: AppColors.textSecondary,
                           fontSize: 11,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
@@ -140,7 +141,7 @@ class CompactFoodCard extends StatelessWidget {
               ),
               // ORANGE ACTION AREA
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 decoration: const BoxDecoration(
                   gradient: AppColors.orangeGradient,
                   borderRadius: BorderRadius.vertical(bottom: Radius.circular(19)),
@@ -150,10 +151,10 @@ class CompactFoodCard extends StatelessWidget {
                   children: [
                     Text(
                       "${food.price} TL",
-                      style: const TextStyle(
+                      style: GoogleFonts.outfit(
                         color: Colors.white,
                         fontWeight: FontWeight.w900,
-                        fontSize: 14,
+                        fontSize: 16,
                       ),
                     ),
                     GestureDetector(
@@ -192,7 +193,7 @@ class CompactFoodCard extends StatelessWidget {
                             )
                           ],
                         ),
-                        child: const Icon(Icons.add, size: 16, color: AppColors.primary),
+                        child: const Icon(Icons.add, size: 18, color: AppColors.primary),
                       ),
                     ),
                   ],
@@ -206,3 +207,4 @@ class CompactFoodCard extends StatelessWidget {
   );
 }
 }
+

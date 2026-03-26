@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -11,13 +11,13 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Artık navigasyon AuthWrapper tarafından lib/main.dart içinde yönetiliyor.
+    // ArtÄ±k navigasyon AuthWrapper tarafÄ±ndan lib/main.dart iÃ§inde yÃ¶netiliyor.
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFF6900), // Referans resimdeki canlı turuncu
+      backgroundColor: const Color(0xFFFF6900), // Referans resimdeki canlÄ± turuncu
       body: Stack(
         children: [
           Center(
@@ -25,7 +25,7 @@ class _SplashScreenState extends State<SplashScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Spacer(flex: 4),
-                // Logo Alanı (Animasyonlu)
+                // Logo AlanÄ± (Animasyonlu)
                 TweenAnimationBuilder<double>(
                   tween: Tween<double>(begin: -200, end: 0),
                   duration: const Duration(milliseconds: 1200),
@@ -35,10 +35,10 @@ class _SplashScreenState extends State<SplashScreen> {
                       offset: Offset(translateValue, 0),
                       child: TweenAnimationBuilder<double>(
                         tween: Tween<double>(begin: 0, end: 2 * 3.141592653589793), // Tam bir tur (360 derece = 2pi)
-                        duration: const Duration(seconds: 4), // 4 saniyede döner
+                        duration: const Duration(seconds: 4), // 4 saniyede dÃ¶ner
                         builder: (context, rotationValue, child) {
                           return Transform.rotate(
-                            angle: rotationValue, // Kuryeyi döndürür
+                            angle: rotationValue, // Kuryeyi dÃ¶ndÃ¼rÃ¼r
                             child: Container(
                               padding: const EdgeInsets.all(20),
                               child: Image.asset(
@@ -55,7 +55,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  "MUGT GELSİN",
+                  "mugut GELSÄ°N",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 42,
@@ -65,7 +65,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  "Lezzet Kapınızda",
+                  "Lezzet KapÄ±nÄ±zda",
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: 18,
@@ -85,3 +85,4 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 }
+

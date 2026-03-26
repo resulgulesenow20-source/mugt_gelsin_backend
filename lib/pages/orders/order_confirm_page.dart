@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/pages/main_screen.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/pages/main_screen.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
 
 class OrderConfirmPage extends StatelessWidget {
   const OrderConfirmPage({super.key});
@@ -16,7 +16,7 @@ class OrderConfirmPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
-              // Başarı İkonu
+              // BaÅŸarÄ± Ä°konu
               Container(
                 padding: const EdgeInsets.all(30),
                 decoration: BoxDecoration(
@@ -31,9 +31,9 @@ class OrderConfirmPage extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               
-              // Başlık
+              // BaÅŸlÄ±k
               const Text(
-                "Siparişiniz Alındı!",
+                "SipariÅŸiniz AlÄ±ndÄ±!",
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -42,9 +42,9 @@ class OrderConfirmPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               
-              // Açıklama
+              // AÃ§Ä±klama
               const Text(
-                "Siparişiniz başarıyla oluşturuldu.\nHazırlanmaya başladığında size bildireceğiz.",
+                "SipariÅŸiniz baÅŸarÄ±yla oluÅŸturuldu.\nHazÄ±rlanmaya baÅŸladÄ±ÄŸÄ±nda size bildireceÄŸiz.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
@@ -54,7 +54,7 @@ class OrderConfirmPage extends StatelessWidget {
               ),
               const Spacer(),
               
-              // Ana Sayfaya Dön Butonu
+              // Ana Sayfaya DÃ¶n Butonu
               SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -75,7 +75,7 @@ class OrderConfirmPage extends StatelessWidget {
                     elevation: 0,
                   ),
                     child: const Text(
-                      "Ana Sayfaya Dön",
+                      "Ana Sayfaya DÃ¶n",
                       style: TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 18,
@@ -92,3 +92,4 @@ class OrderConfirmPage extends StatelessWidget {
     );
   }
 }
+

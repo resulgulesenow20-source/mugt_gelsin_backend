@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/presentation/common/cards/food_card.dart';
-import 'package:mugt_gelsin/models/restaurant_model.dart';
-import 'package:mugt_gelsin/pages/home/widgets/review_section.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/presentation/common/cards/food_card.dart';
+import 'package:mugut_gelsin/models/restaurant_model.dart';
+import 'package:mugut_gelsin/pages/home/widgets/review_section.dart';
 import 'package:provider/provider.dart';
-import 'package:mugt_gelsin/providers/cart_provider.dart';
-import 'package:mugt_gelsin/pages/cart/cart_page.dart';
-import 'package:mugt_gelsin/providers/favorite_provider.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
+import 'package:mugut_gelsin/providers/cart_provider.dart';
+import 'package:mugut_gelsin/pages/cart/cart_page.dart';
+import 'package:mugut_gelsin/providers/favorite_provider.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class RestaurantDetailPage extends StatefulWidget {
@@ -18,7 +18,7 @@ class RestaurantDetailPage extends StatefulWidget {
 }
 
 class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
-  // Resim yükleme ve hata yönetimi fonksiyonu
+  // Resim yÃ¼kleme ve hata yÃ¶netimi fonksiyonu
   Widget _buildSmartImage(String url, {double? width, double? height}) {
     final cleanUrl = url.trim();
     if (cleanUrl.startsWith('http')) {
@@ -64,123 +64,199 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(widget.restaurant.name),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
-        actions: [
-          // ✅ FAVORİ BUTONU EKLENDİ
-          Consumer<FavoriteProvider>(
-            builder: (context, provider, child) {
-              final isFav = provider.isExist(widget.restaurant);
-              return IconButton(
-                icon: Icon(
-                  isFav ? Icons.favorite : Icons.favorite_border,
-                  color: isFav ? Colors.red : Colors.black,
+      body: CustomScrollView(
+        slivers: [
+          // ðŸ–¼ï¸ SLIVER APP BAR (IMAGE HEADER)
+          SliverAppBar(
+            expandedHeight: 250,
+            pinned: true,
+            elevation: 0,
+            backgroundColor: Colors.white,
+            foregroundColor: AppColors.textPrimary,
+            leading: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: CircleAvatar(
+                backgroundColor: Colors.white.withValues(alpha: 0.9),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary, size: 20),
+                  onPressed: () => Navigator.pop(context),
                 ),
-                onPressed: () => provider.toggleFavorite(widget.restaurant),
-              );
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.shopping_cart_outlined),
-                  onPressed: () {
-                    // ✅ BAĞLANTI BURADA: Sepet ikonuna basınca CartPage açılır
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const CartPage()),
-                    );
-                  },
-                ),
-                Positioned(
-                  right: 5,
-                  top: 5,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 16,
-                      minHeight: 16,
-                    ),
-                    child: Text(
-                      context.watch<CartProvider>().items.length.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+              ),
+            ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: CircleAvatar(
+                  backgroundColor: Colors.white.withValues(alpha: 0.9),
+                  child: Consumer<FavoriteProvider>(
+                    builder: (context, provider, child) {
+                      final isFav = provider.isExist(widget.restaurant);
+                      return IconButton(
+                        icon: Icon(
+                          isFav ? Icons.favorite : Icons.favorite_border,
+                          color: isFav ? AppColors.error : AppColors.textPrimary,
+                          size: 20,
+                        ),
+                        onPressed: () => provider.toggleFavorite(widget.restaurant),
+                      );
+                    },
                   ),
                 ),
-              ],
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: CircleAvatar(
+                  backgroundColor: Colors.white.withValues(alpha: 0.9),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.shopping_cart_rounded, color: AppColors.textPrimary, size: 20),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const CartPage()),
+                          );
+                        },
+                      ),
+                      Positioned(
+                        right: 4,
+                        top: 4,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                          constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+                          child: Text(
+                            context.watch<CartProvider>().items.length.toString(),
+                            style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+            flexibleSpace: FlexibleSpaceBar(
+              background: _buildSmartImage(
+                widget.restaurant.imageUrl,
+                width: double.infinity,
+                height: double.infinity,
+              ),
+            ),
+          ),
+
+          // ðŸ“ RESTAURANT INFO & MENU
+          SliverToBoxAdapter(
+            child: Container(
+              decoration: const BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                   // Info Section
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.restaurant.name,
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -1,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            _buildInfoChip(Icons.star_rounded, "${widget.restaurant.rating}", AppColors.warning),
+                            const SizedBox(width: 12),
+                            _buildInfoChip(Icons.access_time_filled_rounded, widget.restaurant.deliveryTime, AppColors.primary),
+                            const SizedBox(width: 12),
+                            _buildInfoChip(Icons.restaurant_rounded, widget.restaurant.category, Colors.blueAccent),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Divider(height: 1, color: AppColors.surfaceSubtle),
+                  ),
+
+                  // Review Section
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: ReviewSection(restaurantId: widget.restaurant.id),
+                  ),
+
+                  // Menu Section
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                    child: Text(
+                      "Popular Menus",
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 22,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                  ),
+
+                  // Menu List
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    itemCount: widget.restaurant.menu.length,
+                    itemBuilder: (context, index) {
+                      final food = widget.restaurant.menu[index];
+                      return FoodCard(
+                        food: food,
+                        restaurantId: widget.restaurant.id,
+                        restaurantName: widget.restaurant.name,
+                        minOrderAmount: widget.restaurant.minOrderAmount,
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 100),
+                ],
+              ),
             ),
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSmartImage(
-              widget.restaurant.imageUrl,
-              width: double.infinity,
-              height: 220,
+    );
+  }
+
+  Widget _buildInfoChip(IconData icon, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 16),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: GoogleFonts.outfit(
+              color: color.withValues(alpha: 0.8),
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
             ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.restaurant.name,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 20),
-                      Text(
-                        " ${widget.restaurant.rating} • ${widget.restaurant.deliveryTime}",
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  ReviewSection(restaurantId: widget.restaurant.id),
-                  const SizedBox(height: 32),
-                  const Text(
-                    "Popüler Menüler",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  ...widget.restaurant.menu
-                      .map(
-                        (food) => FoodCard(
-                          food: food,
-                          restaurantId: widget.restaurant.id,
-                          restaurantName: widget.restaurant.name,
-                          minOrderAmount: widget.restaurant.minOrderAmount,
-                        ),
-                      )
-                      ,
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
+

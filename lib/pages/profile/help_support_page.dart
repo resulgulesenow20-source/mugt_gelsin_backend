@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
 
-import 'package:mugt_gelsin/pages/profile/live_support_page.dart';
+import 'package:mugut_gelsin/pages/profile/live_support_page.dart';
 
 class HelpSupportPage extends StatelessWidget {
   const HelpSupportPage({super.key});
@@ -11,7 +11,7 @@ class HelpSupportPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F7),
       appBar: AppBar(
-        title: const Text("Yardım & Destek", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("YardÄ±m & Destek", style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
@@ -44,14 +44,14 @@ class HelpSupportPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            "Bize Ulaşın",
+            "Bize UlaÅŸÄ±n",
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
           ),
           const SizedBox(height: 16),
           _buildContactItem(
             icon: Icons.support_agent_outlined,
-            title: "Canlı Destek",
-            subtitle: "Müşteri temsilcisi ile hemen görüşün",
+            title: "CanlÄ± Destek",
+            subtitle: "MÃ¼ÅŸteri temsilcisi ile hemen gÃ¶rÃ¼ÅŸÃ¼n",
             color: AppColors.textPrimary,
             onTap: () {
               Navigator.push(
@@ -63,31 +63,31 @@ class HelpSupportPage extends StatelessWidget {
           const Divider(),
           _buildContactItem(
             icon: Icons.chat_bubble_outline,
-            title: "WhatsApp Destek Hattı",
-            subtitle: "Anında çözüm için bize yazın",
+            title: "WhatsApp Destek HattÄ±",
+            subtitle: "AnÄ±nda Ã§Ã¶zÃ¼m iÃ§in bize yazÄ±n",
             color: Colors.green,
             onTap: () {
-              // WhatsApp yönlendirmesi eklenebilir
+              // WhatsApp yÃ¶nlendirmesi eklenebilir
             },
           ),
           const Divider(),
           _buildContactItem(
             icon: Icons.phone_in_talk_outlined,
-            title: "Müşteri Hizmetlerini Ara",
-            subtitle: "Hafta içi 09:00 - 18:00",
+            title: "MÃ¼ÅŸteri Hizmetlerini Ara",
+            subtitle: "Hafta iÃ§i 09:00 - 18:00",
             color: Colors.blue,
             onTap: () {
-              // Arama yönlendirmesi eklenebilir
+              // Arama yÃ¶nlendirmesi eklenebilir
             },
           ),
           const Divider(),
           _buildContactItem(
             icon: Icons.mail_outline,
-            title: "E-posta Gönder",
-            subtitle: "destek@mugtgelsin.com",
+            title: "E-posta GÃ¶nder",
+            subtitle: "destek@mugutgelsin.com",
             color: AppColors.textPrimary,
             onTap: () {
-              // Mail yönlendirmesi eklenebilir
+              // Mail yÃ¶nlendirmesi eklenebilir
             },
           ),
         ],
@@ -133,17 +133,17 @@ class HelpSupportPage extends StatelessWidget {
           const Padding(
             padding: EdgeInsets.all(20),
             child: Text(
-              "Sıkça Sorulan Sorular",
+              "SÄ±kÃ§a Sorulan Sorular",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
             ),
           ),
-          _buildFAQItem("Siparişim ne zaman gelir?", "Siparişleriniz dükkanın yoğunluğuna göre ortalama 30-45 dakika içerisinde teslim edilir."),
+          _buildFAQItem("SipariÅŸim ne zaman gelir?", "SipariÅŸleriniz dÃ¼kkanÄ±n yoÄŸunluÄŸuna gÃ¶re ortalama 30-45 dakika iÃ§erisinde teslim edilir."),
           const Divider(height: 1),
-          _buildFAQItem("Ödeme yöntemleri nelerdir?", "Şu an için kapıda nakit veya kredi kartı ile ödeme yapabilirsiniz."),
+          _buildFAQItem("Ã–deme yÃ¶ntemleri nelerdir?", "Åžu an iÃ§in kapÄ±da nakit veya kredi kartÄ± ile Ã¶deme yapabilirsiniz."),
           const Divider(height: 1),
-          _buildFAQItem("Siparişi nasıl iptal ederim?", "Siparişiniz hazırlanmaya başlamadan önce 'Yardım' hattı üzerinden ulaşarak iptal edebilirsiniz."),
+          _buildFAQItem("SipariÅŸi nasÄ±l iptal ederim?", "SipariÅŸiniz hazÄ±rlanmaya baÅŸlamadan Ã¶nce 'YardÄ±m' hattÄ± Ã¼zerinden ulaÅŸarak iptal edebilirsiniz."),
           const Divider(height: 1),
-          _buildFAQItem("Adresimi nasıl değiştiririm?", "Profil sekmesindeki 'Adreslerim' bölümünden yeni adres ekleyebilir veya düzenleyebilirsiniz."),
+          _buildFAQItem("Adresimi nasÄ±l deÄŸiÅŸtiririm?", "Profil sekmesindeki 'Adreslerim' bÃ¶lÃ¼mÃ¼nden yeni adres ekleyebilir veya dÃ¼zenleyebilirsiniz."),
         ],
       ),
     );
@@ -164,3 +164,4 @@ class HelpSupportPage extends StatelessWidget {
     );
   }
 }
+

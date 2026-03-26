@@ -1,24 +1,24 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/models/restaurant_model.dart';
-import 'package:mugt_gelsin/providers/navigation_provider.dart';
+import 'package:mugut_gelsin/models/restaurant_model.dart';
+import 'package:mugut_gelsin/providers/navigation_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:mugt_gelsin/pages/home/widgets/home_address_bar.dart';
-import 'package:mugt_gelsin/pages/home/widgets/home_search_bar.dart';
-import 'package:mugt_gelsin/pages/home/widgets/active_order_widget.dart';
-import 'package:mugt_gelsin/pages/home/widgets/home_empty_state.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
-import 'package:mugt_gelsin/providers/language_provider.dart';
-import 'package:mugt_gelsin/pages/home/widgets/banner_slider.dart';
-import 'package:mugt_gelsin/pages/home/widgets/category_list.dart';
-import 'package:mugt_gelsin/pages/home/widgets/filter_chips.dart';
-import 'package:mugt_gelsin/pages/home/widgets/horizontal_restaurant_list.dart';
-import 'package:mugt_gelsin/pages/home/widgets/restaurant_grid.dart';
-import 'package:mugt_gelsin/services/api_service.dart';
-import 'package:mugt_gelsin/utils/dummy_data.dart';
-import 'package:mugt_gelsin/pages/home/widgets/horizontal_food_list.dart';
-import 'package:mugt_gelsin/presentation/common/cards/food_card.dart';
-import 'package:mugt_gelsin/pages/restaurant/restaurant_detail_page.dart';
+import 'package:mugut_gelsin/pages/home/widgets/home_address_bar.dart';
+import 'package:mugut_gelsin/pages/home/widgets/home_search_bar.dart';
+import 'package:mugut_gelsin/pages/home/widgets/active_order_widget.dart';
+import 'package:mugut_gelsin/pages/home/widgets/home_empty_state.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
+import 'package:mugut_gelsin/providers/language_provider.dart';
+import 'package:mugut_gelsin/pages/home/widgets/banner_slider.dart';
+import 'package:mugut_gelsin/pages/home/widgets/category_list.dart';
+import 'package:mugut_gelsin/pages/home/widgets/filter_chips.dart';
+import 'package:mugut_gelsin/pages/home/widgets/horizontal_restaurant_list.dart';
+import 'package:mugut_gelsin/pages/home/widgets/restaurant_grid.dart';
+import 'package:mugut_gelsin/services/api_service.dart';
+import 'package:mugut_gelsin/utils/dummy_data.dart';
+import 'package:mugut_gelsin/pages/home/widgets/horizontal_food_list.dart';
+import 'package:mugut_gelsin/presentation/common/cards/food_card.dart';
+import 'package:mugut_gelsin/pages/restaurant/restaurant_detail_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -29,18 +29,18 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<Restaurant> displayedRestaurants = [];
-  List<Restaurant> allRestaurants = []; // ✅ Orijinal listeyi tutmak için
-  List<FoodWithRestaurant> cheapestFoods = []; // ✅ En ucuz yemekler listesi
-  List<FoodWithRestaurant> matchedFoods = []; // ✅ Arama ile eşleşen yemekler
-  String _searchQuery = ""; // ✅ Mevcut arama sorgusu
+  List<Restaurant> allRestaurants = []; // âœ… Orijinal listeyi tutmak iÃ§in
+  List<FoodWithRestaurant> cheapestFoods = []; // âœ… En ucuz yemekler listesi
+  List<FoodWithRestaurant> matchedFoods = []; // âœ… Arama ile eÅŸleÅŸen yemekler
+  String _searchQuery = ""; // âœ… Mevcut arama sorgusu
   bool isLoading = true;
-  Timer? _searchDebounce; // ✅ Arama geciktirici (performans için)
-  int _lastResetCounter = 0; // ✅ Sıfırlama takibi için
-  final ScrollController _scrollController = ScrollController(); // ✅ Yukarı kaydırmak için
+  Timer? _searchDebounce; // âœ… Arama geciktirici (performans iÃ§in)
+  int _lastResetCounter = 0; // âœ… SÄ±fÄ±rlama takibi iÃ§in
+  final ScrollController _scrollController = ScrollController(); // âœ… YukarÄ± kaydÄ±rmak iÃ§in
 
   void _showAllFoods() {
     setState(() {
-      _searchQuery = "Tüm Ürünler";
+      _searchQuery = "TÃ¼m ÃœrÃ¼nler";
       matchedFoods = [];
       for (var res in allRestaurants) {
         for (var food in res.menu) {
@@ -58,13 +58,13 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _loadData(); // ✅ Veriyi servisten çek
+    _loadData(); // âœ… Veriyi servisten Ã§ek
   }
 
   @override
   void dispose() {
-    _searchDebounce?.cancel(); // ✅ Timer'ı temizle
-    _scrollController.dispose(); // ✅ Controller'ı temizle
+    _searchDebounce?.cancel(); // âœ… Timer'Ä± temizle
+    _scrollController.dispose(); // âœ… Controller'Ä± temizle
     super.dispose();
   }
 
@@ -73,11 +73,11 @@ class _HomePageState extends State<HomePage> {
     final restaurants = await apiService.fetchRestaurants();
     setState(() {
       if (restaurants.isEmpty) {
-        allRestaurants = dummyRestaurants; // ✅ Hata durumunda dummy veri göster
-        // Hata durumunda kullanıcıyı bilgilendir
+        allRestaurants = dummyRestaurants; // âœ… Hata durumunda dummy veri gÃ¶ster
+        // Hata durumunda kullanÄ±cÄ±yÄ± bilgilendir
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text("Sunucuya bağlanılamadı, demo veriler gösteriliyor."),
+            content: const Text("Sunucuya baÄŸlanÄ±lamadÄ±, demo veriler gÃ¶steriliyor."),
             backgroundColor: AppColors.primary,
             duration: const Duration(seconds: 3),
           ),
@@ -86,7 +86,7 @@ class _HomePageState extends State<HomePage> {
         allRestaurants = restaurants;
       }
 
-      // ✅ EN UCUZ YEMEKLERİ HESAPLA
+      // âœ… EN UCUZ YEMEKLERÄ° HESAPLA
       cheapestFoods = [];
       for (var res in allRestaurants) {
         for (var food in res.menu) {
@@ -97,7 +97,7 @@ class _HomePageState extends State<HomePage> {
           ));
         }
       }
-      // Fiyata göre sırala ve ilk 10'u al
+      // Fiyata gÃ¶re sÄ±rala ve ilk 10'u al
       cheapestFoods.sort((a, b) => a.food.price.compareTo(b.food.price));
       if (cheapestFoods.length > 10) {
         cheapestFoods = cheapestFoods.sublist(0, 10);
@@ -109,7 +109,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _filterRestaurants(String query) {
-    // ✅ Performans için debounce ekle
+    // âœ… Performans iÃ§in debounce ekle
     if (_searchDebounce?.isActive ?? false) _searchDebounce!.cancel();
     _searchDebounce = Timer(const Duration(milliseconds: 300), () {
       if (!mounted) return;
@@ -132,7 +132,7 @@ class _HomePageState extends State<HomePage> {
             return nameMatch || foodMatch;
           }).toList();
 
-          // 2. Özel Ürün Eşleşmeleri
+          // 2. Ã–zel ÃœrÃ¼n EÅŸleÅŸmeleri
           matchedFoods = [];
           for (var res in allRestaurants) {
             for (var food in res.menu) {
@@ -153,7 +153,7 @@ class _HomePageState extends State<HomePage> {
 
   void _filterByCategory(String categoryName) {
     setState(() {
-      _searchQuery = ""; // Kategori seçilince aramayı temizle
+      _searchQuery = ""; // Kategori seÃ§ilince aramayÄ± temizle
       if (categoryName == "Hepsi") {
         displayedRestaurants = List<Restaurant>.from(allRestaurants);
       } else {
@@ -181,18 +181,18 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ NAVIGASYON VE DİL TAKİBİ
+    // âœ… NAVIGASYON VE DÄ°L TAKÄ°BÄ°
     final navProvider = context.watch<NavigationProvider>();
     final langProvider = context.watch<LanguageProvider>();
     
-    // ✅ SIFIRLAMA SİNYALİ KONTROLÜ
+    // âœ… SIFIRLAMA SÄ°NYALÄ° KONTROLÃœ
     if (navProvider.resetHomeCounter > _lastResetCounter) {
       _lastResetCounter = navProvider.resetHomeCounter;
       _searchQuery = "";
       matchedFoods = [];
       displayedRestaurants = List.from(allRestaurants);
 
-      // Sayfayı en yukarı kaydır
+      // SayfayÄ± en yukarÄ± kaydÄ±r
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           0,
@@ -202,8 +202,8 @@ class _HomePageState extends State<HomePage> {
       }
     }
 
-    if (navProvider.homeMode == HomeMode.allProducts && _searchQuery != "Tüm Ürünler" && !isLoading) {
-      // Bir sonraki frame'de çalışması için WidgetsBinding kullan
+    if (navProvider.homeMode == HomeMode.allProducts && _searchQuery != "TÃ¼m ÃœrÃ¼nler" && !isLoading) {
+      // Bir sonraki frame'de Ã§alÄ±ÅŸmasÄ± iÃ§in WidgetsBinding kullan
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _showAllFoods();
       });
@@ -214,6 +214,11 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text(
           langProvider.translate('app_name'),
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.w900,
+            fontSize: 22,
+            letterSpacing: -1,
+          ),
         ),
       ),
       body: isLoading 
@@ -221,15 +226,15 @@ class _HomePageState extends State<HomePage> {
           : RefreshIndicator(
               onRefresh: _loadData,
               child: SingleChildScrollView(
-                controller: _scrollController, // ✅ Buraya bağla
+                controller: _scrollController, // âœ… Buraya baÄŸla
                 child: Column(
                   children: [
-                    // ADRES VE ARAMA ÇUBUĞU YAN YANA
+                    // ADRES VE ARAMA Ã‡UBUÄžU YAN YANA
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                       child: Row(
                         children: [
-                          // Adres Seçimi (Sol Taraf)
+                          // Adres SeÃ§imi (Sol Taraf)
                           const Expanded(
                             flex: 4,
                             child: SizedBox(
@@ -238,7 +243,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          // Arama Çubuğu (Sağ Taraf)
+                          // Arama Ã‡ubuÄŸu (SaÄŸ Taraf)
                           Expanded(
                             flex: 6,
                             child: HomeSearchBar(
@@ -254,20 +259,24 @@ class _HomePageState extends State<HomePage> {
                         ? HomeEmptyState(onRetry: _loadData)
                         : Column(
                             children: [
-                              // 🔍 ARAMA MODU: Sadece ürünler ve dükkanlar
+                              // ðŸ” ARAMA MODU: Sadece Ã¼rÃ¼nler ve dÃ¼kkanlar
                               if (_searchQuery.isNotEmpty) ...[
                                 if (matchedFoods.isNotEmpty) ...[
-                                  const Padding(
-                                    padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                                     child: Align(
                                       alignment: Alignment.centerLeft,
                                       child: Text(
-                                        "Eşleşen Ürünler",
-                                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                                        "EÅŸleÅŸen ÃœrÃ¼nler",
+                                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 20,
+                                          letterSpacing: -0.5,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                  // ✅ PERFORMANS: ListView.builder yerine Column içinde map() yerine builder kullanıldı
+                                  // âœ… PERFORMANS: ListView.builder yerine Column iÃ§inde map() yerine builder kullanÄ±ldÄ±
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 12),
                                     child: ListView.builder(
@@ -292,15 +301,19 @@ class _HomePageState extends State<HomePage> {
                                   child: Align(
                                     alignment: Alignment.centerLeft,
                                     child: Text(
-                                      "Eşleşen Restoranlar",
-                                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary),
+                                      "EÅŸleÅŸen Restoranlar",
+                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 20,
+                                        letterSpacing: -0.5,
+                                      ),
                                     ),
                                   ),
                                 ),
                                 RestaurantGrid(restaurants: displayedRestaurants),
                               ],
 
-                              // 🏠 ANA SAYFA MODU: Banner, Kategori, Fırsatlar
+                              // ðŸ  ANA SAYFA MODU: Banner, Kategori, FÄ±rsatlar
                               if (_searchQuery.isEmpty) ...[
                                 const BannerSlider(),
                                 const FilterChips(),
@@ -308,41 +321,53 @@ class _HomePageState extends State<HomePage> {
                                   onCategorySelected: (category) => _filterByCategory(category),
                                 ),
                                 const ActiveOrderWidget(),
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        langProvider.translate('highlights'),
-                                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary),
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      langProvider.translate('highlights'),
+                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 20,
+                                        letterSpacing: -0.5,
                                       ),
                                     ),
                                   ),
-                                  HorizontalRestaurantList(restaurants: displayedRestaurants),
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        langProvider.translate('cheapest'),
-                                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary),
+                                ),
+                                HorizontalRestaurantList(restaurants: displayedRestaurants),
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      langProvider.translate('cheapest'),
+                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 20,
+                                        letterSpacing: -0.5,
                                       ),
                                     ),
                                   ),
-                                  HorizontalFoodList(
-                                    items: cheapestFoods,
-                                    onItemTap: (item) => _navigateToRestaurant(item.restaurantId),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        langProvider.translate('restaurants'),
-                                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary),
+                                ),
+                                HorizontalFoodList(
+                                  items: cheapestFoods,
+                                  onItemTap: (item) => _navigateToRestaurant(item.restaurantId),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      langProvider.translate('restaurants'),
+                                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 24,
+                                        letterSpacing: -0.5,
                                       ),
                                     ),
                                   ),
+                                ),
                                 RestaurantGrid(restaurants: displayedRestaurants),
                               ],
                             ],
@@ -357,3 +382,4 @@ class _HomePageState extends State<HomePage> {
 
 
 }
+

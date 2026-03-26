@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
 
 class AddReviewPage extends StatefulWidget {
   final String orderId;
@@ -33,7 +33,7 @@ class _AddReviewPageState extends State<AddReviewPage> {
     try {
       final reviewData = {
         'userId': user.uid,
-        'userName': user.displayName ?? "Müşteri",
+        'userName': user.displayName ?? "MÃ¼ÅŸteri",
         'restaurantId': widget.restaurantId,
         'orderId': widget.orderId,
         'rating': _rating,
@@ -52,14 +52,14 @@ class _AddReviewPageState extends State<AddReviewPage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Değerlendirmeniz için teşekkürler!")),
+          const SnackBar(content: Text("DeÄŸerlendirmeniz iÃ§in teÅŸekkÃ¼rler!")),
         );
         Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Hata oluştu: $e")),
+          SnackBar(content: Text("Hata oluÅŸtu: $e")),
         );
       }
     } finally {
@@ -72,7 +72,7 @@ class _AddReviewPageState extends State<AddReviewPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Değerlendir", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: const Text("DeÄŸerlendir", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -95,7 +95,7 @@ class _AddReviewPageState extends State<AddReviewPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              "Siparişinizi nasıl buldunuz?",
+              "SipariÅŸinizi nasÄ±l buldunuz?",
               style: TextStyle(color: Colors.grey[600], fontSize: 16),
             ),
             const SizedBox(height: 32),
@@ -153,7 +153,7 @@ class _AddReviewPageState extends State<AddReviewPage> {
                 ),
                 child: _isLoading 
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text("Gönder", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                  : const Text("GÃ¶nder", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
               ),
             ),
           ],
@@ -168,3 +168,4 @@ class _AddReviewPageState extends State<AddReviewPage> {
     super.dispose();
   }
 }
+

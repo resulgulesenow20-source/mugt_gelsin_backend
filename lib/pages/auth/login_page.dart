@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/pages/auth/register_page.dart';
-import 'package:mugt_gelsin/pages/main_screen.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/pages/auth/register_page.dart';
+import 'package:mugut_gelsin/pages/main_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:mugt_gelsin/providers/auth_provider.dart' as app_auth;
-// Giriş başarılı olunca gidecek yer
-import 'package:mugt_gelsin/providers/language_provider.dart';
+import 'package:mugut_gelsin/providers/auth_provider.dart' as app_auth;
+// GiriÅŸ baÅŸarÄ±lÄ± olunca gidecek yer
+import 'package:mugut_gelsin/providers/language_provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -46,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
               _isLoading = false;
             });
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Doğrulama kodu gönderildi.")),
+              const SnackBar(content: Text("DoÄŸrulama kodu gÃ¶nderildi.")),
             );
           },
           onError: (error) {
@@ -59,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
       } else {
         // Step 2: Verify OTP
         if (_codeController.text.isEmpty) {
-          throw "Lütfen doğrulama kodunu girin.";
+          throw "LÃ¼tfen doÄŸrulama kodunu girin.";
         }
         await authProvider.signInWithOTP(_codeController.text.trim());
         if (mounted) {
@@ -108,7 +108,7 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const SizedBox(height: 20),
-                      // Logo Alanı (Sürekli Nefes Alan Animasyon)
+                      // Logo AlanÄ± (SÃ¼rekli Nefes Alan Animasyon)
                       TweenAnimationBuilder<double>(
                         tween: Tween<double>(begin: 0.9, end: 1.0),
                         duration: const Duration(seconds: 1),
@@ -120,7 +120,7 @@ class _LoginPageState extends State<LoginPage> {
                               padding: const EdgeInsets.all(10),
                               child: Image.asset(
                                 'assets/images/logo_m.png',
-                                height: _codeSent ? 100 : 180, // Kod gönderilince logoyu küçült
+                                height: _codeSent ? 100 : 180, // Kod gÃ¶nderilince logoyu kÃ¼Ã§Ã¼lt
                                 fit: BoxFit.contain,
                               ),
                             ),
@@ -130,7 +130,7 @@ class _LoginPageState extends State<LoginPage> {
                       const SizedBox(height: 16),
                       if (!_codeSent) ...[
                         const Text(
-                          "Mugt Gelsin",
+                          "mugut Gelsin",
                           style: TextStyle(
                             fontSize: 36,
                             fontWeight: FontWeight.w900,
@@ -150,20 +150,20 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                       SizedBox(height: _codeSent ? 10 : 30),
 
-                      // Dil Seçimi Bölümü
+                      // Dil SeÃ§imi BÃ¶lÃ¼mÃ¼
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _buildLangButton(context, 'TR', 'Türkçe', '+90'),
+                          _buildLangButton(context, 'TR', 'TÃ¼rkÃ§e', '+90'),
                           const SizedBox(width: 12),
-                          _buildLangButton(context, 'TM', 'Türkmen', '+993'),
+                          _buildLangButton(context, 'TM', 'TÃ¼rkmen', '+993'),
                           const SizedBox(width: 12),
-                          _buildLangButton(context, 'RU', 'Русский', '+7'),
+                          _buildLangButton(context, 'RU', 'Ð ÑƒÑÑÐºÐ¸Ð¹', '+7'),
                         ],
                       ),
                       const SizedBox(height: 30),
 
-                      // Giriş Alanları
+                      // GiriÅŸ AlanlarÄ±
                       if (!_codeSent) ...[
                         TextField(
                           controller: _phoneController,
@@ -203,12 +203,12 @@ class _LoginPageState extends State<LoginPage> {
                               const Icon(Icons.mark_email_read_outlined, color: Colors.white, size: 48),
                               const SizedBox(height: 16),
                               const Text(
-                                "SMS Doğrulama",
+                                "SMS DoÄŸrulama",
                                 style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                "$_countryCode${_phoneController.text} numarasına 6 haneli bir kod gönderdik.",
+                                "$_countryCode${_phoneController.text} numarasÄ±na 6 haneli bir kod gÃ¶nderdik.",
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(color: Colors.white70, fontSize: 14),
                               ),
@@ -237,7 +237,7 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                       const SizedBox(height: 24),
 
-                      // Giriş Butonu
+                      // GiriÅŸ Butonu
                       SizedBox(
                         width: double.infinity,
                         height: 60,
@@ -254,7 +254,7 @@ class _LoginPageState extends State<LoginPage> {
                           child: _isLoading
                               ? const CircularProgressIndicator(color: Color(0xFFFF6900))
                               : Text(
-                                  _codeSent ? "DOĞRULA" : langProvider.translate('login_button'),
+                                  _codeSent ? "DOÄžRULA" : langProvider.translate('login_button'),
                                   style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
@@ -266,11 +266,11 @@ class _LoginPageState extends State<LoginPage> {
                       if (_codeSent)
                         TextButton(
                           onPressed: () => setState(() => _codeSent = false),
-                          child: const Text("Numarayı Değiştir", style: TextStyle(color: Colors.white70)),
+                          child: const Text("NumarayÄ± DeÄŸiÅŸtir", style: TextStyle(color: Colors.white70)),
                         ),
                       const SizedBox(height: 24),
 
-                      // Kayıt Ol Linki
+                      // KayÄ±t Ol Linki
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -338,3 +338,4 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+

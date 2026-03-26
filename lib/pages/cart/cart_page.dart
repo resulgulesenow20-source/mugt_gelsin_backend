@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
 import 'package:provider/provider.dart';
-import 'package:mugt_gelsin/providers/cart_provider.dart';
-import 'package:mugt_gelsin/providers/navigation_provider.dart';
-import 'package:mugt_gelsin/providers/language_provider.dart';
-import 'package:mugt_gelsin/pages/cart/checkout_page.dart';
+import 'package:mugut_gelsin/providers/cart_provider.dart';
+import 'package:mugut_gelsin/providers/navigation_provider.dart';
+import 'package:mugut_gelsin/providers/language_provider.dart';
+import 'package:mugut_gelsin/pages/cart/checkout_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class CartPage extends StatelessWidget {
@@ -249,7 +249,7 @@ class CartPage extends StatelessWidget {
   Widget _buildOrderSummary(BuildContext context, CartProvider cart, LanguageProvider lang) {
     const double deliveryFee = 15.0;
     const double serviceFee = 5.0;
-    final double minOrderAmount = cart.minOrderAmount; // Minimum sipariş tutarı
+    final double minOrderAmount = cart.minOrderAmount; // Minimum sipariÅŸ tutarÄ±
     final double total = cart.totalPrice + deliveryFee + serviceFee;
     final bool isBelowMinOrder = cart.totalPrice < minOrderAmount;
     final double remainingAmount = minOrderAmount - cart.totalPrice;
@@ -309,7 +309,7 @@ class CartPage extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      "Minimum sipariş tutarı $minOrderAmount TL'dir. Sipariş vermek için sepetinize ${remainingAmount.toStringAsFixed(2)} TL'lik ürün daha ekleyin.",
+                      "Minimum sipariÅŸ tutarÄ± $minOrderAmount TL'dir. SipariÅŸ vermek iÃ§in sepetinize ${remainingAmount.toStringAsFixed(2)} TL'lik Ã¼rÃ¼n daha ekleyin.",
                       style: const TextStyle(color: Colors.red, fontSize: 13),
                     ),
                   ),
@@ -375,3 +375,4 @@ class CartPage extends StatelessWidget {
     );
   }
 }
+

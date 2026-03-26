@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
 
 class ProfileStatsCard extends StatelessWidget {
   final double balance;
@@ -36,7 +36,7 @@ class ProfileStatsCard extends StatelessWidget {
             context,
             icon: Icons.account_balance_wallet_rounded,
             value: "${balance.toStringAsFixed(2)} TL",
-            label: "Cüzdan",
+            label: "CÃ¼zdan",
             color: Colors.blue,
           ),
           _buildDivider(),
@@ -44,7 +44,7 @@ class ProfileStatsCard extends StatelessWidget {
             context,
             icon: Icons.stars_rounded,
             value: points.toString(),
-            label: "Mugt Puan",
+            label: "mugut Puan",
             color: Colors.orange,
           ),
           _buildDivider(),
@@ -52,7 +52,7 @@ class ProfileStatsCard extends StatelessWidget {
             context,
             icon: Icons.local_shipping_rounded,
             value: activeOrders.toString(),
-            label: "Siparişler",
+            label: "SipariÅŸler",
             color: Colors.green,
           ),
         ],
@@ -107,3 +107,4 @@ class ProfileStatsCard extends StatelessWidget {
     );
   }
 }
+

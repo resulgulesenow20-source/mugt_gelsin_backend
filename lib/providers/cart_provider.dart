@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/models/restaurant_model.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/models/restaurant_model.dart';
 
-// ✅ SEPET ÖĞESİ MODELİ (Bunu en üste koyduk ki tanısın)
+// âœ… SEPET Ã–ÄžESÄ° MODELÄ° (Bunu en Ã¼ste koyduk ki tanÄ±sÄ±n)
 class CartItem {
   final Food food;
   int quantity;
@@ -10,10 +10,10 @@ class CartItem {
 }
 
 class CartProvider with ChangeNotifier {
-  // ✅ ÖZEL LİSTE (Map kullanarak adet tutuyoruz)
+  // âœ… Ã–ZEL LÄ°STE (Map kullanarak adet tutuyoruz)
   final Map<String, CartItem> _items = {};
   
-  // ✅ RESTORAN BİLGİSİ (Siparişi doğru dükkana göndermek için)
+  // âœ… RESTORAN BÄ°LGÄ°SÄ° (SipariÅŸi doÄŸru dÃ¼kkana gÃ¶ndermek iÃ§in)
   String? _restaurantId;
   String? _restaurantName;
   double _minOrderAmount = 50.0;
@@ -22,10 +22,10 @@ class CartProvider with ChangeNotifier {
   String? get restaurantName => _restaurantName;
   double get minOrderAmount => _minOrderAmount;
 
-  // ✅ DIŞARIYA AÇIK LİSTE (Hata veren 'items' burası işte)
+  // âœ… DIÅžARIYA AÃ‡IK LÄ°STE (Hata veren 'items' burasÄ± iÅŸte)
   List<CartItem> get items => _items.values.toList();
 
-  // ✅ SEPETE EKLEME
+  // âœ… SEPETE EKLEME
   void addToCart(Food food, {String? restaurantId, String? restaurantName, double? minOrderAmount}) {
     if (_items.isEmpty) {
       _restaurantId = restaurantId;
@@ -34,16 +34,16 @@ class CartProvider with ChangeNotifier {
     }
 
     if (_items.containsKey(food.name)) {
-      // Ürün varsa adedi artır
+      // ÃœrÃ¼n varsa adedi artÄ±r
       _items[food.name]!.quantity++;
     } else {
-      // Ürün yoksa yeni ekle
+      // ÃœrÃ¼n yoksa yeni ekle
       _items[food.name] = CartItem(food: food);
     }
-    notifyListeners(); // Sayfayı yeniletir
+    notifyListeners(); // SayfayÄ± yeniletir
   }
 
-  // ✅ SEPETTEN ÇIKARMA (Azaltma)
+  // âœ… SEPETTEN Ã‡IKARMA (Azaltma)
   void removeFromCart(Food food) {
     if (!_items.containsKey(food.name)) return;
 
@@ -55,7 +55,7 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // ✅ TOPLAM FİYAT HESAPLAMA
+  // âœ… TOPLAM FÄ°YAT HESAPLAMA
   double get totalPrice {
     double total = 0.0;
     _items.forEach((key, cartItem) {
@@ -64,7 +64,7 @@ class CartProvider with ChangeNotifier {
     return total;
   }
 
-  // ✅ SEPETİ SIFIRLA
+  // âœ… SEPETÄ° SIFIRLA
   void clearCart() {
     _items.clear();
     _restaurantId = null;
@@ -73,3 +73,4 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
   }
 }
+

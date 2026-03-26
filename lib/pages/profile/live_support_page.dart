@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-import 'package:mugt_gelsin/services/chat_service.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
+import 'package:mugut_gelsin/services/chat_service.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
 
 class LiveSupportPage extends StatefulWidget {
   const LiveSupportPage({super.key});
@@ -49,8 +49,8 @@ class _LiveSupportPageState extends State<LiveSupportPage> {
   Widget build(BuildContext context) {
     if (currentUser == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text("Mugt Destek")),
-        body: const Center(child: Text("Lütfen giriş yapın.")),
+        appBar: AppBar(title: const Text("mugut Destek")),
+        body: const Center(child: Text("LÃ¼tfen giriÅŸ yapÄ±n.")),
       );
     }
 
@@ -59,7 +59,7 @@ class _LiveSupportPageState extends State<LiveSupportPage> {
       appBar: AppBar(
         title: Column(
           children: [
-            const Text("Mugt Destek", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            const Text("mugut Destek", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -69,7 +69,7 @@ class _LiveSupportPageState extends State<LiveSupportPage> {
                   decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle),
                 ),
                 const SizedBox(width: 4),
-                const Text("Çevrimiçi", style: TextStyle(fontSize: 12, color: Colors.green)),
+                const Text("Ã‡evrimiÃ§i", style: TextStyle(fontSize: 12, color: Colors.green)),
               ],
             ),
           ],
@@ -96,7 +96,7 @@ class _LiveSupportPageState extends State<LiveSupportPage> {
                       children: [
                         Icon(Icons.chat_outlined, size: 80, color: Colors.grey.shade300),
                         const SizedBox(height: 16),
-                        const Text("Size nasıl yardımcı olabiliriz?",
+                        const Text("Size nasÄ±l yardÄ±mcÄ± olabiliriz?",
                             style: TextStyle(color: Colors.grey, fontSize: 16)),
                       ],
                     ),
@@ -205,7 +205,7 @@ class _LiveSupportPageState extends State<LiveSupportPage> {
                 child: TextField(
                   controller: _messageController,
                   decoration: const InputDecoration(
-                    hintText: "Mesajınızı yazın...",
+                    hintText: "MesajÄ±nÄ±zÄ± yazÄ±n...",
                     border: InputBorder.none,
                   ),
                   onSubmitted: (_) => _sendMessage(),
@@ -237,3 +237,4 @@ class _LiveSupportPageState extends State<LiveSupportPage> {
     super.dispose();
   }
 }
+

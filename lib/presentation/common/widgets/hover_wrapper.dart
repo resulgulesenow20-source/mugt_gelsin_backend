@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
 
 class HoverWrapper extends StatefulWidget {
   final Widget child;
@@ -44,3 +44,4 @@ class _HoverWrapperState extends State<HoverWrapper> {
     );
   }
 }
+

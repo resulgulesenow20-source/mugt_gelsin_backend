@@ -1,20 +1,20 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/pages/profile/my_addresses_page.dart';
-import 'package:mugt_gelsin/pages/profile/help_support_page.dart';
-import 'package:mugt_gelsin/pages/profile/orders_page.dart';
-import 'package:mugt_gelsin/pages/profile/live_support_page.dart';
-import 'package:mugt_gelsin/pages/profile/coupons_page.dart';
-import 'package:mugt_gelsin/pages/profile/widgets/profile_header.dart';
-import 'package:mugt_gelsin/pages/profile/widgets/profile_menu_item.dart';
-import 'package:mugt_gelsin/pages/auth/login_page.dart';
-import 'package:mugt_gelsin/presentation/common/dialogs/confirmation_dialog.dart';
-import 'package:mugt_gelsin/providers/auth_provider.dart' as app_auth;
-import 'package:mugt_gelsin/providers/language_provider.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/pages/profile/my_addresses_page.dart';
+import 'package:mugut_gelsin/pages/profile/help_support_page.dart';
+import 'package:mugut_gelsin/pages/profile/orders_page.dart';
+import 'package:mugut_gelsin/pages/profile/live_support_page.dart';
+import 'package:mugut_gelsin/pages/profile/coupons_page.dart';
+import 'package:mugut_gelsin/pages/profile/widgets/profile_header.dart';
+import 'package:mugut_gelsin/pages/profile/widgets/profile_menu_item.dart';
+import 'package:mugut_gelsin/pages/auth/login_page.dart';
+import 'package:mugut_gelsin/presentation/common/dialogs/confirmation_dialog.dart';
+import 'package:mugut_gelsin/providers/auth_provider.dart' as app_auth;
+import 'package:mugut_gelsin/providers/language_provider.dart';
 import 'package:provider/provider.dart';
 import 'payment_methods_page.dart';
 
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
-import 'package:mugt_gelsin/pages/profile/widgets/profile_stats_card.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
+import 'package:mugut_gelsin/pages/profile/widgets/profile_stats_card.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -64,7 +64,7 @@ class ProfilePage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // SECTION: Hesabım
+            // SECTION: HesabÄ±m
             _buildSectionHeader("HESABIM"),
             ProfileMenuItem(
               icon: Icons.location_on_rounded,
@@ -87,8 +87,8 @@ class ProfilePage extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // SECTION: İşlemlerim
-            _buildSectionHeader("İŞLEMLERİM"),
+            // SECTION: Ä°ÅŸlemlerim
+            _buildSectionHeader("Ä°ÅžLEMLERÄ°M"),
             ProfileMenuItem(
               icon: Icons.shopping_bag_rounded,
               title: langProvider.translate('orders'),
@@ -102,7 +102,7 @@ class ProfilePage extends StatelessWidget {
             _buildSectionHeader("DESTEK & YARDIM"),
             ProfileMenuItem(
               icon: Icons.support_agent_rounded,
-              title: langProvider.translate('mugt_support'),
+              title: langProvider.translate('mugut_support'),
               color: AppColors.primary,
               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LiveSupportPage())),
             ),
@@ -174,3 +174,4 @@ class ProfilePage extends StatelessWidget {
     );
   }
 }
+

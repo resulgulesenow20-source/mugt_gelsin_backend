@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-import 'package:mugt_gelsin/pages/orders/add_review_page.dart';
-import 'package:mugt_gelsin/pages/orders/order_tracking_page.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
-import 'package:mugt_gelsin/providers/cart_provider.dart';
-import 'package:mugt_gelsin/models/restaurant_model.dart';
+import 'package:mugut_gelsin/pages/orders/add_review_page.dart';
+import 'package:mugut_gelsin/pages/orders/order_tracking_page.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
+import 'package:mugut_gelsin/providers/cart_provider.dart';
+import 'package:mugut_gelsin/models/restaurant_model.dart';
 import 'package:provider/provider.dart';
 
 class OrdersPage extends StatelessWidget {
@@ -21,9 +21,9 @@ class OrdersPage extends StatelessWidget {
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'onay bekliyor':
-      case 'onaylanıyor':
+      case 'onaylanÄ±yor':
         return AppColors.textPrimary;
-      case 'hazırlanıyor':
+      case 'hazÄ±rlanÄ±yor':
         return AppColors.primary;
       case 'yolda':
         return Colors.blue;
@@ -43,10 +43,10 @@ class OrdersPage extends StatelessWidget {
     
     switch (status.toLowerCase()) {
       case 'onay bekliyor':
-      case 'onaylanıyor':
+      case 'onaylanÄ±yor':
         icon = Icons.timer_outlined;
         break;
-      case 'hazırlanıyor':
+      case 'hazÄ±rlanÄ±yor':
         icon = Icons.restaurant_rounded;
         break;
       case 'yolda':
@@ -96,11 +96,11 @@ class OrdersPage extends StatelessWidget {
 
     if (items.isEmpty) return;
 
-    // Sepeti temizleyelim mi? Kullanıcıya sorulabilir ama şimdilik doğrudan ekleyelim
-    // Eğer farklı bir dükkan ise sepet otomatik temizleniyor zaten (CartProvider kuralı)
+    // Sepeti temizleyelim mi? KullanÄ±cÄ±ya sorulabilir ama ÅŸimdilik doÄŸrudan ekleyelim
+    // EÄŸer farklÄ± bir dÃ¼kkan ise sepet otomatik temizleniyor zaten (CartProvider kuralÄ±)
     
     for (var item in items) {
-      final String name = item['name'] ?? 'Ürün';
+      final String name = item['name'] ?? 'ÃœrÃ¼n';
       final double price = (item['price'] is int) ? (item['price'] as int).toDouble() : (item['price'] ?? 0.0);
       final int quantity = item['quantity'] ?? 1;
 
@@ -124,7 +124,7 @@ class OrdersPage extends StatelessWidget {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text("$shopName siparişiniz sepete tekrar eklendi!"),
+        content: Text("$shopName sipariÅŸiniz sepete tekrar eklendi!"),
         backgroundColor: AppColors.primary,
         behavior: SnackBarBehavior.floating,
       ),
@@ -138,14 +138,14 @@ class OrdersPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Siparişlerim"),
+        title: const Text("SipariÅŸlerim"),
         centerTitle: true,
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: currentUser == null
-          ? const Center(child: Text("Siparişlerinizi görmek için lütfen giriş yapın."))
+          ? const Center(child: Text("SipariÅŸlerinizi gÃ¶rmek iÃ§in lÃ¼tfen giriÅŸ yapÄ±n."))
           : StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('Emirler')
@@ -158,7 +158,7 @@ class OrdersPage extends StatelessWidget {
 
                 if (snapshot.hasError) {
                   return Center(
-                    child: Text("Hata oluştu: ${snapshot.error}"),
+                    child: Text("Hata oluÅŸtu: ${snapshot.error}"),
                   );
                 }
 
@@ -171,7 +171,7 @@ class OrdersPage extends StatelessWidget {
                             size: 80, color: Colors.grey.shade400),
                         const SizedBox(height: 16),
                         const Text(
-                          "Henüz siparişiniz bulunmamaktadır",
+                          "HenÃ¼z sipariÅŸiniz bulunmamaktadÄ±r",
                           style: TextStyle(fontSize: 16, color: Colors.grey),
                         ),
                       ],
@@ -254,7 +254,7 @@ class OrdersPage extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     const Text(
-                                      "Sipariş Özeti",
+                                      "SipariÅŸ Ã–zeti",
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 13,
@@ -320,7 +320,7 @@ class OrdersPage extends StatelessWidget {
                             child: Row(
                               children: [
                                 if (status.toLowerCase() == 'delivered' || 
-                                    status.toLowerCase() == 'tamamlandı' || 
+                                    status.toLowerCase() == 'tamamlandÄ±' || 
                                     status.toLowerCase() == 'tamamlandi' || 
                                     status.toLowerCase() == 'teslim edildi') ...[
                                   Expanded(
@@ -328,7 +328,7 @@ class OrdersPage extends StatelessWidget {
                                     child: ElevatedButton.icon(
                                       onPressed: () => _reorderItems(context, order),
                                       icon: const Icon(Icons.refresh_rounded, size: 20, color: Colors.black),
-                                      label: const Text("Siparişi Tekrarla"),
+                                      label: const Text("SipariÅŸi Tekrarla"),
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: AppColors.primary,
                                         foregroundColor: Colors.black,
@@ -362,13 +362,13 @@ class OrdersPage extends StatelessWidget {
                                         padding: const EdgeInsets.symmetric(vertical: 12),
                                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                       ),
-                                      child: Text(order['isRated'] == true ? "Puanlandı" : "Puanla"),
+                                      child: Text(order['isRated'] == true ? "PuanlandÄ±" : "Puanla"),
                                     ),
                                   ),
                                 ],
 
                                 if (status.toLowerCase() != 'delivered' && 
-                                    status.toLowerCase() != 'tamamlandı' && 
+                                    status.toLowerCase() != 'tamamlandÄ±' && 
                                     status.toLowerCase() != 'teslim edildi' &&
                                     status.toLowerCase() != 'iptal' &&
                                     status.toLowerCase() != 'iletilemedi') ...[
@@ -385,7 +385,7 @@ class OrdersPage extends StatelessWidget {
                                         );
                                       },
                                       icon: const Icon(Icons.location_searching_rounded, size: 18),
-                                      label: const Text("Canlı Takip Et"),
+                                      label: const Text("CanlÄ± Takip Et"),
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.blue[700],
                                         foregroundColor: Colors.white,
@@ -408,3 +408,4 @@ class OrdersPage extends StatelessWidget {
     );
   }
 }
+

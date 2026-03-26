@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/models/address_model.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/models/address_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -18,7 +18,7 @@ class AddressProvider with ChangeNotifier {
     }
   }
 
-  // Kullanıcının adreslerini Firestore'dan çek
+  // KullanÄ±cÄ±nÄ±n adreslerini Firestore'dan Ã§ek
   Future<void> fetchAddresses() async {
     final user = _auth.currentUser;
     if (user == null) return;
@@ -36,7 +36,7 @@ class AddressProvider with ChangeNotifier {
       }
       notifyListeners();
     } catch (e) {
-      debugPrint("Adres çekme hatası: $e");
+      debugPrint("Adres Ã§ekme hatasÄ±: $e");
     }
   }
 
@@ -45,12 +45,12 @@ class AddressProvider with ChangeNotifier {
     if (user == null) return;
 
     try {
-      // Eğer bu ilk adres ise varsayılan yap
+      // EÄŸer bu ilk adres ise varsayÄ±lan yap
       if (_addresses.isEmpty) {
         address.isDefault = true;
       }
 
-      // Önce Firestore'a ekle
+      // Ã–nce Firestore'a ekle
       await _firestore
           .collection('users')
           .doc(user.uid)
@@ -62,7 +62,7 @@ class AddressProvider with ChangeNotifier {
       _addresses.add(address);
       notifyListeners();
     } catch (e) {
-      debugPrint("Adres ekleme hatası: $e");
+      debugPrint("Adres ekleme hatasÄ±: $e");
     }
   }
 
@@ -73,7 +73,7 @@ class AddressProvider with ChangeNotifier {
     try {
       WriteBatch batch = _firestore.batch();
       
-      // Tüm adreslerin isDefault değerini false yap
+      // TÃ¼m adreslerin isDefault deÄŸerini false yap
       for (var addr in _addresses) {
         DocumentReference ref = _firestore
             .collection('users')
@@ -93,7 +93,7 @@ class AddressProvider with ChangeNotifier {
       await batch.commit();
       notifyListeners();
     } catch (e) {
-      debugPrint("Varsayılan adres ayarlama hatası: $e");
+      debugPrint("VarsayÄ±lan adres ayarlama hatasÄ±: $e");
     }
   }
 
@@ -115,7 +115,7 @@ class AddressProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      debugPrint("Adres güncelleme hatası: $e");
+      debugPrint("Adres gÃ¼ncelleme hatasÄ±: $e");
     }
   }
 
@@ -139,14 +139,15 @@ class AddressProvider with ChangeNotifier {
 
       _addresses.removeWhere((a) => a.id == id);
 
-      // Eğer silinen adres varsayılansa ve başka adres varsa, ilkini varsayılan yap
+      // EÄŸer silinen adres varsayÄ±lansa ve baÅŸka adres varsa, ilkini varsayÄ±lan yap
       if (wasDefault && _addresses.isNotEmpty) {
         await setDefaultAddress(_addresses.first.id);
       } else {
         notifyListeners();
       }
     } catch (e) {
-      debugPrint("Adres silme hatası: $e");
+      debugPrint("Adres silme hatasÄ±: $e");
     }
   }
 }
+

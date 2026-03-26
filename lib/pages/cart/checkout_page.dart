@@ -1,14 +1,14 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:mugt_gelsin/providers/cart_provider.dart';
-import 'package:mugt_gelsin/providers/address_provider.dart';
-import 'package:mugt_gelsin/providers/payment_provider.dart';
-import 'package:mugt_gelsin/providers/auth_provider.dart' as app_auth;
-import 'package:mugt_gelsin/models/address_model.dart';
-import 'package:mugt_gelsin/pages/orders/order_tracking_page.dart';
-import 'package:mugt_gelsin/services/api_service.dart';
+import 'package:mugut_gelsin/providers/cart_provider.dart';
+import 'package:mugut_gelsin/providers/address_provider.dart';
+import 'package:mugut_gelsin/providers/payment_provider.dart';
+import 'package:mugut_gelsin/providers/auth_provider.dart' as app_auth;
+import 'package:mugut_gelsin/models/address_model.dart';
+import 'package:mugut_gelsin/pages/orders/order_tracking_page.dart';
+import 'package:mugut_gelsin/services/api_service.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -34,12 +34,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
   @override
   void initState() {
     super.initState();
-    // Sayfa açıldığında adresleri yükle
+    // Sayfa aÃ§Ä±ldÄ±ÄŸÄ±nda adresleri yÃ¼kle
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AddressProvider>().fetchAddresses();
       context.read<PaymentProvider>().fetchCards();
       
-      // Varsayılan telefon numarasını AuthProvider'dan alıp dolduralım
+      // VarsayÄ±lan telefon numarasÄ±nÄ± AuthProvider'dan alÄ±p dolduralÄ±m
       final auth = context.read<app_auth.AuthProvider>();
       if (auth.userData?['phone'] != null) {
         _phoneController.text = auth.userData?['phone'];
@@ -57,16 +57,16 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
     if (address == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Lütfen bir teslimat adresi seçin.")),
+        const SnackBar(content: Text("LÃ¼tfen bir teslimat adresi seÃ§in.")),
       );
       return;
     }
 
-    // Seçili online ödeme ise kart kontrolü yap
+    // SeÃ§ili online Ã¶deme ise kart kontrolÃ¼ yap
     if (_paymentMethod == 'online_kart') {
       if (paymentProvider.cards.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Lütfen önce bir ödeme yöntemi ekleyin.")),
+          const SnackBar(content: Text("LÃ¼tfen Ã¶nce bir Ã¶deme yÃ¶ntemi ekleyin.")),
         );
         return;
       }
@@ -79,25 +79,25 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
     try {
       final authProvider = context.read<app_auth.AuthProvider>();
-      final customerName = authProvider.userData?['name'] ?? "Bilinmeyen Müşteri";
+      final customerName = authProvider.userData?['name'] ?? "Bilinmeyen MÃ¼ÅŸteri";
       final customerPhone = _phoneController.text.trim();
       final orderNote = _noteController.text.trim();
       final customerUid = authProvider.user?.uid;
       
       if (customerPhone.isEmpty) {
-        throw "Lütfen bir iletişim numarası girin.";
+        throw "LÃ¼tfen bir iletiÅŸim numarasÄ± girin.";
       }
 
-      // Opsiyonel: Eğer profil telefonu boşsa veya kullanıcı farklı bir numara girmişse 
-      // profil bilgilerini güncellemeyi teklif edebiliriz veya doğrudan güncelleyebiliriz.
-      // Şimdilik sadece bu sipariş için kullanıyoruz.
-      // Gelecekte ana profili de güncelleyebiliriz:
+      // Opsiyonel: EÄŸer profil telefonu boÅŸsa veya kullanÄ±cÄ± farklÄ± bir numara girmiÅŸse 
+      // profil bilgilerini gÃ¼ncellemeyi teklif edebiliriz veya doÄŸrudan gÃ¼ncelleyebiliriz.
+      // Åžimdilik sadece bu sipariÅŸ iÃ§in kullanÄ±yoruz.
+      // Gelecekte ana profili de gÃ¼ncelleyebiliriz:
       final storedPhone = authProvider.userData?['phone']?.toString() ?? "";
       if (storedPhone != customerPhone) {
         await authProvider.updateUserData({'phone': customerPhone});
       }
 
-      // 1. Önce Firestore'dan bir doküman referansı oluşturup ID alıyoruz
+      // 1. Ã–nce Firestore'dan bir dokÃ¼man referansÄ± oluÅŸturup ID alÄ±yoruz
       final orderRef = FirebaseFirestore.instance.collection('Emirler').doc();
       final firestoreId = orderRef.id;
 
@@ -105,12 +105,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
         'customerUid': customerUid,
         'firestore_id': firestoreId,
         'shop_id': cart.restaurantId ?? 'unknown_shop',
-        'shop_name': cart.restaurantName ?? 'İsimsiz Dükkan',
+        'shop_name': cart.restaurantName ?? 'Ä°simsiz DÃ¼kkan',
         'customerName': customerName,
         'customerPhone': customerPhone,
         'note': orderNote,
         'totalPrice': cart.totalPrice,
-        'status': 'onay bekliyor', // İlk durum: Onay bekliyor/İşleniyor
+        'status': 'onay bekliyor', // Ä°lk durum: Onay bekliyor/Ä°ÅŸleniyor
         'paymentMethod': _paymentMethod,
         'cardId': _paymentMethod == 'online_kart' ? _selectedCardId : null,
         'items': cart.items.map((item) => {
@@ -125,19 +125,19 @@ class _CheckoutPageState extends State<CheckoutPage> {
         'timestamp': FieldValue.serverTimestamp(),
       };
 
-      // 2. HEMEN Firestore'a Kaydet (Böylece sipariş geçmişinde hemen görünür)
+      // 2. HEMEN Firestore'a Kaydet (BÃ¶ylece sipariÅŸ geÃ§miÅŸinde hemen gÃ¶rÃ¼nÃ¼r)
       await orderRef.set(orderData);
 
-      // 3. Flask Backend'e Gönder (Admin Paneli İçin)
+      // 3. Flask Backend'e GÃ¶nder (Admin Paneli Ä°Ã§in)
       final apiService = ApiService();
       final backendSuccess = await apiService.placeOrder({
         ...orderData,
-        'timestamp': DateTime.now().toIso8601String(), // JSON için string formatı
+        'timestamp': DateTime.now().toIso8601String(), // JSON iÃ§in string formatÄ±
       });
 
       if (backendSuccess) {
-        // Dükkan siparişi aldı, durumu güncelle
-        await orderRef.update({'status': 'hazırlanıyor'});
+        // DÃ¼kkan sipariÅŸi aldÄ±, durumu gÃ¼ncelle
+        await orderRef.update({'status': 'hazÄ±rlanÄ±yor'});
         
         cart.clearCart();
 
@@ -150,13 +150,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
           );
         }
       } else {
-        // Dükkan siparişi alamadı (Sunucu kapalı olabilir)
+        // DÃ¼kkan sipariÅŸi alamadÄ± (Sunucu kapalÄ± olabilir)
         await orderRef.update({'status': 'iletilemedi'});
-        throw "Sipariş dükkana iletilemedi, ancak geçmişinize kaydedildi. Lütfen dükkanla iletişime geçin.";
+        throw "SipariÅŸ dÃ¼kkana iletilemedi, ancak geÃ§miÅŸinize kaydedildi. LÃ¼tfen dÃ¼kkanla iletiÅŸime geÃ§in.";
       }
 
     } catch (e) {
-      debugPrint("Sipariş gönderme hatası: $e");
+      debugPrint("SipariÅŸ gÃ¶nderme hatasÄ±: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(e.toString())),
@@ -185,7 +185,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Siparişi Tamamla"),
+        title: const Text("SipariÅŸi Tamamla"),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textPrimary,
       ),
@@ -208,28 +208,28 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       _buildAddressCard(selectedAddress),
                       const SizedBox(height: 25),
                       const Text(
-                        "Ödeme Yöntemi",
+                        "Ã–deme YÃ¶ntemi",
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 10),
                       _buildPaymentMethods(context),
                       const SizedBox(height: 25),
                       const Text(
-                        "İletişim Bilgileri",
+                        "Ä°letiÅŸim Bilgileri",
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 10),
-                      _buildTextField(_phoneController, "Telefon Numarası", Icons.phone, TextInputType.phone),
+                      _buildTextField(_phoneController, "Telefon NumarasÄ±", Icons.phone, TextInputType.phone),
                       const SizedBox(height: 20),
                       const Text(
-                        "Sipariş Notu",
+                        "SipariÅŸ Notu",
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 10),
                       _buildTextField(_noteController, "Notunuzu buraya yazabilirsiniz...", Icons.note_add, TextInputType.text),
                       const SizedBox(height: 25),
                       const Text(
-                        "Sipariş Özeti",
+                        "SipariÅŸ Ã–zeti",
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
                       ),
@@ -319,7 +319,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       ),
                     ],
                   )
-                : const Text("Lütfen bir adres ekleyin"),
+                : const Text("LÃ¼tfen bir adres ekleyin"),
           ),
         ],
       ),
@@ -329,9 +329,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
   Widget _buildPaymentMethods(BuildContext context) {
     return Column(
       children: [
-        _buildPaymentOption('kapida_nakit', 'Kapıda Nakit', Icons.money),
-        _buildPaymentOption('kapida_kart', 'Kapıda Kredi Kartı', Icons.credit_card),
-        _buildPaymentOption('online_kart', 'Uygulama İçi Kredi Kartı', Icons.app_registration),
+        _buildPaymentOption('kapida_nakit', 'KapÄ±da Nakit', Icons.money),
+        _buildPaymentOption('kapida_kart', 'KapÄ±da Kredi KartÄ±', Icons.credit_card),
+        _buildPaymentOption('online_kart', 'Uygulama Ä°Ã§i Kredi KartÄ±', Icons.app_registration),
       ],
     );
   }
@@ -427,7 +427,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           ),
                         )
                       : Text(
-                          isBelowMinOrder ? "MİNİMUM TUTAR ALTINDA" : "SİPARİŞİ ONAYLA",
+                          isBelowMinOrder ? "MÄ°NÄ°MUM TUTAR ALTINDA" : "SÄ°PARÄ°ÅžÄ° ONAYLA",
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w900,
@@ -444,3 +444,4 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 }
+

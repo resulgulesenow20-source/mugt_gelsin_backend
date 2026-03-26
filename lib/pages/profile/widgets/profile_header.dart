@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
 
-import 'package:mugt_gelsin/providers/auth_provider.dart';
+import 'package:mugut_gelsin/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 
 class ProfileHeader extends StatelessWidget {
@@ -11,7 +11,7 @@ class ProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
     final userData = authProvider.userData;
-    final String name = userData?['name'] ?? "Kullanıcı";
+    final String name = userData?['name'] ?? "KullanÄ±cÄ±";
     final String email = userData?['email'] ?? authProvider.user?.phoneNumber ?? "E-posta/Telefon";
 
     return Column(
@@ -92,3 +92,4 @@ class ProfileHeader extends StatelessWidget {
     );
   }
 }
+

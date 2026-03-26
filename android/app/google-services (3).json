@@ -1,15 +1,15 @@
-{
+﻿{
   "project_info": {
     "project_number": "337676615490",
-    "project_id": "mugt-gelsin",
-    "storage_bucket": "mugt-gelsin.firebasestorage.app"
+    "project_id": "mugut-gelsin",
+    "storage_bucket": "mugut-gelsin.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
         "mobilesdk_app_id": "1:337676615490:android:1c1de8e137a584db2e12db",
         "android_client_info": {
-          "package_name": "com.company.Mugt_gelsin"
+          "package_name": "com.company.mugut_gelsin"
         }
       },
       "oauth_client": [],
@@ -28,7 +28,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:337676615490:android:843e812655584cc82e12db",
         "android_client_info": {
-          "package_name": "com.company.mugt_gelsin"
+          "package_name": "com.company.mugut_gelsin"
         }
       },
       "oauth_client": [],

@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:mugt_gelsin/utils/dummy_data.dart';
-import 'package:mugt_gelsin/core/constants/app_colors.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mugut_gelsin/utils/dummy_data.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
 
 class CategoryList extends StatelessWidget {
   final Function(String) onCategorySelected;
@@ -10,7 +10,7 @@ class CategoryList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 120, // Yazıların kesilmemesi için biraz yükselttik
+      height: 120, // YazÄ±larÄ±n kesilmemesi iÃ§in biraz yÃ¼kselttik
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -62,3 +62,4 @@ class CategoryList extends StatelessWidget {
     );
   }
 }
+
