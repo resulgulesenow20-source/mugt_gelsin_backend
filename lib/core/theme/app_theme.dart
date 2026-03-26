@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
 
@@ -16,8 +16,8 @@ class AppTheme {
     
     // ðŸ–‹ï¸ GLOBAL TYPOGRAPHY
     textTheme: GoogleFonts.outfitTextTheme(const TextTheme(
-      headlineLarge: TextStyle(color: AppColors.textTitle, fontWeight: FontWeight.w900, fontSize: 32, letterSpacing: -1),
-      headlineMedium: TextStyle(color: AppColors.textTitle, fontWeight: FontWeight.w800, fontSize: 24, letterSpacing: -0.5),
+      headlineLarge: TextStyle(color: AppColors.textTitle, fontWeight: FontWeight.w900, fontSize: 32, letterSpacing: 0),
+      headlineMedium: TextStyle(color: AppColors.textTitle, fontWeight: FontWeight.w800, fontSize: 24, letterSpacing: 0),
       titleLarge: TextStyle(color: AppColors.textTitle, fontWeight: FontWeight.w700, fontSize: 20),
       titleMedium: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 16),
       bodyLarge: TextStyle(color: AppColors.textPrimary, fontSize: 16),

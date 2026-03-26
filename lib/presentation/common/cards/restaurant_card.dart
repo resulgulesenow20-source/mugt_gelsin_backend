@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mugut_gelsin/models/restaurant_model.dart';
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
 import 'package:mugut_gelsin/pages/restaurant/restaurant_detail_page.dart';
@@ -89,7 +89,7 @@ class RestaurantCard extends StatelessWidget {
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontSize: isCompact ? 16 : 19,
                         fontWeight: FontWeight.w900,
-                        letterSpacing: -0.6,
+                        letterSpacing: 0,
                         color: AppColors.textPrimary,
                       ),
                     ),

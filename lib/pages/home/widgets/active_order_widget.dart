@@ -17,7 +17,7 @@ class ActiveOrderWidget extends StatelessWidget {
       stream: FirebaseFirestore.instance
           .collection('Emirler')
           .where('customerUid', isEqualTo: user.uid)
-          .where('status', whereIn: ['hazÄ±rlanÄ±yor', 'yolda', 'yola Ã§Ä±ktÄ±', 'onay bekliyor', 'onaylanÄ±yor'])
+          .where('status', whereIn: ['hazırlanıyor', 'yolda', 'yola çıktı', 'onay bekliyor', 'onaylanıyor'])
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
@@ -26,11 +26,11 @@ class ActiveOrderWidget extends StatelessWidget {
         }
 
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          debugPrint("ActiveOrderWidget: Aktif sipariÅŸ bulunamadÄ± (Uid: ${user.uid})");
+          debugPrint("ActiveOrderWidget: Aktif sipariş bulunamadı (Uid: ${user.uid})");
           return const SizedBox.shrink();
         }
 
-        // Bellekte tarihe gÃ¶re sÄ±ralayalÄ±m (orderBy index gerektirdiÄŸi iÃ§in kaldÄ±rdÄ±k)
+        // Bellekte tarihe göre sıralayalım (orderBy index gerektirdiği için kaldırdık)
         final docs = snapshot.data!.docs.toList();
         docs.sort((a, b) {
           final aTime = (a.data() as Map<String, dynamic>)['timestamp'];
@@ -43,7 +43,7 @@ class ActiveOrderWidget extends StatelessWidget {
 
         final orderDoc = docs.first;
         final orderData = orderDoc.data() as Map<String, dynamic>;
-        final String status = orderData['status'] ?? 'hazÄ±rlanÄ±yor';
+        final String status = orderData['status'] ?? 'hazırlanıyor';
         final String shopName = orderData['shop_name'] ?? 'Restoran';
 
         return Column(
@@ -97,7 +97,7 @@ class ActiveOrderWidget extends StatelessWidget {
                               fontWeight: FontWeight.w900,
                               fontSize: 16,
                               color: AppColors.textPrimary,
-                              letterSpacing: -0.4,
+                              letterSpacing: 0,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -141,12 +141,12 @@ class ActiveOrderWidget extends StatelessWidget {
         icon = Icons.access_time_rounded;
         color = AppColors.warning;
         break;
-      case 'hazÄ±rlanÄ±yor':
+      case 'hazırlanıyor':
         icon = Icons.restaurant_rounded;
         color = AppColors.primary;
         break;
       case 'yolda':
-      case 'yola Ã§Ä±ktÄ±':
+      case 'yola çıktı':
         icon = Icons.delivery_dining_rounded;
         color = Colors.blueAccent;
         break;
@@ -168,12 +168,12 @@ class ActiveOrderWidget extends StatelessWidget {
   String _getStatusText(String status) {
     switch (status.toLowerCase()) {
       case 'onay bekliyor':
-        return "SipariÅŸ onay bekliyor...";
-      case 'hazÄ±rlanÄ±yor':
-        return "SipariÅŸiniz hazÄ±rlanÄ±yor...";
+        return "Sipariş onay bekliyor...";
+      case 'hazırlanıyor':
+        return "Siparişiniz hazırlanıyor...";
       case 'yolda':
-      case 'yola Ã§Ä±ktÄ±':
-        return "Kurye yola Ã§Ä±ktÄ±!";
+      case 'yola çıktı':
+        return "Kurye yola çıktı!";
       default:
         return "SipariÅŸiniz iÅŸleniyor";
     }
@@ -182,11 +182,11 @@ class ActiveOrderWidget extends StatelessWidget {
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'yolda':
-      case 'yola Ã§Ä±ktÄ±':
+      case 'yola çıktı':
         return Colors.blueAccent;
       case 'onay bekliyor':
         return AppColors.warning;
-      case 'hazÄ±rlanÄ±yor':
+      case 'hazırlanıyor':
         return AppColors.primary;
       default:
         return AppColors.textPrimary;

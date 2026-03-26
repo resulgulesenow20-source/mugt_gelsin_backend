@@ -121,7 +121,7 @@ class CompactFoodCard extends StatelessWidget {
                         fontWeight: FontWeight.w800,
                         fontSize: 14,
                         color: AppColors.textTitle,
-                        letterSpacing: -0.3,
+                        letterSpacing: 0,
                       ),
                     ),
                     if (restaurantName != null) ...[

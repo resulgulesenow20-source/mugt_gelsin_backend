@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mugut_gelsin/models/restaurant_model.dart';
 import 'package:mugut_gelsin/providers/cart_provider.dart';
 import 'package:mugut_gelsin/providers/favorite_provider.dart';
@@ -99,7 +99,7 @@ class FoodCard extends StatelessWidget {
                             food.name,
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w800,
-                              letterSpacing: -0.4,
+                              letterSpacing: 0,
                               fontSize: 16,
                             ),
                           ),
