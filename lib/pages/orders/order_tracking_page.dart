@@ -1,36 +1,71 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
 import 'package:mugut_gelsin/models/order_model.dart';
 import 'package:mugut_gelsin/providers/order_tracking_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:mugut_gelsin/pages/orders/widgets/order_review_dialog.dart';
+import 'package:mugut_gelsin/pages/profile/live_support_page.dart';
 
-class OrderTrackingPage extends StatelessWidget {
+class OrderTrackingPage extends StatefulWidget {
   final String orderId;
 
   const OrderTrackingPage({super.key, required this.orderId});
+
+  @override
+  State<OrderTrackingPage> createState() => _OrderTrackingPageState();
+}
+
+class _OrderTrackingPageState extends State<OrderTrackingPage> {
+  bool _dialogShown = false;
+
+  void _showReviewDialogIfNeeded(OrderModel order) {
+    if (order.status == OrderStatus.delivered && !order.isRated && !_dialogShown) {
+      _dialogShown = true;
+      
+      // Build tamamlandıktan sonra dialog'u göster
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        
+        await showDialog(
+          context: context,
+          barrierDismissible: false, // Değerlendirme yapmadan geçmesin (veya çıkınca pop olsun)
+          builder: (context) => OrderReviewDialog(order: order),
+        );
+        
+        // Dialog kapandığında (puan verildikten veya vazgeçildikten sonra) takip sayfasından çık
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text("SipariÅŸ Takibi"),
+        title: const Text("Sipariş Takibi"),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         centerTitle: true,
       ),
       body: StreamBuilder<OrderModel?>(
-        stream: context.read<OrderTrackingProvider>().trackOrder(orderId),
+        stream: context.read<OrderTrackingProvider>().trackOrder(widget.orderId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data == null) {
-            return const Center(child: Text("SipariÅŸ bulunamadÄ±."));
+            return const Center(child: Text("Sipariş bulunamadı."));
           }
 
           final order = snapshot.data!;
+          
+          // Otomatik değerlendirme kontrolü
+          _showReviewDialogIfNeeded(order);
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -40,6 +75,10 @@ class OrderTrackingPage extends StatelessWidget {
                 _buildStatusTimeline(order),
                 const SizedBox(height: 24),
                 _buildOrderDetails(order),
+                if (order.status == OrderStatus.delivered && !order.isRated) ...[
+                  const SizedBox(height: 24),
+                  _buildRateButton(context, order),
+                ],
                 const SizedBox(height: 40),
                 _buildSupportButton(context),
               ],
@@ -63,7 +102,7 @@ class OrderTrackingPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: AppColors.primary.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.shopping_bag_rounded, color: AppColors.primary),
@@ -78,7 +117,7 @@ class OrderTrackingPage extends StatelessWidget {
                   style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
                 ),
                 Text(
-                  "SipariÅŸ No: ${order.id.substring(0, 8).toUpperCase()}",
+                  "Sipariş No: ${order.id.substring(0, 8).toUpperCase()}",
                   style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
                 ),
               ],
@@ -111,16 +150,16 @@ class OrderTrackingPage extends StatelessWidget {
       child: Column(
         children: [
           _buildTimelineStep(
-            "SipariÅŸ AlÄ±ndÄ±",
-            "SipariÅŸiniz dÃ¼kkana iletildi",
+            "Sipariş Alındı",
+            "Siparişiniz dükkana iletildi",
             Icons.check_circle_rounded,
             status.index >= OrderStatus.pending.index,
             true,
           ),
           _buildTimelineDivider(status.index > OrderStatus.pending.index),
           _buildTimelineStep(
-            "HazÄ±rlanÄ±yor",
-            "DÃ¼kkan sipariÅŸinizi hazÄ±rlÄ±yor",
+            "Hazırlanıyor",
+            "Dükkan siparişinizi hazırlıyor",
             Icons.restaurant_rounded,
             status.index >= OrderStatus.preparing.index,
             status.index == OrderStatus.preparing.index,
@@ -129,8 +168,8 @@ class OrderTrackingPage extends StatelessWidget {
           _buildTimelineStep(
             "Yolda",
             order.status == OrderStatus.onWay && order.courierName != null
-                ? "${order.shopName} kuryesi ${order.courierName} sipariÅŸinizi getirmek iÃ§in yola Ã§Ä±ktÄ±"
-                : "Kurye sipariÅŸinizi getirmek iÃ§in yola Ã§Ä±ktÄ±",
+                ? "${order.shopName} kuryesi ${order.courierName} siparişinizi getirmek için yola çıktı"
+                : "Kurye siparişinizi getirmek için yola çıktı",
             Icons.delivery_dining_rounded,
             status.index >= OrderStatus.onWay.index,
             status.index == OrderStatus.onWay.index,
@@ -155,7 +194,7 @@ class OrderTrackingPage extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
+            color: color.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: color, size: 24),
@@ -184,10 +223,10 @@ class OrderTrackingPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: AppColors.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Text("Åžu an", style: TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold)),
+            child: const Text("Şu an", style: TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold)),
           ),
       ],
     );
@@ -213,7 +252,7 @@ class OrderTrackingPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("SipariÅŸ Ã–zeti", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+          const Text("Sipariş Özeti", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
           const SizedBox(height: 16),
           ...order.items.map((item) => Padding(
             padding: const EdgeInsets.only(bottom: 8),
@@ -251,10 +290,13 @@ class OrderTrackingPage extends StatelessWidget {
       height: 60,
       child: ElevatedButton.icon(
         onPressed: () {
-          // Implement support navigation
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const LiveSupportPage()),
+          );
         },
         icon: const Icon(Icons.support_agent_rounded, color: Colors.white),
-        label: const Text("mugut Destek'e BaÄŸlan", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        label: const Text("mugut Destek'e Bağlan", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.textPrimary,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -263,5 +305,28 @@ class OrderTrackingPage extends StatelessWidget {
       ),
     );
   }
-}
 
+  Widget _buildRateButton(BuildContext context, OrderModel order) {
+    return SizedBox(
+      width: double.infinity,
+      height: 60,
+      child: ElevatedButton.icon(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => OrderReviewDialog(order: order),
+          ).then((_) {
+            // Dialog elle kapatıldığında da çıkmak gerekirse eklenebilir
+          });
+        },
+        icon: const Icon(Icons.star_rate_rounded, color: Colors.amber),
+        label: const Text("Siparişi Değerlendir", style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.amber.withOpacity(0.2),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          elevation: 0,
+        ),
+      ),
+    );
+  }
+}

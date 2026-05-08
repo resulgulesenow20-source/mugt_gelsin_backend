@@ -25,8 +25,8 @@ class _FilterChipsState extends State<FilterChips> {
   Widget build(BuildContext context) {
     final filters = [
       {"label": "Filtrele", "icon": Icons.tune_rounded, "isMain": true},
-      {"label": "Teslimat SÃ¼resi", "icon": Icons.access_time_rounded, "isMain": false},
-      {"label": "Restoran PuanÄ±", "icon": Icons.star_rounded, "isMain": false},
+      {"label": "Teslimat Süresi", "icon": Icons.access_time_rounded, "isMain": false},
+      {"label": "Restoran Puanı", "icon": Icons.star_rounded, "isMain": false},
       {"label": "Mutfak", "icon": Icons.restaurant_menu_rounded, "isMain": false},
     ];
 
@@ -52,7 +52,7 @@ class _FilterChipsState extends State<FilterChips> {
                 if (!isMain) {
                   _toggleFilter(label);
                 } else {
-                  // Filtrele butonuna tÄ±klandÄ±ÄŸÄ±nda yapÄ±lacaklar buraya eklenebilir
+                  // Filtrele butonuna tıklandığında yapılacaklar buraya eklenebilir
                 }
               },
               borderRadius: BorderRadius.circular(22),

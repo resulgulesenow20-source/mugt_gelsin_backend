@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mugut_gelsin/providers/auth_provider.dart' as app_auth;
 import 'package:mugut_gelsin/models/review_model.dart';
@@ -34,7 +34,7 @@ class _ReviewSectionState extends State<ReviewSection> {
     final authProvider = Provider.of<app_auth.AuthProvider>(context, listen: false);
     if (!authProvider.isLoggedIn) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Yorum yapmak iÃ§in lÃ¼tfen giriÅŸ yapÄ±n.")),
+        const SnackBar(content: Text("Yorum yapmak için lütfen giriş yapın.")),
       );
       return;
     }
@@ -57,11 +57,11 @@ class _ReviewSectionState extends State<ReviewSection> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                "PuanÄ±nÄ±z ve Yorumunuz",
+                "Puanınız ve Yorumunuz",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              // YÄ±ldÄ±zlÄ± Puanlama
+              // Yıldızlı Puanlama
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(5, (index) {
@@ -84,7 +84,7 @@ class _ReviewSectionState extends State<ReviewSection> {
                 controller: _commentController,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  hintText: "DÃ¼ÅŸÃ¼ncelerinizi yazÄ±n...",
+                  hintText: "Düşüncelerinizi yazın...",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -103,7 +103,7 @@ class _ReviewSectionState extends State<ReviewSection> {
                   ),
                   onPressed: () async {
                     if (_commentController.text.isNotEmpty) {
-                      final customerName = authProvider.userData?['name'] ?? "Bilinmeyen KullanÄ±cÄ±";
+                      final customerName = authProvider.userData?['name'] ?? "Bilinmeyen Kullanıcı";
                       final rating = _userRating.toInt();
                       final comment = _commentController.text;
 
@@ -119,7 +119,7 @@ class _ReviewSectionState extends State<ReviewSection> {
                         if (context.mounted) {
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Yorumunuz baÅŸarÄ±yla gÃ¶nderildi.")),
+                            const SnackBar(content: Text("Yorumunuz başarıyla gönderildi.")),
                           );
                           // Listeyi yenile
                           _loadReviews();
@@ -127,13 +127,13 @@ class _ReviewSectionState extends State<ReviewSection> {
                       } else {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Yorum gÃ¶nderilemedi. LÃ¼tfen tekrar deneyin.")),
+                            const SnackBar(content: Text("Yorum gönderilemedi. Lütfen tekrar deneyin.")),
                           );
                         }
                       }
                     }
                   },
-                  child: const Text("Yorumu GÃ¶nder", style: TextStyle(color: AppColors.textPrimary)),
+                  child: const Text("Yorumu Gönder", style: TextStyle(color: AppColors.textPrimary)),
                 ),
               ),
               const SizedBox(height: 20),
@@ -153,12 +153,12 @@ class _ReviewSectionState extends State<ReviewSection> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              "MÃ¼ÅŸteri YorumlarÄ±",
+              "Müşteri Yorumları",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             TextButton.icon(
               onPressed: _showCommentSheet,
-              icon: Icon(Icons.add_comment_outlined, size: 18),
+              icon: const Icon(Icons.add_comment_outlined, size: 18),
               label: const Text("Yorum Yap"),
               style: TextButton.styleFrom(foregroundColor: AppColors.primary),
             ),
@@ -181,7 +181,7 @@ class _ReviewSectionState extends State<ReviewSection> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Text(
-                  "HenÃ¼z yorum yapÄ±lmamÄ±ÅŸ. Ä°lk yorumu sen yap!",
+                  "Henüz yorum yapılmamış. İlk yorumu sen yap!",
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.grey),
                 ),
@@ -191,7 +191,7 @@ class _ReviewSectionState extends State<ReviewSection> {
             final reviewsData = snapshot.data!;
 
             return SizedBox(
-              height: 120, // 120 yÃ¼ksekliÄŸe sÄ±ÄŸmasÄ± iÃ§in yorum kartÄ±nÄ±n boyutuna dikkat ediyoruz
+              height: 120, // 120 yüksekliğe sığması için yorum kartının boyutuna dikkat ediyoruz
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: reviewsData.length,
@@ -219,7 +219,7 @@ class _ReviewSectionState extends State<ReviewSection> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.04),
+            color: AppColors.primary.withAlpha(10),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

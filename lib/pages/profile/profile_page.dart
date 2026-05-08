@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mugut_gelsin/pages/profile/my_addresses_page.dart';
 import 'package:mugut_gelsin/pages/profile/help_support_page.dart';
 import 'package:mugut_gelsin/pages/profile/orders_page.dart';
@@ -12,6 +12,8 @@ import 'package:mugut_gelsin/providers/auth_provider.dart' as app_auth;
 import 'package:mugut_gelsin/providers/language_provider.dart';
 import 'package:provider/provider.dart';
 import 'payment_methods_page.dart';
+import '../../providers/order_tracking_provider.dart';
+import '../../models/order_model.dart';
 
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
 import 'package:mugut_gelsin/pages/profile/widgets/profile_stats_card.dart';
@@ -22,11 +24,12 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final langProvider = context.watch<LanguageProvider>();
+    final authProvider = context.watch<app_auth.AuthProvider>();
+    final userData = authProvider.userData;
     
-    // Mock values for now, would ideally come from a real provider
-    const double balance = 125.50;
-    const int points = 450;
-    const int activeOrders = 1;
+    final double balance = (userData?['balance'] ?? 0.0).toDouble();
+    final int points = (userData?['points'] ?? 0).toInt();
+    final String uid = authProvider.user?.uid ?? "";
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -57,14 +60,22 @@ class ProfilePage extends StatelessWidget {
             const SizedBox(height: 24),
             
             // Statistics Card
-            const ProfileStatsCard(
-              balance: balance,
-              points: points,
-              activeOrders: activeOrders,
-            ),
+            uid.isEmpty 
+              ? ProfileStatsCard(balance: balance, points: points, activeOrders: 0)
+              : StreamBuilder<List<OrderModel>>(
+                  stream: context.read<OrderTrackingProvider>().getActiveOrders(uid),
+                  builder: (context, snapshot) {
+                    int activeOrdersCount = snapshot.hasData ? snapshot.data!.length : 0;
+                    return ProfileStatsCard(
+                      balance: balance,
+                      points: points,
+                      activeOrders: activeOrdersCount,
+                    );
+                  },
+                ),
             const SizedBox(height: 24),
 
-            // SECTION: HesabÄ±m
+            // SECTION: Hesabım
             _buildSectionHeader("HESABIM"),
             ProfileMenuItem(
               icon: Icons.location_on_rounded,
@@ -87,8 +98,8 @@ class ProfilePage extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // SECTION: Ä°ÅŸlemlerim
-            _buildSectionHeader("Ä°ÅžLEMLERÄ°M"),
+            // SECTION: İşlemlerim
+            _buildSectionHeader("İŞLEMLERİM"),
             ProfileMenuItem(
               icon: Icons.shopping_bag_rounded,
               title: langProvider.translate('orders'),
@@ -124,9 +135,9 @@ class ProfilePage extends StatelessWidget {
             ),
             
             const SizedBox(height: 40),
-            Text(
+            const Text(
               "v1.0.5",
-              style: TextStyle(color: Colors.grey.shade400, fontSize: 12),
+              style: TextStyle(color: Colors.grey, fontSize: 12),
             ),
             const SizedBox(height: 120),
           ],
@@ -145,7 +156,7 @@ class ProfilePage extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w800,
-            color: Colors.grey.shade500,
+            color: Colors.grey[500],
             letterSpacing: 1.2,
           ),
         ),

@@ -11,63 +11,79 @@ class AuthProvider with ChangeNotifier {
   Map<String, dynamic>? _userData;
   final bool _isAutoLoggingIn = false;
   bool _isInitialized = false;
+  bool _hasPersistedLogin = false; // WEB İÇİN GECİKME ÖNLEYİCİ
   String? _verificationId;
+  final GlobalKey<ScaffoldMessengerState>? _messengerKey;
 
   User? get user => _user;
   Map<String, dynamic>? get userData => _userData;
   bool get isLoggedIn => _user != null;
   bool get isAutoLoggingIn => _isAutoLoggingIn;
   bool get isInitialized => _isInitialized;
+  bool get hasPersistedLogin => _hasPersistedLogin;
 
-  AuthProvider() {
+  AuthProvider([this._messengerKey]) {
     _init();
   }
 
   Future<void> _init() async {
+    // 0. Hızlıca yerel hafızaya bak, eğer daha önce giriş yaptıysa anında flag'i true yap
     final prefs = await SharedPreferences.getInstance();
-    
-    bool isPrefLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    _hasPersistedLogin = prefs.getBool('isLoggedIn') ?? false;
 
     try {
       // Platformdan bağımsız olarak yerel persistence (kalıcılık) ayarla
-      // Bu, uygulamanın kapanıp açılması sırasında oturumun korunmasını sağlar
       await _auth.setPersistence(Persistence.LOCAL);
     } catch (e) {
       debugPrint("Persistence desteklenmiyor veya zaten ayarlı: $e");
     }
     
-    // Hızlı başlangıç için mevcut kullanıcıyı kontrol et
-    _user = _auth.currentUser;
-    
-    // Firebase SDK henüz kullanıcıyı yüklememiş olabilir, bu yüzden kısa bir bekleme süresi ekliyoruz
-    if (isPrefLoggedIn && _user == null) {
-      await Future.delayed(const Duration(milliseconds: 800));
-      _user = _auth.currentUser;
-    }
-
-    if (_user != null) {
-      await _fetchUserData(_user!.uid);
-      _isInitialized = true;
-      notifyListeners();
-    }
-
-    _auth.authStateChanges().listen((User? user) async {
-      try {
-        _user = user;
-        if (user != null) {
-          await prefs.setBool('isLoggedIn', true);
-          await _fetchUserData(user.uid);
-        } else {
-          await prefs.setBool('isLoggedIn', false); // Çıkış yapılmışsa flag'i temizle
-          _userData = null;
-        }
-      } catch (e) {
-        debugPrint("Auth listener hatası: $e");
-      } finally {
-        _isInitialized = true;
+    // 1. Durum değişikliklerini sürekli dinle
+    _auth.authStateChanges().listen((User? user) {
+      _user = user;
+      if (user == null) {
+        _userData = null;
+      } else {
+        prefs.setBool('isLoggedIn', true); // Giriş yapmışsa hemen true olarak kaydet
+        _hasPersistedLogin = true;
+      }
+      
+      // Eğer sistem zaten başlatılıp UI'a haber verildiyse, yeni değişiklikleri bildir
+      if (_isInitialized) {
         notifyListeners();
       }
     });
+
+    // 2. İlk açılışta Firebase'in oturumu geri yüklemesini tamamen bekle
+    debugPrint("Auth Service: Firebase başlangıç durumu bekleniyor...");
+    
+    // Web üzerinde oturumun geri gelmesi için biraz vakit vermek gerekebilir
+    // Sadece .first yerine stream'i bir süre dinleyip geçerli bir user gelmesini beklemek daha sağlıklı olabilir.
+    _user = _auth.currentUser;
+    if (_user == null) {
+      // Bir kez daha bekle (Web için kritik)
+      await Future.delayed(const Duration(milliseconds: 500));
+      _user = _auth.currentUser;
+    }
+
+    debugPrint("Auth Service: Başlangıç durumu alındı. Kullanıcı: ${_user?.uid ?? 'Yok'}");
+
+    if (_user != null) {
+      prefs.setBool('isLoggedIn', true);
+      _hasPersistedLogin = true;
+      // Kullanıcı verilerini ÇEK ve BEKLE (UI açılmadan verilerin hazır olması önemli)
+      await _fetchUserData(_user!.uid);
+      await _saveUserToFirestore(_user!);
+    } else {
+      // Eğer user gerçekten yoksa, login flag'ini temizle
+      if (!_hasPersistedLogin) {
+        await prefs.setBool('isLoggedIn', false);
+      }
+    }
+
+    // 3. UI'a uygulamanın hazır olduğunu bildir
+    _isInitialized = true;
+    notifyListeners();
   }
 
   // --- REAL PHONE AUTHENTICATION ---
@@ -106,36 +122,79 @@ class AuthProvider with ChangeNotifier {
 
     UserCredential userCredential = await _auth.signInWithCredential(credential);
     
-    // Eğer yeni bir kullanıcı ise veya isim verilmişse Firestore kaydı yap/güncelle
-    if (userCredential.additionalUserInfo?.isNewUser == true || name != null) {
-      await _saveUserToFirestore(userCredential.user!, name: name);
-    }
+    // Giriş başarılı olduktan sonra Firestore kaydını arka planda yap
+    // AWAIT etmiyoruz, çünkü Firebase offline olarak sıraya alır ve internet/bağlantı gelince yazar.
+    // Bu sayede bağlantı yavaşsa bile kullanıcı anında uygulamaya girer.
+    _saveUserToFirestore(userCredential.user!, name: name);
   }
 
   Future<void> _saveUserToFirestore(User user, {String? name}) async {
-    final doc = await _firestore.collection('users').doc(user.uid).get();
-    if (!doc.exists) {
-      await _firestore.collection('users').doc(user.uid).set({
-        'name': name ?? 'Kullanıcı',
-        'phone': user.phoneNumber,
-        'createdAt': FieldValue.serverTimestamp(),
-        'status': 'active', // Varsayılan durum
-      });
-    } else if (name != null) {
-      await _firestore.collection('users').doc(user.uid).update({'name': name});
+    try {
+      debugPrint("Auth Service: Firestore'a kullanıcı kaydediliyor/güncelleniyor. Arka planda çalışıyor.");
+      
+      final userDoc = _firestore.collection('users').doc(user.uid);
+      
+      // Get the document (but catch timeout so it doesn't break the silent backend task)
+      try {
+        final doc = await userDoc.get().timeout(const Duration(seconds: 8));
+        
+        if (!doc.exists) {
+          await userDoc.set({
+            'name': name ?? 'Kullanıcı',
+            'phone': user.phoneNumber ?? '',
+            'email': user.email ?? '',
+            'uid': user.uid,
+            'createdAt': FieldValue.serverTimestamp(),
+            'status': 'active',
+            'lastLogin': FieldValue.serverTimestamp(),
+            'balance': 0.0,
+            'points': 0,
+          });
+        } else {
+          Map<String, dynamic> updates = {'lastLogin': FieldValue.serverTimestamp()};
+          if (name != null) updates['name'] = name;
+          await userDoc.update(updates);
+        }
+      } catch (e) {
+        // Eğer Get işlemi timeout yemişse (örneğin Emulator kaynaklı gRPC bağlantı sorunu),
+        await userDoc.set({
+          'phone': user.phoneNumber ?? '',
+          'uid': user.uid,
+          'lastLogin': FieldValue.serverTimestamp(),
+          'balance': 0.0,
+          'points': 0,
+        }, SetOptions(merge: true));
+      }
+    } catch (e) {
+      debugPrint("!!!!!!!! FIRESTORE KAYIT HATASI !!!!!!!!: $e");
+      // SADECE GİRİŞ/KAYIT BLOĞU DIŞINDA OLDUĞU İÇİN EKRANDA KIRMIZI UYARI ÇIKARTMIYORUZ
+      // ARTIK KULLANICIYI ENGELLEMEYECEK
+    }
+  }
+
+  void _showError(String message) {
+    if (_messengerKey != null && _messengerKey!.currentState != null) {
+      _messengerKey!.currentState!.showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+        ),
+      );
     }
   }
 
   // Kullanıcı verilerini Firestore'dan çek
   Future<void> _fetchUserData(String uid) async {
     try {
-      DocumentSnapshot doc = await _firestore.collection('users').doc(uid).get();
+      // Ağı beklemek yerine varsa önbellekten de hızlıca alabilmesi için timeout koyuyoruz
+      final DocumentSnapshot doc = await _firestore.collection('users').doc(uid).get().timeout(const Duration(seconds: 5));
       if (doc.exists) {
         _userData = doc.data() as Map<String, dynamic>;
         notifyListeners();
       }
     } catch (e) {
-      debugPrint("Kullanıcı verisi çekme hatası: $e");
+      debugPrint("Kullanıcı verisi çekme hatası (veya Timeout): $e");
     }
   }
 

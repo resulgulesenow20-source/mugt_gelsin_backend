@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mugut_gelsin/models/restaurant_model.dart';
 import 'package:mugut_gelsin/providers/navigation_provider.dart';
@@ -19,6 +19,7 @@ import 'package:mugut_gelsin/utils/dummy_data.dart';
 import 'package:mugut_gelsin/pages/home/widgets/horizontal_food_list.dart';
 import 'package:mugut_gelsin/presentation/common/cards/food_card.dart';
 import 'package:mugut_gelsin/pages/restaurant/restaurant_detail_page.dart';
+import 'package:mugut_gelsin/providers/address_provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -29,18 +30,18 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<Restaurant> displayedRestaurants = [];
-  List<Restaurant> allRestaurants = []; // âœ… Orijinal listeyi tutmak iÃ§in
+  List<Restaurant> allRestaurants = []; // âœ… Orijinal listeyi tutmak için
   List<FoodWithRestaurant> cheapestFoods = []; // âœ… En ucuz yemekler listesi
-  List<FoodWithRestaurant> matchedFoods = []; // âœ… Arama ile eÅŸleÅŸen yemekler
+  List<FoodWithRestaurant> matchedFoods = []; // âœ… Arama ile eşleşen yemekler
   String _searchQuery = ""; // âœ… Mevcut arama sorgusu
   bool isLoading = true;
-  Timer? _searchDebounce; // âœ… Arama geciktirici (performans iÃ§in)
-  int _lastResetCounter = 0; // âœ… SÄ±fÄ±rlama takibi iÃ§in
-  final ScrollController _scrollController = ScrollController(); // âœ… YukarÄ± kaydÄ±rmak iÃ§in
+  Timer? _searchDebounce; // âœ… Arama geciktirici (performans için)
+  int _lastResetCounter = 0; // âœ… Sıfırlama takibi için
+  final ScrollController _scrollController = ScrollController(); // âœ… Yukarı kaydırmak için
 
   void _showAllFoods() {
     setState(() {
-      _searchQuery = "TÃ¼m ÃœrÃ¼nler";
+      _searchQuery = "Tüm Ürünler";
       matchedFoods = [];
       for (var res in allRestaurants) {
         for (var food in res.menu) {
@@ -58,13 +59,18 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _loadData(); // âœ… Veriyi servisten Ã§ek
+    _loadData(); // âœ… Veriyi servisten çek
+    
+    // Adresleri de yükle ki ana sayfada hemen görüksün
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AddressProvider>().fetchAddresses();
+    });
   }
 
   @override
   void dispose() {
-    _searchDebounce?.cancel(); // âœ… Timer'Ä± temizle
-    _scrollController.dispose(); // âœ… Controller'Ä± temizle
+    _searchDebounce?.cancel(); // âœ… Timer'ı temizle
+    _scrollController.dispose(); // âœ… Controller'ı temizle
     super.dispose();
   }
 
@@ -73,11 +79,11 @@ class _HomePageState extends State<HomePage> {
     final restaurants = await apiService.fetchRestaurants();
     setState(() {
       if (restaurants.isEmpty) {
-        allRestaurants = dummyRestaurants; // âœ… Hata durumunda dummy veri gÃ¶ster
-        // Hata durumunda kullanÄ±cÄ±yÄ± bilgilendir
+        allRestaurants = dummyRestaurants; // âœ… Hata durumunda dummy veri göster
+        // Hata durumunda kullanıcıyı bilgilendir
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text("Sunucuya baÄŸlanÄ±lamadÄ±, demo veriler gÃ¶steriliyor."),
+            content: const Text("Sunucuya bağlanılamadı, demo veriler gösteriliyor."),
             backgroundColor: AppColors.primary,
             duration: const Duration(seconds: 3),
           ),
@@ -86,7 +92,7 @@ class _HomePageState extends State<HomePage> {
         allRestaurants = restaurants;
       }
 
-      // âœ… EN UCUZ YEMEKLERÄ° HESAPLA
+      // âœ… EN UCUZ YEMEKLERİ HESAPLA
       cheapestFoods = [];
       for (var res in allRestaurants) {
         for (var food in res.menu) {
@@ -97,7 +103,7 @@ class _HomePageState extends State<HomePage> {
           ));
         }
       }
-      // Fiyata gÃ¶re sÄ±rala ve ilk 10'u al
+      // Fiyata göre sırala ve ilk 10'u al
       cheapestFoods.sort((a, b) => a.food.price.compareTo(b.food.price));
       if (cheapestFoods.length > 10) {
         cheapestFoods = cheapestFoods.sublist(0, 10);
@@ -109,7 +115,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _filterRestaurants(String query) {
-    // âœ… Performans iÃ§in debounce ekle
+    // âœ… Performans için debounce ekle
     if (_searchDebounce?.isActive ?? false) _searchDebounce!.cancel();
     _searchDebounce = Timer(const Duration(milliseconds: 300), () {
       if (!mounted) return;
@@ -132,7 +138,7 @@ class _HomePageState extends State<HomePage> {
             return nameMatch || foodMatch;
           }).toList();
 
-          // 2. Ã–zel ÃœrÃ¼n EÅŸleÅŸmeleri
+          // 2. Özel Ürün Eşleşmeleri
           matchedFoods = [];
           for (var res in allRestaurants) {
             for (var food in res.menu) {
@@ -153,7 +159,7 @@ class _HomePageState extends State<HomePage> {
 
   void _filterByCategory(String categoryName) {
     setState(() {
-      _searchQuery = ""; // Kategori seÃ§ilince aramayÄ± temizle
+      _searchQuery = ""; // Kategori seçilince aramayı temizle
       if (categoryName == "Hepsi") {
         displayedRestaurants = List<Restaurant>.from(allRestaurants);
       } else {
@@ -181,18 +187,18 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // âœ… NAVIGASYON VE DÄ°L TAKÄ°BÄ°
+    // âœ… NAVIGASYON VE DİL TAKİBİ
     final navProvider = context.watch<NavigationProvider>();
     final langProvider = context.watch<LanguageProvider>();
     
-    // âœ… SIFIRLAMA SÄ°NYALÄ° KONTROLÃœ
+    // âœ… SIFIRLAMA SİNYALİ KONTROLÜ
     if (navProvider.resetHomeCounter > _lastResetCounter) {
       _lastResetCounter = navProvider.resetHomeCounter;
       _searchQuery = "";
       matchedFoods = [];
       displayedRestaurants = List.from(allRestaurants);
 
-      // SayfayÄ± en yukarÄ± kaydÄ±r
+      // Sayfayı en yukarı kaydır
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           0,
@@ -202,8 +208,8 @@ class _HomePageState extends State<HomePage> {
       }
     }
 
-    if (navProvider.homeMode == HomeMode.allProducts && _searchQuery != "TÃ¼m ÃœrÃ¼nler" && !isLoading) {
-      // Bir sonraki frame'de Ã§alÄ±ÅŸmasÄ± iÃ§in WidgetsBinding kullan
+    if (navProvider.homeMode == HomeMode.allProducts && _searchQuery != "Tüm Ürünler" && !isLoading) {
+      // Bir sonraki frame'de çalışması için WidgetsBinding kullan
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _showAllFoods();
       });
@@ -223,18 +229,20 @@ class _HomePageState extends State<HomePage> {
       ),
       body: isLoading 
           ? const Center(child: CircularProgressIndicator()) 
-          : RefreshIndicator(
-              onRefresh: _loadData,
-              child: SingleChildScrollView(
-                controller: _scrollController, // âœ… Buraya baÄŸla
-                child: Column(
-                  children: [
-                    // ADRES VE ARAMA Ã‡UBUÄžU YAN YANA
+          : Stack(
+              children: [
+                RefreshIndicator(
+                  onRefresh: _loadData,
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    child: Column(
+                      children: [
+                    // ADRES VE ARAMA ÇUBUĞU YAN YANA
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                       child: Row(
                         children: [
-                          // Adres SeÃ§imi (Sol Taraf)
+                          // Adres Seçimi (Sol Taraf)
                           const Expanded(
                             flex: 4,
                             child: SizedBox(
@@ -243,7 +251,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          // Arama Ã‡ubuÄŸu (SaÄŸ Taraf)
+                          // Arama Çubuğu (Sağ Taraf)
                           Expanded(
                             flex: 6,
                             child: HomeSearchBar(
@@ -259,16 +267,16 @@ class _HomePageState extends State<HomePage> {
                         ? HomeEmptyState(onRetry: _loadData)
                         : Column(
                             children: [
-                              // ðŸ” ARAMA MODU: Sadece Ã¼rÃ¼nler ve dÃ¼kkanlar
+                              // ðŸ” ARAMA MODU: Sadece ürünler ve dükkanlar
                               if (_searchQuery.isNotEmpty) ...[
                                 if (matchedFoods.isNotEmpty) ...[
                                   Padding(
                                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                                     child: Align(
                                       alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        "EÅŸleÅŸen ÃœrÃ¼nler",
-                                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                      child: const Text(
+                                        "Eşleşen Ürünler",
+                                        style: TextStyle(
                                           fontWeight: FontWeight.w800,
                                           fontSize: 20,
                                           letterSpacing: -0.5,
@@ -276,7 +284,7 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                     ),
                                   ),
-                                  // âœ… PERFORMANS: ListView.builder yerine Column iÃ§inde map() yerine builder kullanÄ±ldÄ±
+                                  // âœ… PERFORMANS: ListView.builder yerine Column içinde map() yerine builder kullanıldı
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 12),
                                     child: ListView.builder(
@@ -300,9 +308,9 @@ class _HomePageState extends State<HomePage> {
                                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                                   child: Align(
                                     alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      "EÅŸleÅŸen Restoranlar",
-                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    child: const Text(
+                                      "Eşleşen Restoranlar",
+                                      style: TextStyle(
                                         fontWeight: FontWeight.w800,
                                         fontSize: 20,
                                         letterSpacing: -0.5,
@@ -313,14 +321,14 @@ class _HomePageState extends State<HomePage> {
                                 RestaurantGrid(restaurants: displayedRestaurants),
                               ],
 
-                              // ðŸ  ANA SAYFA MODU: Banner, Kategori, FÄ±rsatlar
+                              // 🏠 ANA SAYFA MODU: Banner, Kategori, Fırsatlar
                               if (_searchQuery.isEmpty) ...[
                                 const BannerSlider(),
                                 const FilterChips(),
-                                CategoryList(
-                                  onCategorySelected: (category) => _filterByCategory(category),
-                                ),
-                                const ActiveOrderWidget(),
+                                  CategoryList(
+                                    onCategorySelected: (category) => _filterByCategory(category),
+                                  ),
+                                const ActiveOrderWidget(), // âœ… SipariÅŸ takibi artÄ±k burada (Ã–ne Ã‡Ä±kanlar'Ä±n hemen Ã¼stÃ¼nde)
                                 Padding(
                                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                                   child: Align(
@@ -372,14 +380,14 @@ class _HomePageState extends State<HomePage> {
                               ],
                             ],
                           ),
-                    const SizedBox(height: 150),
+                    const SizedBox(height: 120),
                   ],
                 ),
               ),
             ),
-    );
-  }
-
-
+          ],
+        ),
+      );
+    }
 }
 

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
 import 'package:mugut_gelsin/pages/home/home_page.dart';
 import 'package:mugut_gelsin/pages/cart/cart_page.dart';
@@ -8,6 +8,7 @@ import 'package:mugut_gelsin/pages/favorites/favorites_page.dart';
 import 'package:mugut_gelsin/providers/navigation_provider.dart';
 import 'package:mugut_gelsin/providers/language_provider.dart';
 import 'package:mugut_gelsin/providers/cart_provider.dart';
+import 'package:mugut_gelsin/pages/orders/order_tracking_page.dart';
 import 'package:provider/provider.dart';
 import 'package:add_to_cart_animation/add_to_cart_animation.dart';
 
@@ -19,7 +20,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  // âœ… Her tab iÃ§in ayrÄ± NavigatorKey tanÄ±mlÄ±yoruz
+  // âœ… Her tab için ayrı NavigatorKey tanımlıyoruz
   final GlobalKey<NavigatorState> _homeNavKey = GlobalKey<NavigatorState>();
   final GlobalKey<NavigatorState> _favNavKey = GlobalKey<NavigatorState>();
   final GlobalKey<NavigatorState> _ordersNavKey = GlobalKey<NavigatorState>();
@@ -29,6 +30,30 @@ class _MainScreenState extends State<MainScreen> {
   // AddToCartAnimation Keys
   GlobalKey<CartIconKey> cartKey = GlobalKey<CartIconKey>();
   late Function(GlobalKey) runAddToCartAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    // âœ… Navigasyon sinyallerini dinle
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final navProvider = context.read<NavigationProvider>();
+      navProvider.addListener(() {
+        if (!mounted) return;
+        final orderId = navProvider.orderToTrack;
+        if (orderId != null) {
+          // Takip sinyalini hemen temizleyelim (tekrar tetiklenmesin)
+          navProvider.clearOrderTrackingSignal();
+          
+          // Siparişler sekmesinin (sekme 2) navigator'ına sayfayı bas
+          _ordersNavKey.currentState?.push(
+            MaterialPageRoute(
+              builder: (context) => OrderTrackingPage(orderId: orderId),
+            ),
+          );
+        }
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +89,7 @@ class _MainScreenState extends State<MainScreen> {
           });
         },
         child: Scaffold(
-        extendBody: false, // Body artÄ±k nav barÄ±n arkasÄ±na geÃ§mez, Ã§akÄ±ÅŸma Ã¶nlenir
+        extendBody: false, // Body artık nav barın arkasına geçmez, çakışma önlenir
         body: IndexedStack(
           index: selectedIndex,
           children: [
@@ -82,7 +107,7 @@ class _MainScreenState extends State<MainScreen> {
             borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
+                color: Colors.black.withAlpha(12),
                 blurRadius: 10,
                 offset: const Offset(0, -5),
               ),
@@ -118,7 +143,7 @@ class _MainScreenState extends State<MainScreen> {
         duration: const Duration(milliseconds: 300),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : Colors.transparent,
+          color: isSelected ? AppColors.primary.withAlpha(25) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
@@ -141,7 +166,7 @@ class _MainScreenState extends State<MainScreen> {
                       key: cartKey,
                       icon: Icon(
                         isSelected ? activeIcon : inactiveIcon,
-                        color: isSelected ? AppColors.primary : Colors.black, // <-- Koyu siyah dÄ±ÅŸ Ã§izgi
+                        color: isSelected ? AppColors.primary : Colors.black, // <-- Koyu siyah dış çizgi
                         size: 26,
                       ),
                       badgeOptions: const BadgeOptions(active: false),
@@ -152,7 +177,7 @@ class _MainScreenState extends State<MainScreen> {
             else
               Icon(
                 isSelected ? activeIcon : inactiveIcon,
-                color: isSelected ? AppColors.primary : Colors.black, // <-- Koyu siyah dÄ±ÅŸ Ã§izgi
+                color: isSelected ? AppColors.primary : Colors.black, // <-- Koyu siyah dış çizgi
                 size: 26,
               ),
             if (isSelected)

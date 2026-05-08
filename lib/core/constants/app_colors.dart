@@ -36,7 +36,7 @@ class AppColors {
   );
 
   // Shadows (Modern Soft UI)
-  static List<BoxShadow> softShadow = [
+  static final List<BoxShadow> softShadow = [
     BoxShadow(
       color: Colors.black.withValues(alpha: 0.03),
       blurRadius: 15,
@@ -44,7 +44,7 @@ class AppColors {
     ),
   ];
   
-  static List<BoxShadow> premiumShadow = [
+  static final List<BoxShadow> premiumShadow = [
     BoxShadow(
       color: primary.withValues(alpha: 0.15),
       blurRadius: 20,

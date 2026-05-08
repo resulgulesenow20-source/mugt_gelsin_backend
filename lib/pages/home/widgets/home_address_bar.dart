@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
 import 'package:mugut_gelsin/providers/language_provider.dart';
 import 'package:provider/provider.dart';

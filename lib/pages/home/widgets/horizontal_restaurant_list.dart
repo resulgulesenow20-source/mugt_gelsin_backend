@@ -12,7 +12,7 @@ class HorizontalRestaurantList extends StatelessWidget {
     return SizedBox(
       height: 235, // Increased height to prevent overflow and add breathing room
       child: ListView.builder(
-        scrollDirection: Axis.horizontal, // SÄ°HÄ°R BURADA: Yana kaymayÄ± saÄŸlar
+        scrollDirection: Axis.horizontal, // SİHİR BURADA: Yana kaymayı sağlar
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), // Add vertical padding for shadow
         itemCount: restaurants.length,
         itemBuilder: (context, index) {

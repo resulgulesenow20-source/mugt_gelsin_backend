@@ -5,12 +5,13 @@ enum HomeMode { normal, allProducts }
 class NavigationProvider with ChangeNotifier {
   int _selectedIndex = 0;
   HomeMode _homeMode = HomeMode.normal;
-
   int _resetHomeCounter = 0;
+  String? _orderToTrack; // Takip edilecek aktif sipariÅŸ ID'si
 
   int get selectedIndex => _selectedIndex;
   HomeMode get homeMode => _homeMode;
   int get resetHomeCounter => _resetHomeCounter;
+  String? get orderToTrack => _orderToTrack;
 
   // Animation trigger
   Function(GlobalKey)? runAddToCartAnimation;
@@ -29,7 +30,7 @@ class NavigationProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // ✅ Ana sayfayı sıfırla (Arama ve modları temizle)
+  // âœ… Ana sayfayÄ± sÄ±fÄ±rla (Arama ve modlarÄ± temizle)
   void triggerHomeReset() {
     _selectedIndex = 0;
     _homeMode = HomeMode.normal;
@@ -37,17 +38,29 @@ class NavigationProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Özel geçiş fonksiyonu: Ana sayfaya dön ve tüm ürünleri göster
+  // Ã–ze geÃ§iÅŸ fonksiyonu: Ana sayfaya dÃ¶n ve tÃ¼m Ã¼rÃ¼nleri gÃ¶ster
   void switchToHomeWithAllProducts() {
     _selectedIndex = 0;
     _homeMode = HomeMode.allProducts;
     notifyListeners();
   }
 
-  // Normal ana sayfaya dön
+  // Normal ana sayfaya dÃ¶n
   void switchToHomeNormal() {
     _selectedIndex = 0;
     _homeMode = HomeMode.normal;
     notifyListeners();
+  }
+
+  // âœ… SipariÅŸ takibine geÃ§ (Sekme 2 iÃ§inde aÃ§Ä±lacak)
+  void switchToOrdersWithTracking(String orderId) {
+    _selectedIndex = 2; // "SipariÅŸlerim" sekmesi
+    _orderToTrack = orderId;
+    notifyListeners();
+  }
+
+  // âœ… Takip sinyalini temizle
+  void clearOrderTrackingSignal() {
+    _orderToTrack = null;
   }
 }

@@ -33,7 +33,7 @@ class _AddReviewPageState extends State<AddReviewPage> {
     try {
       final reviewData = {
         'userId': user.uid,
-        'userName': user.displayName ?? "MÃ¼ÅŸteri",
+        'userName': user.displayName ?? "Müşteri",
         'restaurantId': widget.restaurantId,
         'orderId': widget.orderId,
         'rating': _rating,
@@ -46,20 +46,20 @@ class _AddReviewPageState extends State<AddReviewPage> {
 
       // 2. Mark order as rated in Emirler collection
       await FirebaseFirestore.instance
-          .collection('Emirler')
+          .collection('orders')
           .doc(widget.orderId)
           .update({'isRated': true});
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("DeÄŸerlendirmeniz iÃ§in teÅŸekkÃ¼rler!")),
+          const SnackBar(content: Text("Değerlendirmeniz için teşekkürler!")),
         );
         Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Hata oluÅŸtu: $e")),
+          SnackBar(content: Text("Hata oluştu: $e")),
         );
       }
     } finally {
@@ -72,7 +72,7 @@ class _AddReviewPageState extends State<AddReviewPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("DeÄŸerlendir", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: const Text("Değerlendir", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -95,7 +95,7 @@ class _AddReviewPageState extends State<AddReviewPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              "SipariÅŸinizi nasÄ±l buldunuz?",
+              "Siparişinizi nasıl buldunuz?",
               style: TextStyle(color: Colors.grey[600], fontSize: 16),
             ),
             const SizedBox(height: 32),
@@ -153,7 +153,7 @@ class _AddReviewPageState extends State<AddReviewPage> {
                 ),
                 child: _isLoading 
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text("GÃ¶nder", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                  : const Text("Gönder", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
               ),
             ),
           ],

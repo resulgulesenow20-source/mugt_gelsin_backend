@@ -22,6 +22,7 @@ class _MyAddressesPageState extends State<MyAddressesPage> {
   }
 
   Future<void> _loadAddresses() async {
+    if (!mounted) return;
     await Provider.of<AddressProvider>(context, listen: false).fetchAddresses();
     if (mounted) {
       setState(() {
@@ -36,163 +37,165 @@ class _MyAddressesPageState extends State<MyAddressesPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Adreslerim"),
+        title: const Text("Adreslerim", style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.textPrimary,
+        elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.add_rounded),
+            icon: const Icon(Icons.add_location_alt_rounded),
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const AddAddressPage()),
             ),
-            tooltip: "Yeni Adres Ekle",
           ),
-          const SizedBox(width: 8),
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 150),
-              itemCount: addressProvider.addresses.length,
-              itemBuilder: (context, index) {
-                final addr = addressProvider.addresses[index];
-                return _buildAddressCard(context, addr, addressProvider);
-              },
-            ),
+          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          : addressProvider.addresses.isEmpty
+              ? _buildEmptyState()
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: addressProvider.addresses.length,
+                  itemBuilder: (context, index) {
+                    final address = addressProvider.addresses[index];
+                    return _buildAddressCard(address, addressProvider);
+                  },
+                ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const AddAddressPage()),
+        ),
+        backgroundColor: AppColors.primary,
+        label: const Text("YENİ ADRES EKLE", style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+        icon: const Icon(Icons.add, color: AppColors.textPrimary),
+      ),
     );
   }
 
-  Widget _buildAddressCard(BuildContext context, Address addr, AddressProvider provider) {
-    IconData iconData;
-    switch (addr.type) {
-      case 'work': iconData = Icons.work_outline; break;
-      case 'other': iconData = Icons.location_on_outlined; break;
-      default: iconData = Icons.home_outlined;
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: addr.isDefault ? AppColors.primary : Colors.grey.shade200,
-          width: addr.isDefault ? 2 : 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.location_off_rounded, size: 80, color: Colors.grey.withAlpha(100)),
+          const SizedBox(height: 16),
+          const Text(
+            "Henüz kayıtlı bir adresiniz yok.",
+            style: TextStyle(fontSize: 18, color: Colors.grey, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AddAddressPage()),
+            ),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            child: const Text("İLK ADRESİNİ EKLE", style: TextStyle(color: AppColors.textPrimary)),
           ),
         ],
       ),
-      child: Column(
-        children: [
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            leading: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(iconData, color: AppColors.textPrimary),
-            ),
-            title: Row(
-              children: [
-                Text(
-                  addr.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+    );
+  }
+
+  Widget _buildAddressCard(Address address, AddressProvider provider) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+        side: BorderSide(
+          color: address.isDefault ? AppColors.primary : Colors.black.withAlpha(20),
+          width: address.isDefault ? 2 : 1,
+        ),
+      ),
+      elevation: address.isDefault ? 4 : 0,
+      child: InkWell(
+        onTap: () => provider.setDefaultAddress(address.id),
+        borderRadius: BorderRadius.circular(15),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: address.isDefault ? AppColors.primary : Colors.grey.withAlpha(30),
+                  shape: BoxShape.circle,
                 ),
-                if (addr.isDefault) ...[
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Text(
-                      "VARSAYILAN",
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-            subtitle: Padding(
-              padding: const EdgeInsets.only(top: 4.0),
-              child: Text(
-                "${addr.district}, ${addr.city}\n${addr.fullAddress}",
-                style: TextStyle(color: Colors.grey[600], fontSize: 13),
-              ),
-            ),
-          ),
-          const Divider(height: 1),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton.icon(
-                  onPressed: addr.isDefault ? null : () => provider.setDefaultAddress(addr.id),
-                  icon: Icon(
-                    addr.isDefault ? Icons.check_circle : Icons.circle_outlined,
-                    size: 18,
-                    color: addr.isDefault ? Colors.green : Colors.grey,
-                  ),
-                  label: Text(
-                    addr.isDefault ? "Varsayılan Adres" : "Varsayılan Yap",
-                    style: TextStyle(
-                      color: addr.isDefault ? Colors.green : Colors.grey[700],
-                      fontSize: 13,
-                    ),
-                  ),
+                child: Icon(
+                  address.type == 'home' ? Icons.home_rounded : address.type == 'work' ? Icons.work_rounded : Icons.place_rounded,
+                  color: address.isDefault ? AppColors.textPrimary : Colors.grey,
                 ),
-                Row(
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AddAddressPage(existingAddress: addr),
+                    Row(
+                      children: [
+                        Text(
+                          address.title,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                         ),
-                      ),
+                        if (address.isDefault)
+                          Container(
+                            margin: const EdgeInsets.only(left: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withAlpha(40),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text(
+                              "VARSAYILAN",
+                              style: TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                      ],
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
-                      onPressed: () => _showDeleteDialog(context, addr, provider),
+                    const SizedBox(height: 4),
+                    Text(
+                      "${address.district}, ${address.city}",
+                      style: const TextStyle(color: Colors.grey, fontSize: 13),
+                    ),
+                    Text(
+                      "${address.street} No:${address.buildingNo}, Kat:${address.floor} Daire:${address.doorNo}",
+                      style: TextStyle(color: Colors.black.withOpacity(0.7), fontSize: 13, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      address.fullAddress,
+                      style: TextStyle(color: Colors.black.withOpacity(0.5), fontSize: 13),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                onPressed: () => _confirmDelete(address, provider),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  void _showDeleteDialog(BuildContext context, Address addr, AddressProvider provider) {
+  void _confirmDelete(Address address, AddressProvider provider) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Adresi Sil"),
-        content: Text("${addr.title} adresini silmek istediğinize emin misiniz?"),
+        content: const Text("Bu adresi silmek istediğinizden emin misiniz?"),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("İPTAL"),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("VAZGEÇ")),
           TextButton(
             onPressed: () {
-              provider.deleteAddress(addr.id);
+              provider.deleteAddress(address.id);
               Navigator.pop(context);
             },
             child: const Text("SİL", style: TextStyle(color: Colors.red)),

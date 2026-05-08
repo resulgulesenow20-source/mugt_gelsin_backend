@@ -50,7 +50,7 @@ class _LiveSupportPageState extends State<LiveSupportPage> {
     if (currentUser == null) {
       return Scaffold(
         appBar: AppBar(title: const Text("mugut Destek")),
-        body: const Center(child: Text("LÃ¼tfen giriÅŸ yapÄ±n.")),
+        body: const Center(child: Text("Lütfen giriş yapın.")),
       );
     }
 
@@ -69,7 +69,7 @@ class _LiveSupportPageState extends State<LiveSupportPage> {
                   decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle),
                 ),
                 const SizedBox(width: 4),
-                const Text("Ã‡evrimiÃ§i", style: TextStyle(fontSize: 12, color: Colors.green)),
+                const Text("Çevrimiçi", style: TextStyle(fontSize: 12, color: Colors.green)),
               ],
             ),
           ],
@@ -96,7 +96,7 @@ class _LiveSupportPageState extends State<LiveSupportPage> {
                       children: [
                         Icon(Icons.chat_outlined, size: 80, color: Colors.grey.shade300),
                         const SizedBox(height: 16),
-                        const Text("Size nasÄ±l yardÄ±mcÄ± olabiliriz?",
+                        const Text("Size nasıl yardımcı olabiliriz?",
                             style: TextStyle(color: Colors.grey, fontSize: 16)),
                       ],
                     ),
@@ -205,7 +205,7 @@ class _LiveSupportPageState extends State<LiveSupportPage> {
                 child: TextField(
                   controller: _messageController,
                   decoration: const InputDecoration(
-                    hintText: "MesajÄ±nÄ±zÄ± yazÄ±n...",
+                    hintText: "Mesajınızı yazın...",
                     border: InputBorder.none,
                   ),
                   onSubmitted: (_) => _sendMessage(),

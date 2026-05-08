@@ -10,7 +10,7 @@ class CategoryList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 120, // YazÄ±larÄ±n kesilmemesi iÃ§in biraz yÃ¼kselttik
+      height: 120, // Yazıların kesilmemesi için biraz yükselttik
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 8),

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mugut_gelsin/providers/auth_provider.dart' as app_auth;
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
@@ -46,7 +46,7 @@ class _RegisterPageState extends State<RegisterPage> {
               _isLoading = false;
             });
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("DoÄŸrulama kodu gÃ¶nderildi.")),
+              const SnackBar(content: Text("Doğrulama kodu gönderildi.")),
             );
           },
           onError: (error) {
@@ -59,7 +59,7 @@ class _RegisterPageState extends State<RegisterPage> {
       } else {
         // Step 2: Verify OTP
         if (_codeController.text.isEmpty) {
-          throw "LÃ¼tfen doÄŸrulama kodunu girin.";
+          throw "Lütfen doğrulama kodunu girin.";
         }
         await authProvider.signInWithOTP(
           _codeController.text.trim(),
@@ -69,10 +69,7 @@ class _RegisterPageState extends State<RegisterPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(langProvider.translate('register_success'))),
           );
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => MainScreen()),
-          );
+          Navigator.of(context).popUntil((route) => route.isFirst);
         }
       }
     } catch (e) {
@@ -122,7 +119,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             const SizedBox(height: 32),
 
-            // KayÄ±t AlanlarÄ±
+            // Kayıt Alanları
             if (!_codeSent) ...[
               _buildTextField(
                 controller: _nameController,
@@ -157,16 +154,16 @@ class _RegisterPageState extends State<RegisterPage> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.05),
+                  color: AppColors.primary.withAlpha(12),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+                  border: Border.all(color: AppColors.primary.withAlpha(51)),
                 ),
                 child: Column(
                   children: [
                     const Icon(Icons.sms_outlined, color: AppColors.primary, size: 48),
                     const SizedBox(height: 16),
                     const Text(
-                      "Kodu DoÄŸrula",
+                      "Kodu Doğrula",
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -175,7 +172,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      "$_countryCode${_phoneController.text} numarasÄ±na bir SMS kodu gÃ¶nderdik.",
+                      "$_countryCode${_phoneController.text} numarasına bir SMS kodu gönderdik.",
                       textAlign: TextAlign.center,
                       style: const TextStyle(color: AppColors.textSecondary),
                     ),
@@ -194,16 +191,16 @@ class _RegisterPageState extends State<RegisterPage> {
                       decoration: InputDecoration(
                         counterText: "",
                         hintText: "******",
-                        hintStyle: TextStyle(color: Colors.grey.shade300),
+                        hintStyle: const TextStyle(color: Colors.grey),
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.grey.shade200),
+                          borderSide: BorderSide(color: Colors.grey.withAlpha(51)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.grey.shade200),
+                          borderSide: BorderSide(color: Colors.grey.withAlpha(51)),
                         ),
                       ),
                     ),
@@ -213,7 +210,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ],
             const SizedBox(height: 32),
 
-            // KayÄ±t Ol Butonu
+            // Kayıt Ol Butonu
             SizedBox(
               width: double.infinity,
               height: 56,
@@ -229,7 +226,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
-                        _codeSent ? "DOÄžRULA VE KAYIT OL" : langProvider.translate('register_title'),
+                        _codeSent ? "DOĞRULA VE KAYIT OL" : langProvider.translate('register_title'),
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -241,11 +238,11 @@ class _RegisterPageState extends State<RegisterPage> {
             if (_codeSent)
               TextButton(
                 onPressed: () => setState(() => _codeSent = false),
-                child: const Text("Bilgileri DÃ¼zenle", style: TextStyle(color: AppColors.textSecondary)),
+                child: const Text("Bilgileri Düzenle", style: TextStyle(color: AppColors.textSecondary)),
               ),
             const SizedBox(height: 16),
 
-            // GiriÅŸ Yap Linki
+            // Giriş Yap Linki
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -316,8 +313,8 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildCountryOption(context, "TÃ¼rkiye", "+90"),
-              _buildCountryOption(context, "TÃ¼rkmenistan", "+993"),
+              _buildCountryOption(context, "Türkiye", "+90"),
+              _buildCountryOption(context, "Türkmenistan", "+993"),
               _buildCountryOption(context, "Rusya", "+7"),
             ],
           ),

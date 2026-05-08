@@ -34,6 +34,7 @@ class OrderModel {
   final String deliveryAddress;
   final String? courierName;
   final DateTime timestamp;
+  final bool isRated;
 
   OrderModel({
     required this.id,
@@ -45,6 +46,7 @@ class OrderModel {
     required this.deliveryAddress,
     this.courierName,
     required this.timestamp,
+    this.isRated = false,
   });
 
   factory OrderModel.fromFirestore(Map<String, dynamic> data, String id) {
@@ -60,6 +62,7 @@ class OrderModel {
       deliveryAddress: data['deliveryAddress'] ?? '',
       courierName: data['courier_name'],
       timestamp: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      isRated: data['isRated'] ?? false,
     );
   }
 
@@ -75,6 +78,12 @@ class OrderModel {
       case 'iptal_edildi':
       case 'cancelled':
         return OrderStatus.cancelled;
+      case 'teslim_edildi':
+      case 'teslim edildi':
+      case 'delivered':
+      case 'tamamlandi':
+      case 'tamamlandı':
+        return OrderStatus.delivered;
       case 'onaylanıyor':
       case 'onay bekliyor':
       case 'onay_bekliyor':

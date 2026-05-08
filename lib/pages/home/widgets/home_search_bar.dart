@@ -28,7 +28,7 @@ class HomeSearchBar extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        // âœ… DESTEK SAYFASINA GÄ°DEN BUTON
+        // âœ… DESTEK SAYFASINA GİDEN BUTON
         InkWell(
           onTap: () {
             Navigator.push(

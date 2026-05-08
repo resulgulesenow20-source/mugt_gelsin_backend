@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -11,13 +11,13 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // ArtÄ±k navigasyon AuthWrapper tarafÄ±ndan lib/main.dart iÃ§inde yÃ¶netiliyor.
+    // Artık navigasyon AuthWrapper tarafından lib/main.dart içinde yönetiliyor.
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFF6900), // Referans resimdeki canlÄ± turuncu
+      backgroundColor: const Color(0xFFFF6900), // Referans resimdeki canlı turuncu
       body: Stack(
         children: [
           Center(
@@ -25,7 +25,7 @@ class _SplashScreenState extends State<SplashScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Spacer(flex: 4),
-                // Logo AlanÄ± (Animasyonlu)
+                // Logo Alanı (Animasyonlu)
                 TweenAnimationBuilder<double>(
                   tween: Tween<double>(begin: -200, end: 0),
                   duration: const Duration(milliseconds: 1200),
@@ -34,11 +34,11 @@ class _SplashScreenState extends State<SplashScreen> {
                     return Transform.translate(
                       offset: Offset(translateValue, 0),
                       child: TweenAnimationBuilder<double>(
-                        tween: Tween<double>(begin: 0, end: 2 * 3.141592653589793), // Tam bir tur (360 derece = 2pi)
-                        duration: const Duration(seconds: 4), // 4 saniyede dÃ¶ner
+                        tween: Tween<double>(begin: 0, end: 6.283185307), // 2 * pi
+                        duration: const Duration(seconds: 4), // 4 saniyede döner
                         builder: (context, rotationValue, child) {
                           return Transform.rotate(
-                            angle: rotationValue, // Kuryeyi dÃ¶ndÃ¼rÃ¼r
+                            angle: rotationValue, // Kuryeyi döndürür
                             child: Container(
                               padding: const EdgeInsets.all(20),
                               child: Image.asset(
@@ -55,7 +55,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  "mugut GELSÄ°N",
+                  "mugut GELSİN",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 42,
@@ -65,7 +65,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  "Lezzet KapÄ±nÄ±zda",
+                  "Lezzet Kapınızda",
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: 18,

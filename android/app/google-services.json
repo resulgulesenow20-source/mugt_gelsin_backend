@@ -1,21 +1,21 @@
-﻿{
+{
   "project_info": {
-    "project_number": "244575841502",
-    "project_id": "getir-clone-b8568",
-    "storage_bucket": "getir-clone-b8568.firebasestorage.app"
+    "project_number": "337676615490",
+    "project_id": "mugt-gelsin",
+    "storage_bucket": "mugt-gelsin.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:244575841502:android:7dcb1f5fce5a60604de64f",
+        "mobilesdk_app_id": "1:337676615490:android:1c1de8e137a584db2e12db",
         "android_client_info": {
-          "package_name": "com.example.getir_clone"
+          "package_name": "com.company.mugut_gelsin"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyD2DMj6MbWH9vtugG5Nb5gdXGcni4dyuWo"
+          "current_key": "AIzaSyBQD2typ01aRHrPftX36jMBYxc5ymA4s6A"
         }
       ],
       "services": {
@@ -26,15 +26,15 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:244575841502:android:f9569fe4bfcf04f84de64f",
+        "mobilesdk_app_id": "1:337676615490:android:843e812655584cc82e12db",
         "android_client_info": {
-          "package_name": "com.example.mugut_gelsin"
+          "package_name": "com.company.mugut_gelsin"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyD2DMj6MbWH9vtugG5Nb5gdXGcni4dyuWo"
+          "current_key": "AIzaSyBQD2typ01aRHrPftX36jMBYxc5ymA4s6A"
         }
       ],
       "services": {

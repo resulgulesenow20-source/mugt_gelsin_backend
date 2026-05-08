@@ -8,7 +8,7 @@ class CustomSearchField extends StatelessWidget {
   const CustomSearchField({
     super.key,
     required this.onChanged,
-    this.hintText = "Arama yapÄ±n...",
+    this.hintText = "Arama yapın...",
   });
 
   @override

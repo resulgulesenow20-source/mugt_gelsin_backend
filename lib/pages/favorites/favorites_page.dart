@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:mugut_gelsin/utils/dummy_data.dart';
@@ -53,7 +53,7 @@ class FavoritesPage extends StatelessWidget {
                         },
                       ),
 
-                // ÃœRÃœNLER TAB
+                // ÜRÜNLER TAB
                 favProvider.favoriteFoods.isEmpty
                     ? _buildEmptyState(context, langProvider.translate('no_fav_prod'), Icons.fastfood_outlined)
                     : ListView.builder(
@@ -90,12 +90,12 @@ class FavoritesPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
+              color: Colors.black.withAlpha(8),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
           ],
-          border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+          border: Border.all(color: Colors.grey.withAlpha(25)),
         ),
         child: Row(
           children: [
@@ -177,12 +177,12 @@ class FavoritesPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
+              color: Colors.black.withAlpha(8),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
           ],
-          border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+          border: Border.all(color: Colors.grey.withAlpha(25)),
         ),
         child: Row(
           children: [
@@ -270,10 +270,10 @@ class FavoritesPage extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             Provider.of<LanguageProvider>(context, listen: false).selectedLang == 'TR' 
-              ? "Favorilerine eklediklerin burada gÃ¶rÃ¼necek."
+              ? "Favorilerine eklediklerin burada görünecek."
               : Provider.of<LanguageProvider>(context, listen: false).selectedLang == 'TM'
-                ? "HalanlaryÅˆyz bu Ã½erde peÃ½da bolar."
-                : "Ð’Ð°ÑˆÐµ Ð¸Ð·Ð±Ñ€Ð°Ð½Ð½Ð¾Ðµ Ð¿Ð¾ÑÐ²Ð¸Ñ‚ÑÑ Ð·Ð´ÐµÑÑŒ.",
+                ? "Halanlaryňyz bu ýerde peýda bolar."
+                : "Ваше избранное появится здесь.",
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey[600], fontSize: 14),
           ),

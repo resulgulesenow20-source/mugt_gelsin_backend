@@ -1,8 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
 
 import 'package:mugut_gelsin/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
+import '../edit_profile_page.dart';
 
 class ProfileHeader extends StatelessWidget {
   const ProfileHeader({super.key});
@@ -11,7 +12,7 @@ class ProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
     final userData = authProvider.userData;
-    final String name = userData?['name'] ?? "KullanÄ±cÄ±";
+    final String name = userData?['name'] ?? "Kullanıcı";
     final String email = userData?['email'] ?? authProvider.user?.phoneNumber ?? "E-posta/Telefon";
 
     return Column(
@@ -57,14 +58,22 @@ class ProfileHeader extends StatelessWidget {
             Positioned(
               bottom: 0,
               right: MediaQuery.of(context).size.width / 2 - 50,
-              child: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: AppColors.secondary,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const EditProfilePage()),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppColors.secondary,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: const Icon(Icons.edit, size: 16, color: AppColors.textPrimary),
                 ),
-                child: const Icon(Icons.edit, size: 16, color: AppColors.textPrimary),
               ),
             ),
           ],

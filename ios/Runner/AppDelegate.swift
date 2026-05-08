@@ -1,6 +1,7 @@
 import Flutter
 import UIKit
 
+
 @main
 @objc class AppDelegate: FlutterAppDelegate {
   override func application(
@@ -10,4 +11,5 @@ import UIKit
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
+
 }

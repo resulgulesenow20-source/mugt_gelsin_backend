@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:mugut_gelsin/providers/cart_provider.dart';
@@ -55,9 +55,7 @@ class CartPage extends StatelessWidget {
                           child: const Icon(Icons.delete_outline, color: Colors.redAccent),
                         ),
                         onDismissed: (direction) {
-                          for(int i=0; i<item.quantity; i++) {
-                             cartProvider.removeFromCart(item.food);
-                          }
+                          cartProvider.removeFromCart(item); // ÃœrÃ¼nÃ¼ tamamen sildik (quantity gÃ¶zetmeksizin silmek iÃ§in dÃ¶ngÃ¼ye gerek yok, Map'ten siliyoruz)
                         },
                         child: _buildCartItemCard(cartProvider, item),
                       );
@@ -95,34 +93,34 @@ class CartPage extends StatelessWidget {
 
   Widget _buildCartItemCard(CartProvider cartProvider, dynamic item) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withAlpha(8),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+        border: Border.all(color: Colors.grey.withAlpha(25)),
       ),
       child: Row(
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(12),
               child: CachedNetworkImage(
                 imageUrl: item.food.imageUrl,
-                width: 80,
-                height: 80,
+                width: 65,
+                height: 65,
                 fit: BoxFit.cover,
                 errorWidget: (context, url, error) => Container(
-                  width: 80,
-                  height: 80,
+                  width: 65,
+                  height: 65,
                   color: Colors.grey[100],
-                  child: const Icon(Icons.fastfood, color: Colors.grey),
+                  child: const Icon(Icons.fastfood, color: Colors.grey, size: 20),
                 ),
               ),
           ),
@@ -133,17 +131,30 @@ class CartPage extends StatelessWidget {
               children: [
                 Text(
                   item.food.name,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   "${item.food.price} TL",
                   style: TextStyle(
                     color: Colors.grey[600],
-                    fontSize: 14,
+                    fontSize: 12,
                   ),
                 ),
-                const SizedBox(height: 8),
+                if (item.note != null && item.note!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      "Not: ${item.note}",
+                      style: const TextStyle(
+                        color: Colors.orange,
+                        fontSize: 11,
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 6),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -152,7 +163,7 @@ class CartPage extends StatelessWidget {
                       style: const TextStyle(
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: 14,
                       ),
                     ),
                     Container(
@@ -164,7 +175,7 @@ class CartPage extends StatelessWidget {
                         children: [
                           _buildQuantityBtn(
                             icon: Icons.remove,
-                            onPressed: () => cartProvider.removeFromCart(item.food),
+                            onPressed: () => cartProvider.removeFromCart(item),
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -175,7 +186,12 @@ class CartPage extends StatelessWidget {
                           ),
                           _buildQuantityBtn(
                             icon: Icons.add,
-                            onPressed: () => cartProvider.addToCart(item.food),
+                            onPressed: () => cartProvider.addToCart(
+                              item.food, 
+                              note: item.note,
+                              restaurantId: cartProvider.restaurantId,
+                              restaurantName: cartProvider.restaurantName,
+                            ),
                           ),
                         ],
                       ),
@@ -249,7 +265,7 @@ class CartPage extends StatelessWidget {
   Widget _buildOrderSummary(BuildContext context, CartProvider cart, LanguageProvider lang) {
     const double deliveryFee = 15.0;
     const double serviceFee = 5.0;
-    final double minOrderAmount = cart.minOrderAmount; // Minimum sipariÅŸ tutarÄ±
+    final double minOrderAmount = cart.minOrderAmount; // Minimum sipariş tutarı
     final double total = cart.totalPrice + deliveryFee + serviceFee;
     final bool isBelowMinOrder = cart.totalPrice < minOrderAmount;
     final double remainingAmount = minOrderAmount - cart.totalPrice;
@@ -260,7 +276,7 @@ class CartPage extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withAlpha(12),
             blurRadius: 20,
             offset: const Offset(0, -5),
           ),
@@ -309,7 +325,7 @@ class CartPage extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      "Minimum sipariÅŸ tutarÄ± $minOrderAmount TL'dir. SipariÅŸ vermek iÃ§in sepetinize ${remainingAmount.toStringAsFixed(2)} TL'lik Ã¼rÃ¼n daha ekleyin.",
+                      "Minimum sipariş tutarı $minOrderAmount TL'dir. Sipariş vermek için sepetinize ${remainingAmount.toStringAsFixed(2)} TL'lik ürün daha ekleyin.",
                       style: const TextStyle(color: Colors.red, fontSize: 13),
                     ),
                   ),

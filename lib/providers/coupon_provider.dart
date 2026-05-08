@@ -19,8 +19,8 @@ class CouponProvider with ChangeNotifier {
       Coupon(
         id: '1',
         code: 'YENI20',
-        title: 'HoÅŸ Geldin Ä°ndirimi',
-        description: 'Ä°lk sipariÅŸine Ã¶zel %20 indirim!',
+        title: 'Hoş Geldin İndirimi',
+        description: 'İlk siparişine özel %20 indirim!',
         discountAmount: 20,
         expiryDate: DateTime.now().add(const Duration(days: 30)),
         type: 'percentage',
@@ -28,8 +28,8 @@ class CouponProvider with ChangeNotifier {
       Coupon(
         id: '2',
         code: 'mugut50',
-        title: 'Hafta Sonu FÄ±rsatÄ±',
-        description: '50 TL ve Ã¼zeri sipariÅŸlerde 15 TL indirim.',
+        title: 'Hafta Sonu Fırsatı',
+        description: '50 TL ve üzeri siparişlerde 15 TL indirim.',
         discountAmount: 15,
         expiryDate: DateTime.now().add(const Duration(days: 2)),
         type: 'amount',
@@ -37,8 +37,8 @@ class CouponProvider with ChangeNotifier {
       Coupon(
         id: '3',
         code: 'ESKI10',
-        title: 'GeÃ§miÅŸ Kupon',
-        description: 'SÃ¼resi dolmuÅŸ bir kupon Ã¶rneÄŸi.',
+        title: 'Geçmiş Kupon',
+        description: 'Süresi dolmuş bir kupon örneği.',
         discountAmount: 10,
         expiryDate: DateTime.now().subtract(const Duration(days: 5)),
         type: 'amount',

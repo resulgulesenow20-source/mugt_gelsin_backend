@@ -19,7 +19,7 @@ class RestaurantDetailPage extends StatefulWidget {
 }
 
 class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
-  // Resim yÃ¼kleme ve hata yÃ¶netimi fonksiyonu
+  // Resim yükleme ve hata yönetimi fonksiyonu
   Widget _buildSmartImage(String url, {double? width, double? height}) {
     final cleanUrl = url.trim();
     if (cleanUrl.startsWith('http')) {
@@ -77,7 +77,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
             leading: Padding(
               padding: const EdgeInsets.all(8.0),
               child: CircleAvatar(
-                backgroundColor: Colors.white.withValues(alpha: 0.9),
+                backgroundColor: Colors.white.withAlpha(230),
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary, size: 20),
                   onPressed: () => Navigator.pop(context),
@@ -88,7 +88,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: CircleAvatar(
-                  backgroundColor: Colors.white.withValues(alpha: 0.9),
+                  backgroundColor: Colors.white.withAlpha(230),
                   child: Consumer<FavoriteProvider>(
                     builder: (context, provider, child) {
                       final isFav = provider.isExist(widget.restaurant);
@@ -239,7 +239,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withAlpha(25),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -250,7 +250,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
           Text(
             label,
             style: GoogleFonts.outfit(
-              color: color.withValues(alpha: 0.8),
+              color: color.withAlpha(204),
               fontWeight: FontWeight.w700,
               fontSize: 13,
             ),

@@ -16,7 +16,7 @@ class OrderConfirmPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
-              // BaÅŸarÄ± Ä°konu
+              // Başarı İkonu
               Container(
                 padding: const EdgeInsets.all(30),
                 decoration: BoxDecoration(
@@ -31,9 +31,9 @@ class OrderConfirmPage extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               
-              // BaÅŸlÄ±k
+              // Başlık
               const Text(
-                "SipariÅŸiniz AlÄ±ndÄ±!",
+                "Siparişiniz Alındı!",
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -42,9 +42,9 @@ class OrderConfirmPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               
-              // AÃ§Ä±klama
+              // Açıklama
               const Text(
-                "SipariÅŸiniz baÅŸarÄ±yla oluÅŸturuldu.\nHazÄ±rlanmaya baÅŸladÄ±ÄŸÄ±nda size bildireceÄŸiz.",
+                "Siparişiniz başarıyla oluşturuldu.\nHazırlanmaya başladığında size bildireceğiz.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
@@ -54,7 +54,7 @@ class OrderConfirmPage extends StatelessWidget {
               ),
               const Spacer(),
               
-              // Ana Sayfaya DÃ¶n Butonu
+              // Ana Sayfaya Dön Butonu
               SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -75,7 +75,7 @@ class OrderConfirmPage extends StatelessWidget {
                     elevation: 0,
                   ),
                     child: const Text(
-                      "Ana Sayfaya DÃ¶n",
+                      "Ana Sayfaya Dön",
                       style: TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 18,

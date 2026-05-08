@@ -17,7 +17,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   final List<Widget> _pages = [
     const HomePage(),
     const Center(child: Text("Arama")),
-    const CartPage(), // BurayÄ± gÃ¼ncelledik
+    const CartPage(), // Burayı güncelledik
     const ProfilePage(),
   ];
 
