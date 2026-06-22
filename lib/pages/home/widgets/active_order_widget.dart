@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mugut_gelsin/pages/orders/order_tracking_page.dart';
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ActiveOrderWidget extends StatefulWidget {
   const ActiveOrderWidget({super.key});
@@ -43,14 +44,14 @@ class _ActiveOrderWidgetState extends State<ActiveOrderWidget> {
           return const SizedBox.shrink();
         }
 
-        // âœ… SipariÅŸleri Tarihe GÃ¶re (En Yeni En Ãœstte) SÄ±ralayalÄ±m
+        // ✅ Siparişleri Tarihe Göre (En Yeni En Üstte) Sıralayalım
         final docs = snapshot.data!.docs.toList();
         docs.sort((a, b) {
           final aTime = (a.data() as Map<String, dynamic>)['timestamp'];
           final bTime = (b.data() as Map<String, dynamic>)['timestamp'];
           
           if (aTime is Timestamp && bTime is Timestamp) {
-            return bTime.compareTo(aTime); // En yeni en Ã¶nce
+            return bTime.compareTo(aTime); // En yeni en önce
           }
           return 0;
         });
@@ -64,7 +65,7 @@ class _ActiveOrderWidgetState extends State<ActiveOrderWidget> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    docs.length > 1 ? "Aktif SipariÅŸlerin (${docs.length})" : "SipariÅŸini Takip Et",
+                    docs.length > 1 ? "Aktif Siparişlerin (${docs.length})" : "Siparişini Takip Et",
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                       fontSize: 17,
@@ -130,8 +131,8 @@ class _ActiveOrderWidgetState extends State<ActiveOrderWidget> {
                       ),
                       child: Row(
                         children: [
-                          _buildStatusIcon(status),
-                          const SizedBox(width: 16),
+                           _buildOrderImage(orderData, status),
+                           const SizedBox(width: 16),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,7 +140,7 @@ class _ActiveOrderWidgetState extends State<ActiveOrderWidget> {
                               children: [
                                 Text(
                                   shopName,
-                                  style: GoogleFonts.outfit(
+                                  style: GoogleFonts.inter(
                                     fontWeight: FontWeight.w900,
                                     fontSize: 15,
                                     color: AppColors.textPrimary,
@@ -151,7 +152,7 @@ class _ActiveOrderWidgetState extends State<ActiveOrderWidget> {
                                 const SizedBox(height: 4),
                                 Text(
                                   _getStatusText(status),
-                                  style: GoogleFonts.outfit(
+                                  style: GoogleFonts.inter(
                                     color: _getStatusColor(status),
                                     fontWeight: FontWeight.w700,
                                     fontSize: 13,
@@ -190,12 +191,12 @@ class _ActiveOrderWidgetState extends State<ActiveOrderWidget> {
         icon = Icons.access_time_rounded;
         color = AppColors.warning;
         break;
-      case 'hazÄ±rlanÄ±yor':
+      case 'hazırlanıyor':
         icon = Icons.restaurant_rounded;
         color = AppColors.primary;
         break;
       case 'yolda':
-      case 'yola Ã§Ä±ktÄ±':
+      case 'yola çıktı':
         icon = Icons.delivery_dining_rounded;
         color = Colors.blueAccent;
         break;
@@ -214,28 +215,134 @@ class _ActiveOrderWidgetState extends State<ActiveOrderWidget> {
     );
   }
 
+  Widget _buildOrderImage(Map<String, dynamic> orderData, String status) {
+    final items = orderData['items'] as List? ?? [];
+    String imageUrl = '';
+    if (items.isNotEmpty) {
+      final firstItem = items[0] as Map<String, dynamic>?;
+      if (firstItem != null) {
+        imageUrl = (firstItem['imageUrl'] ?? firstItem['image_url'] ?? firstItem['Resim'] ?? '') as String;
+      }
+    }
+
+    // Get status configurations (color and icon)
+    IconData icon;
+    Color color;
+    switch (status.toLowerCase()) {
+      case 'onay bekliyor':
+        icon = Icons.access_time_rounded;
+        color = AppColors.warning;
+        break;
+      case 'hazırlanıyor':
+        icon = Icons.restaurant_rounded;
+        color = AppColors.primary;
+        break;
+      case 'yolda':
+      case 'yola çıktı':
+        icon = Icons.delivery_dining_rounded;
+        color = Colors.blueAccent;
+        break;
+      default:
+        icon = Icons.shopping_bag_rounded;
+        color = AppColors.primary;
+    }
+
+    Widget imageWidget;
+    if (imageUrl.isNotEmpty) {
+      imageWidget = CachedNetworkImage(
+        imageUrl: imageUrl,
+        width: 50,
+        height: 50,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => Container(
+          width: 50,
+          height: 50,
+          color: AppColors.surfaceSubtle,
+          child: const Center(
+            child: SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+            ),
+          ),
+        ),
+        errorWidget: (context, url, error) => Container(
+          width: 50,
+          height: 50,
+          color: color.withOpacity(0.1),
+          child: Icon(icon, color: color, size: 22),
+        ),
+      );
+    } else {
+      imageWidget = Container(
+        width: 50,
+        height: 50,
+        color: color.withOpacity(0.1),
+        child: Icon(icon, color: color, size: 22),
+      );
+    }
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: imageWidget,
+        ),
+        // Tiny status badge overlay in the bottom-right corner
+        Positioned(
+          bottom: -4,
+          right: -4,
+          child: Container(
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: const [
+                BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
+              ],
+              border: Border.all(color: Colors.white, width: 1.5),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color: Colors.white,
+                size: 10,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   String _getStatusText(String status) {
     switch (status.toLowerCase()) {
       case 'onay bekliyor':
-        return "SipariÅŸ onay bekliyor...";
-      case 'hazÄ±rlanÄ±yor':
-        return "SipariÅŸiniz hazÄ±rlanÄ±yor...";
+        return "Sipariş onay bekliyor...";
+      case 'hazırlanıyor':
+        return "Siparişiniz hazırlanıyor...";
       case 'yolda':
-      case 'yola Ã§Ä±ktÄ±':
-        return "Kurye yola Ã§Ä±ktÄ±!";
+      case 'yola çıktı':
+        return "Kurye yola çıktı!";
       default:
-        return "SipariÅŸiniz iÅŸleniyor";
+        return "Siparişiniz işleniyor";
     }
   }
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'yolda':
-      case 'yola Ã§Ä±ktÄ±':
+      case 'yola çıktı':
         return Colors.blueAccent;
       case 'onay bekliyor':
         return AppColors.warning;
-      case 'hazÄ±rlanÄ±yor':
+      case 'hazırlanıyor':
         return AppColors.primary;
       default:
         return AppColors.textPrimary;

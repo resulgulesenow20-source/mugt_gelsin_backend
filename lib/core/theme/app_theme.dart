@@ -15,7 +15,7 @@ class AppTheme {
     ),
     
     // ðŸ–‹ï¸ GLOBAL TYPOGRAPHY
-    textTheme: GoogleFonts.outfitTextTheme(const TextTheme(
+    textTheme: GoogleFonts.interTextTheme(const TextTheme(
       headlineLarge: TextStyle(color: AppColors.textTitle, fontWeight: FontWeight.w900, fontSize: 32, letterSpacing: 0),
       headlineMedium: TextStyle(color: AppColors.textTitle, fontWeight: FontWeight.w800, fontSize: 24, letterSpacing: 0),
       titleLarge: TextStyle(color: AppColors.textTitle, fontWeight: FontWeight.w700, fontSize: 20),
@@ -30,7 +30,7 @@ class AppTheme {
       elevation: 0,
       centerTitle: true,
       scrolledUnderElevation: 0,
-      titleTextStyle: GoogleFonts.outfit(
+      titleTextStyle: GoogleFonts.inter(
         color: AppColors.textTitle,
         fontSize: 20,
         fontWeight: FontWeight.w800,
@@ -56,7 +56,7 @@ class AppTheme {
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        textStyle: GoogleFonts.outfit(fontWeight: FontWeight.w800, fontSize: 16),
+        textStyle: GoogleFonts.inter(fontWeight: FontWeight.w800, fontSize: 16),
       ),
     ),
 
@@ -77,7 +77,7 @@ class AppTheme {
         borderRadius: BorderRadius.circular(20),
         borderSide: const BorderSide(color: AppColors.primary, width: 2),
       ),
-      hintStyle: GoogleFonts.outfit(color: AppColors.textTertiary, fontSize: 14, fontWeight: FontWeight.w500),
+      hintStyle: GoogleFonts.inter(color: AppColors.textTertiary, fontSize: 14, fontWeight: FontWeight.w500),
     ),
   );
 }

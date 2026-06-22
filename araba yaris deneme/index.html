@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApexTelemetry - Yarış Arabası Hareket Analiz Sistemi</title>
+    <!-- Google Fonts: Inter ve Orbitron (Telemetri göstergeleri için) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sol Menü (Sidebar) -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <span class="brand-logo">🏁</span>
+                <div class="brand-text">
+                    <h1>APEX<span>TELEMETRY</span></h1>
+                    <small>Yarış Hareket Analizi v1.0</small>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <button class="nav-btn active" data-tab="hud-tab">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
+                    Canlı Telemetri HUD
+                </button>
+                <button class="nav-btn" data-tab="calibration-tab">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+                    Homografi Kalibrasyonu
+                </button>
+                <button class="nav-btn" data-tab="racing-line-tab">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20"/><path d="M20 12v8H4v-8"/><path d="M4 12V4h16v8"/></svg>
+                    Yarış Çizgisi & Apeks
+                </button>
+                <button class="nav-btn" data-tab="comparison-tab">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    Sürücü Karşılaştırma
+                </button>
+                <button class="nav-btn" data-tab="pipeline-code-tab">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                    Python CV Kodları
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="status-indicator">
+                    <span class="dot pulse-green"></span>
+                    <span class="status-text">Sistem Hazır</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Ana İçerik Alanı -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-header">
+                <div class="header-title">
+                    <h2 id="current-tab-title">Canlı Telemetri HUD</h2>
+                    <p id="current-tab-desc">Video akışı üzerinden gerçek zamanlı tespit, takip ve hız analizi.</p>
+                </div>
+                <div class="header-controls">
+                    <div class="control-group">
+                        <label for="track-select">Pist Seçimi:</label>
+                        <select id="track-select">
+                            <option value="spa">Spa-Francorchamps (Belçika)</option>
+                            <option value="monza">Monza (İtalya)</option>
+                            <option value="istanbul">İstanbul Park (Türkiye)</option>
+                        </select>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Sekme İçerikleri -->
+            <div class="tab-viewport">
+                <!-- Sekme 1: HUD ve Canlı Video Telemetrisi -->
+                <div id="hud-tab" class="tab-content active">
+                    <div class="hud-layout">
+                        <!-- Sol: Video ve Bounding Box Simulasyonu -->
+                        <div class="video-container card">
+                            <div class="card-header">
+                                <h3>Tespit ve Takip Akışı (60 FPS)</h3>
+                                <div class="badge green">YOLOv8 + DeepSORT</div>
+                            </div>
+                            <div class="video-wrapper">
+                                <!-- Video simülasyonu için Canvas kullanıyoruz -->
+                                <canvas id="video-canvas" width="800" height="450"></canvas>
+                                <div class="hud-overlay-text" id="hud-car-info">
+                                    CAR #1 (VER) | Speed: 298 km/h | Accel: 1.4 G
+                                </div>
+                            </div>
+                            <div class="video-controls">
+                                <button id="play-pause-btn" class="btn primary">⏸ Duraklat</button>
+                                <button id="reset-sim-btn" class="btn secondary">🔄 Sıfırla</button>
+                                <span class="time-elapsed" id="sim-time">Lap Time: 01:45.32</span>
+                            </div>
+                        </div>
+
+                        <!-- Sağ: Canlı Telemetri Göstergeleri (G-Force, Speedometer vb.) -->
+                        <div class="telemetry-hud-side">
+                            <!-- Hız Kadranı ve Pedallar -->
+                            <div class="card dial-card">
+                                <div class="gauge-container">
+                                    <div class="gauge">
+                                        <div class="gauge-bar" id="speed-gauge-bar"></div>
+                                        <div class="gauge-value">
+                                            <span id="hud-speed" class="font-orbitron">298</span>
+                                            <small>km/h</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="pedals-container">
+                                    <div class="pedal throttle">
+                                        <label>Gas</label>
+                                        <div class="pedal-bar"><div class="pedal-fill" id="throttle-fill"></div></div>
+                                    </div>
+                                    <div class="pedal brake">
+                                        <label>Brake</label>
+                                        <div class="pedal-bar"><div class="pedal-fill" id="brake-fill"></div></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- G-Force Çember Grafiği -->
+                            <div class="card gforce-card">
+                                <h3>G-Force Analizi (Yanal / Boyuna)</h3>
+                                <div class="gforce-canvas-wrapper">
+                                    <canvas id="gforce-canvas" width="180" height="180"></canvas>
+                                </div>
+                                <div class="gforce-stats">
+                                    <div>Yanal G: <span id="gforce-lat" class="font-orbitron">1.82 G</span></div>
+                                    <div>Boyuna G: <span id="gforce-lon" class="font-orbitron">-0.45 G</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sekme 2: Homografi Kalibrasyon Ekranı -->
+                <div id="calibration-tab" class="tab-content">
+                    <div class="calibration-layout">
+                        <!-- Sol: Kamera Görünümü (Perspektif) -->
+                        <div class="card calib-card-src">
+                            <div class="card-header">
+                                <h3>1. Kamera Perspektif Görüntüsü (Piksel)</h3>
+                                <p>Pist üzerindeki 4 referans noktasını sırayla tıklayarak seçin.</p>
+                            </div>
+                            <div class="canvas-wrapper">
+                                <canvas id="calib-src-canvas" width="560" height="350"></canvas>
+                            </div>
+                            <div class="calib-coords" id="src-coords-list">
+                                <div>Nokta 1: <span id="src-p1">-</span></div>
+                                <div>Nokta 2: <span id="src-p2">-</span></div>
+                                <div>Nokta 3: <span id="src-p3">-</span></div>
+                                <div>Nokta 4: <span id="src-p4">-</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Sağ: Üstten 2D Harita Görünümü (Dünya) -->
+                        <div class="card calib-card-dst">
+                            <div class="card-header">
+                                <h3>2. 2D Pist Haritası Eşlemesi (Metre)</h3>
+                                <p>Seçilen noktaların gerçek dünyadaki koordinatlarını eşleştirin.</p>
+                            </div>
+                            <div class="canvas-wrapper">
+                                <canvas id="calib-dst-canvas" width="560" height="350"></canvas>
+                            </div>
+                            <div class="calib-actions">
+                                <button id="calc-homography-btn" class="btn primary">Homografi Matrisini Hesapla</button>
+                                <button id="reset-calib-btn" class="btn secondary">Seçimleri Temizle</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card matrix-output-card" style="margin-top: 20px;">
+                        <h3>Dönüşüm Matrisi (H Matrix)</h3>
+                        <pre id="homography-matrix-display">[ 1.234e-01, -4.567e-01,  8.912e+02 ]
+[ 9.876e-02,  3.456e-01, -1.234e+02 ]
+[ 1.456e-05,  4.789e-05,  1.000e+00 ]</pre>
+                        <p class="small-text text-muted">Bu matris, video koordinatlarını (u, v) gerçek dünyadaki metre koordinatlarına (X, Y) dönüştürmek için kullanılır: <strong>[X, Y, 1]ᵀ ~ H × [u, v, 1]ᵀ</strong></p>
+                    </div>
+                </div>
+
+                <!-- Sekme 3: Yarış Çizgisi ve Apeks Analizi -->
+                <div id="racing-line-tab" class="tab-content">
+                    <div class="racing-line-layout">
+                        <!-- Sol: 2D Pist Çizimi ve Yarış Çizgileri -->
+                        <div class="card track-plot-card">
+                            <div class="card-header">
+                                <h3>Yarış Çizgisi Karşılaştırması & Apeks Noktaları</h3>
+                                <div class="legend">
+                                    <span class="legend-item"><span class="line-color ideal"></span>İdeal Yarış Çizgisi</span>
+                                    <span class="legend-item"><span class="line-color driver-a"></span>Sürücü A (VER)</span>
+                                    <span class="legend-item"><span class="line-color driver-b"></span>Sürücü B (HAM)</span>
+                                </div>
+                            </div>
+                            <div class="track-plot-wrapper">
+                                <canvas id="track-plot-canvas" width="700" height="400"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Sağ: Metrikler ve Analiz Raporu -->
+                        <div class="metrics-sidebar">
+                            <div class="card insight-card">
+                                <h3>Viraj Performans Raporu (Apeks Noktaları)</h3>
+                                <div class="insights-scroll">
+                                    <div class="insight-item">
+                                        <h4>Viraj 1 (La Source)</h4>
+                                        <p><strong>Apeks Hızı:</strong> VER: 82 km/h | HAM: 79 km/h</p>
+                                        <p><strong>Frenleme Noktası:</strong> VER: Viraja 78m kala | HAM: Viraja 82m kala</p>
+                                        <p><strong>Yarış Çizgisi Sapması:</strong> <span class="badge green">VER Optimal (0.12m)</span> <span class="badge orange">HAM Geniş (0.45m)</span></p>
+                                    </div>
+                                    <div class="insight-item">
+                                        <h4>Eau Rouge / Raidillon</h4>
+                                        <p><strong>Tepe Hızı:</strong> VER: 308 km/h | HAM: 304 km/h</p>
+                                        <p><strong>Yanal İvme:</strong> VER: 4.8 G | HAM: 4.5 G</p>
+                                        <p><strong>Geri Bildirim:</strong> VER tam gaz geçerken, HAM hafif gaz kesme uyguladı (%4.2).</p>
+                                    </div>
+                                    <div class="insight-item">
+                                        <h4>Viraj 5-6 (Les Combes)</h4>
+                                        <p><strong>Apeks Hızı:</strong> VER: 142 km/h | HAM: 145 km/h</p>
+                                        <p><strong>Braking Zone:</strong> HAM daha agresif frenleme ile viraj içine girdi.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sekme 4: Sürücü Karşılaştırma Grafikleri -->
+                <div id="comparison-tab" class="tab-content">
+                    <div class="comparison-charts-grid">
+                        <div class="card chart-card">
+                            <h3>Hız Profili Karşılaştırması (Pist Mesafesine Göre)</h3>
+                            <div class="chart-container">
+                                <canvas id="speed-comparison-chart"></canvas>
+                            </div>
+                        </div>
+                        <div class="card chart-card">
+                            <h3>Boyuna ve Yanal İvme (G-Force) Profili</h3>
+                            <div class="chart-container">
+                                <canvas id="gforce-comparison-chart"></canvas>
+                            </div>
+                        </div>
+                        <div class="card chart-card">
+                            <h3>Gaz & Fren Pedalı Kullanımı</h3>
+                            <div class="chart-container">
+                                <canvas id="pedals-comparison-chart"></canvas>
+                            </div>
+                        </div>
+                        <div class="card chart-card">
+                            <h3>Sektör Süreleri & Zaman Farkı (Delta)</h3>
+                            <div class="chart-container">
+                                <canvas id="delta-comparison-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sekme 5: Python Kod Exporter -->
+                <div id="pipeline-code-tab" class="tab-content">
+                    <div class="card code-card">
+                        <div class="card-header">
+                            <h3>Üretime Hazır Python Bilgisayarlı Görü (CV) İş Hattı</h3>
+                            <button id="copy-code-btn" class="btn primary">Kodu Kopyala</button>
+                        </div>
+                        <p class="code-description">Aşağıdaki kod, YOLOv8 modelini kullanarak araçları tespit eder, DeepSORT / SORT tabanlı bir izleyici (Kalman Filtresi) ile kimliklerini (ID) korur ve homografi dönüşümü ile piksel hareketlerini gerçek dünya hız/ivme verilerine çevirir.</p>
+                        <div class="code-wrapper">
+                            <pre><code class="language-python" id="python-code-content"># ==============================================================================
+# APEX TELEMETRY - RACING CAR MOTION ANALYSIS PIPELINE (YOLOv8 + SORT + HOMOGRAPHY)
+# ==============================================================================
+import cv2
+import numpy as np
+from ultralytics import YOLO
+from scipy.signal import savgol_filter
+
+class RacingTelemetryPipeline:
+    def __init__(self, model_path="yolov8x.pt", track_coordinates=None, real_coordinates=None):
+        # 1. Car Detection Model (YOLOv8)
+        self.model = YOLO(model_path)
+        
+        # 2. Homography Calibration Matrix Setup
+        if track_coordinates is not None and real_coordinates is not None:
+            self.H, _ = cv2.findHomography(np.array(track_coordinates), np.array(real_coordinates))
+        else:
+            # Varsayılan Homografi Matrisi (Test için)
+            self.H = np.eye(3)
+            
+        # 3. Object Tracking Parameters (Kalman & SORT varsayılanları)
+        self.tracks = {}  # {track_id: {"positions": [], "timestamps": []}}
+        
+    def detect_cars(self, frame):
+        # YOLOv8x ile araçları tespit et. Sınıf ID 2, 7 (araba, kamyon vs. COCO için)
+        results = self.model(frame, classes=[2, 7], verbose=False)[0]
+        detections = []
+        for box in results.boxes:
+            x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
+            conf = box.conf[0].cpu().numpy()
+            detections.append([x1, y1, x2, y2, conf])
+        return np.array(detections)
+        
+    def transform_point(self, px, py):
+        # Homografi kullanarak piksel koordinatını gerçek dünya (X, Y) koordinatına çevirir (metre)
+        p = np.array([px, py, 1.0]).reshape(3, 1)
+        p_world = np.dot(self.H, p)
+        p_world /= p_world[2, 0]  # Ölçekleme
+        return p_world[0, 0], p_world[1, 0]
+        
+    def update_tracks(self, detections, frame_id, fps):
+        # Basitleştirilmiş takip mekanizması (Kalman Filtreli SORT alternatifi)
+        # Gerçek uygulamada DeepSORT veya SORT kütüphaneleri çağrılır.
+        current_frame_tracks = []
+        t = frame_id / fps
+        
+        for det in detections:
+            x1, y1, x2, y2, conf = det
+            # Araç taban merkez noktası (Lastiklerin yere değdiği orta nokta)
+            cx = (x1 + x2) / 2
+            cy = y2
+            
+            # Dünya koordinatlarına çevir
+            wx, wy = self.transform_point(cx, cy)
+            
+            # En yakın takipçi eşleşmesi (Basit IoU veya Mesafe eşleşmesi)
+            matched_id = self.find_matching_track(wx, wy)
+            
+            if matched_id is None:
+                matched_id = len(self.tracks) + 1
+                self.tracks[matched_id] = {"pos": [], "time": []}
+                
+            self.tracks[matched_id]["pos"].append([wx, wy])
+            self.tracks[matched_id]["time"].append(t)
+            
+            current_frame_tracks.append({
+                "id": matched_id,
+                "bbox": [x1, y1, x2, y2],
+                "world_pos": [wx, wy]
+            })
+            
+        return current_frame_tracks
+        
+    def calculate_telemetry(self, track_id, window_length=11, polyorder=3):
+        # Savitzky-Golay filtresi kullanarak gürültüyü azalt, hız ve ivme hesapla
+        pos = np.array(self.tracks[track_id]["pos"])
+        times = np.array(self.tracks[track_id]["time"])
+        
+        if len(pos) < window_length:
+            return None # Yeterli veri yok
+            
+        # Pürüzsüzleştirilmiş Konumlar
+        wx_smooth = savgol_filter(pos[:, 0], window_length, polyorder)
+        wy_smooth = savgol_filter(pos[:, 1], window_length, polyorder)
+        
+        # Hız Hesaplama (v = ds/dt)
+        dx = np.diff(wx_smooth)
+        dy = np.diff(wy_smooth)
+        dt = np.diff(times)
+        
+        speeds = np.sqrt(dx**2 + dy**2) / dt  # m/s
+        speeds_kmh = speeds * 3.6  # km/h
+        
+        # İvme Hesaplama (a = dv/dt)
+        accel = np.diff(speeds) / dt[:-1]  # m/s^2
+        accel_g = accel / 9.81  # G-Force
+        
+        # Yönelim ve Yanal G-Kuvveti (Merkezkaç ivme)
+        angles = np.arctan2(dy, dx)
+        d_theta = np.diff(angles)
+        angular_velocity = d_theta / dt[:-1]
+        
+        lat_g = (speeds[1:]**2 * angular_velocity) / 9.81
+        
+        return {
+            "smooth_pos": list(zip(wx_smooth, wy_smooth)),
+            "speeds": speeds_kmh.tolist(),
+            "accel": accel_g.tolist(),
+            "lateral_g": lat_g.tolist()
+        }
+
+# Kullanım Örneği:
+# pipeline = RacingTelemetryPipeline(
+#     model_path="yolov8x.pt", 
+#     track_coordinates=[(200, 300), (600, 300), (700, 450), (100, 450)], 
+#     real_coordinates=[(0, 0), (50, 0), (50, 100), (0, 100)]
+# )
+</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>

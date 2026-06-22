@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mugut_gelsin/pages/auth/register_page.dart';
-import 'package:mugut_gelsin/pages/main_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:mugut_gelsin/providers/auth_provider.dart' as app_auth;
-// Giriş başarılı olunca gidecek yer
 import 'package:mugut_gelsin/providers/language_provider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -37,7 +35,6 @@ class _LoginPageState extends State<LoginPage> {
       String fullPhone = "$_countryCode${_phoneController.text.trim().replaceAll(' ', '')}";
       
       if (!_codeSent) {
-        // Step 1: Send Code
         await authProvider.verifyPhoneNumber(
           phoneNumber: fullPhone,
           onCodeSent: (verificationId) {
@@ -46,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
               _isLoading = false;
             });
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Doğrulama kodu gönderildi.")),
+              SnackBar(content: Text(langProvider.get('code_sent_msg'))),
             );
           },
           onError: (error) {
@@ -57,9 +54,8 @@ class _LoginPageState extends State<LoginPage> {
           },
         );
       } else {
-        // Step 2: Verify OTP
         if (_codeController.text.isEmpty) {
-          throw "Lütfen doğrulama kodunu girin.";
+          throw langProvider.get('enter_code_error');
         }
         await authProvider.signInWithOTP(_codeController.text.trim());
         if (mounted) {
@@ -73,8 +69,10 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     } finally {
-      if (mounted && !_codeSent) {
-        setState(() => _isLoading = false);
+      if (mounted) {
+        if (_codeSent) {
+          setState(() => _isLoading = false);
+        }
       }
     }
   }
@@ -105,7 +103,6 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const SizedBox(height: 20),
-                      // Logo Alanı (Sürekli Nefes Alan Animasyon)
                       TweenAnimationBuilder<double>(
                         tween: Tween<double>(begin: 0.9, end: 1.0),
                         duration: const Duration(seconds: 1),
@@ -117,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                               padding: const EdgeInsets.all(10),
                               child: Image.asset(
                                 'assets/images/logo_m.png',
-                                height: _codeSent ? 100 : 180, // Kod gönderilince logoyu küçült
+                                height: _codeSent ? 100 : 180,
                                 fit: BoxFit.contain,
                               ),
                             ),
@@ -126,9 +123,9 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 16),
                       if (!_codeSent) ...[
-                        const Text(
-                          "mugut Gelsin",
-                          style: TextStyle(
+                        Text(
+                          langProvider.get('app_name').toUpperCase(),
+                          style: const TextStyle(
                             fontSize: 36,
                             fontWeight: FontWeight.w900,
                             color: Colors.white,
@@ -147,7 +144,6 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                       SizedBox(height: _codeSent ? 10 : 30),
 
-                      // Dil Seçimi Bölümü
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -160,13 +156,14 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 30),
 
-                      // Giriş Alanları
                       if (!_codeSent) ...[
                         TextField(
                           controller: _phoneController,
                           keyboardType: TextInputType.phone,
                           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          maxLength: _countryCode == '+993' ? 8 : 15,
                           decoration: InputDecoration(
+                            counterText: "",
                             labelText: langProvider.translate('phone_label'),
                             labelStyle: const TextStyle(color: Colors.white70),
                             hintText: langProvider.translate('phone_hint'),
@@ -179,7 +176,7 @@ class _LoginPageState extends State<LoginPage> {
                                 style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                               ),
                             ),
-                            fillColor: Colors.white.withAlpha(51),
+                            fillColor: Colors.white.withOpacity(0.2),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
                               borderSide: BorderSide.none,
@@ -190,7 +187,7 @@ class _LoginPageState extends State<LoginPage> {
                         Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: Colors.white.withAlpha(25),
+                            color: Colors.white.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(24),
                             border: Border.all(color: Colors.white24),
                           ),
@@ -198,13 +195,13 @@ class _LoginPageState extends State<LoginPage> {
                             children: [
                               const Icon(Icons.mark_email_read_outlined, color: Colors.white, size: 48),
                               const SizedBox(height: 16),
-                              const Text(
-                                "SMS Doğrulama",
-                                style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                              Text(
+                                langProvider.get('verify_code'),
+                                style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                "$_countryCode${_phoneController.text} numarasına 6 haneli bir kod gönderdik.",
+                                langProvider.get('sms_sent_to').replaceAll('{phone}', "$_countryCode${_phoneController.text}"),
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(color: Colors.white70, fontSize: 14),
                               ),
@@ -218,9 +215,9 @@ class _LoginPageState extends State<LoginPage> {
                                 decoration: InputDecoration(
                                   counterText: "",
                                   hintText: "******",
-                                  hintStyle: TextStyle(color: Colors.white.withAlpha(77)),
+                                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
                                   filled: true,
-                                  fillColor: Colors.white.withAlpha(25),
+                                  fillColor: Colors.white.withOpacity(0.1),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(16),
                                     borderSide: BorderSide.none,
@@ -233,7 +230,6 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                       const SizedBox(height: 24),
 
-                      // Giriş Butonu
                       SizedBox(
                         width: double.infinity,
                         height: 60,
@@ -250,7 +246,7 @@ class _LoginPageState extends State<LoginPage> {
                           child: _isLoading
                               ? const CircularProgressIndicator(color: Color(0xFFFF6900))
                               : Text(
-                                  _codeSent ? "DOĞRULA" : langProvider.translate('login_button'),
+                                  _codeSent ? langProvider.get('verify_code').toUpperCase() : langProvider.translate('login_button'),
                                   style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
@@ -262,11 +258,10 @@ class _LoginPageState extends State<LoginPage> {
                       if (_codeSent)
                         TextButton(
                           onPressed: () => setState(() => _codeSent = false),
-                          child: const Text("Numarayı Değiştir", style: TextStyle(color: Colors.white70)),
+                          child: Text(langProvider.get('update'), style: const TextStyle(color: Colors.white70)),
                         ),
                       const SizedBox(height: 24),
 
-                      // Kayıt Ol Linki
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -318,7 +313,7 @@ class _LoginPageState extends State<LoginPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white.withValues(alpha: 0.3) : Colors.transparent,
+          color: isSelected ? Colors.white.withOpacity(0.3) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           border: isSelected ? Border.all(color: Colors.white, width: 1.5) : null,
         ),

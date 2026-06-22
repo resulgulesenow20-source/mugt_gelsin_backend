@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mugut_gelsin/presentation/common/cards/food_card.dart';
 import 'package:mugut_gelsin/models/restaurant_model.dart';
@@ -6,9 +8,10 @@ import 'package:mugut_gelsin/pages/home/widgets/review_section.dart';
 import 'package:provider/provider.dart';
 import 'package:mugut_gelsin/providers/cart_provider.dart';
 import 'package:mugut_gelsin/pages/cart/cart_page.dart';
-import 'package:mugut_gelsin/providers/favorite_provider.dart';
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:mugut_gelsin/providers/language_provider.dart';
+import 'package:mugut_gelsin/services/api_service.dart';
 
 class RestaurantDetailPage extends StatefulWidget {
   final Restaurant restaurant;
@@ -19,6 +22,110 @@ class RestaurantDetailPage extends StatefulWidget {
 }
 
 class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
+  late Restaurant _currentRestaurant;
+  StreamSubscription? _restaurantSub;
+
+  String _getHoursLabel(String langCode) {
+    switch (langCode) {
+      case 'TM':
+        return 'Iş sagatlary';
+      case 'RU':
+        return 'Часы работы';
+      default:
+        return 'Çalışma Saatleri';
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _currentRestaurant = widget.restaurant;
+    _listenToRestaurant();
+  }
+
+  @override
+  void dispose() {
+    _restaurantSub?.cancel();
+    super.dispose();
+  }
+
+  void _listenToRestaurant() {
+    _restaurantSub?.cancel();
+    
+    final docId = _currentRestaurant.docId;
+    if (docId != null && docId.isNotEmpty) {
+      _restaurantSub = FirebaseFirestore.instance
+          .collection('Dukkanlar')
+          .doc(docId)
+          .snapshots()
+          .listen((docSnap) {
+            if (docSnap.exists) {
+              final data = docSnap.data();
+              if (data != null && mounted) {
+                setState(() {
+                  var updated = ApiService().mapFirestoreToRestaurant(data, docSnap.id);
+                  if (updated.menu.isEmpty && widget.restaurant.menu.isNotEmpty) {
+                    updated = Restaurant(
+                      id: updated.id,
+                      docId: updated.docId,
+                      name: updated.name,
+                      imageUrl: updated.imageUrl,
+                      rating: updated.rating,
+                      deliveryTime: updated.deliveryTime,
+                      category: updated.category,
+                      minOrderAmount: updated.minOrderAmount,
+                      isFavorite: updated.isFavorite,
+                      isOpen: updated.isOpen,
+                      openingTime: updated.openingTime,
+                      closingTime: updated.closingTime,
+                      menu: widget.restaurant.menu,
+                    );
+                  }
+                  _currentRestaurant = updated;
+                });
+              }
+            }
+          }, onError: (e) {
+            debugPrint("Error listening to restaurant detail doc: $e");
+          });
+    } else {
+      _restaurantSub = FirebaseFirestore.instance
+          .collection('Dukkanlar')
+          .where('id', isEqualTo: _currentRestaurant.id)
+          .snapshots()
+          .listen((snapshot) {
+            if (snapshot.docs.isNotEmpty) {
+              final doc = snapshot.docs.first;
+              final data = doc.data();
+              if (!mounted) return;
+              setState(() {
+                var updated = ApiService().mapFirestoreToRestaurant(data, doc.id);
+                if (updated.menu.isEmpty && widget.restaurant.menu.isNotEmpty) {
+                  updated = Restaurant(
+                    id: updated.id,
+                    docId: updated.docId,
+                    name: updated.name,
+                    imageUrl: updated.imageUrl,
+                    rating: updated.rating,
+                    deliveryTime: updated.deliveryTime,
+                    category: updated.category,
+                    minOrderAmount: updated.minOrderAmount,
+                    isFavorite: updated.isFavorite,
+                    isOpen: updated.isOpen,
+                    openingTime: updated.openingTime,
+                    closingTime: updated.closingTime,
+                    menu: widget.restaurant.menu,
+                  );
+                }
+                _currentRestaurant = updated;
+              });
+            }
+          }, onError: (e) {
+            debugPrint("Error listening to restaurant detail query: $e");
+          });
+    }
+  }
+
   // Resim yükleme ve hata yönetimi fonksiyonu
   Widget _buildSmartImage(String url, {double? width, double? height}) {
     final cleanUrl = url.trim();
@@ -59,15 +166,16 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
       ),
     );
   }
-
-
+  
   @override
   Widget build(BuildContext context) {
+    final langProvider = context.watch<LanguageProvider>();
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
-          // ðŸ–¼ï¸ SLIVER APP BAR (IMAGE HEADER)
+          // Header Image with Back Button and Actions
           SliverAppBar(
             expandedHeight: 250,
             pinned: true,
@@ -77,7 +185,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
             leading: Padding(
               padding: const EdgeInsets.all(8.0),
               child: CircleAvatar(
-                backgroundColor: Colors.white.withAlpha(230),
+                backgroundColor: Colors.white.withOpacity(0.9),
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary, size: 20),
                   onPressed: () => Navigator.pop(context),
@@ -85,29 +193,11 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
               ),
             ),
             actions: [
+
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: CircleAvatar(
-                  backgroundColor: Colors.white.withAlpha(230),
-                  child: Consumer<FavoriteProvider>(
-                    builder: (context, provider, child) {
-                      final isFav = provider.isExist(widget.restaurant);
-                      return IconButton(
-                        icon: Icon(
-                          isFav ? Icons.favorite : Icons.favorite_border,
-                          color: isFav ? AppColors.error : AppColors.textPrimary,
-                          size: 20,
-                        ),
-                        onPressed: () => provider.toggleFavorite(widget.restaurant),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: CircleAvatar(
-                  backgroundColor: Colors.white.withValues(alpha: 0.9),
+                  backgroundColor: Colors.white.withOpacity(0.9),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
@@ -141,14 +231,14 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
             ],
             flexibleSpace: FlexibleSpaceBar(
               background: _buildSmartImage(
-                widget.restaurant.imageUrl,
+                _currentRestaurant.imageUrl,
                 width: double.infinity,
                 height: double.infinity,
               ),
             ),
           ),
 
-          // ðŸ“ RESTAURANT INFO & MENU
+          // Restaurant Info & Menu
           SliverToBoxAdapter(
             child: Container(
               decoration: const BoxDecoration(
@@ -158,6 +248,33 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (!_currentRestaurant.isOpen)
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.error.withOpacity(0.2)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.error_outline_rounded, color: AppColors.error),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              "${langProvider.get('shop_closed_warning')}${(_currentRestaurant.openingTime != null && _currentRestaurant.closingTime != null) ? " (${_getHoursLabel(langProvider.selectedLang)}: ${_currentRestaurant.openingTime} - ${_currentRestaurant.closingTime})" : ""}",
+                              style: const TextStyle(
+                                color: AppColors.error,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                    // Info Section
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
@@ -165,21 +282,29 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.restaurant.name,
+                          _currentRestaurant.name,
                           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.w900,
                             letterSpacing: -1,
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            _buildInfoChip(Icons.star_rounded, "${widget.restaurant.rating}", AppColors.warning),
-                            const SizedBox(width: 12),
-                            _buildInfoChip(Icons.access_time_filled_rounded, widget.restaurant.deliveryTime, AppColors.primary),
-                            const SizedBox(width: 12),
-                            _buildInfoChip(Icons.restaurant_rounded, widget.restaurant.category, Colors.blueAccent),
-                          ],
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          child: Row(
+                            children: [
+                              _buildInfoChip(Icons.star_rounded, "${_currentRestaurant.rating}", AppColors.warning),
+                              const SizedBox(width: 12),
+                              _buildInfoChip(Icons.access_time_filled_rounded, _currentRestaurant.deliveryTime, AppColors.primary),
+                              const SizedBox(width: 12),
+                              _buildInfoChip(
+                                Icons.alarm_rounded,
+                                "${_currentRestaurant.openingTime ?? '09:00'} - ${_currentRestaurant.closingTime ?? '23:00'}",
+                                Colors.blueAccent,
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -193,14 +318,17 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                   // Review Section
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: ReviewSection(restaurantId: widget.restaurant.id),
+                    child: ReviewSection(
+                      restaurantId: _currentRestaurant.id,
+                      docId: _currentRestaurant.docId,
+                    ),
                   ),
 
                   // Menu Section
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
                     child: Text(
-                      "Popular Menus",
+                      langProvider.translate('highlights'),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w800,
                         fontSize: 22,
@@ -214,14 +342,15 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     padding: const EdgeInsets.symmetric(horizontal: 4),
-                    itemCount: widget.restaurant.menu.length,
+                    itemCount: _currentRestaurant.menu.length,
                     itemBuilder: (context, index) {
-                      final food = widget.restaurant.menu[index];
+                      final food = _currentRestaurant.menu[index];
                       return FoodCard(
                         food: food,
-                        restaurantId: widget.restaurant.id,
-                        restaurantName: widget.restaurant.name,
-                        minOrderAmount: widget.restaurant.minOrderAmount,
+                        restaurantId: _currentRestaurant.id,
+                        restaurantName: _currentRestaurant.name,
+                        minOrderAmount: _currentRestaurant.minOrderAmount,
+                        restaurantIsOpen: _currentRestaurant.isOpen,
                       );
                     },
                   ),
@@ -239,7 +368,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withAlpha(25),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -249,8 +378,8 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
           const SizedBox(width: 6),
           Text(
             label,
-            style: GoogleFonts.outfit(
-              color: color.withAlpha(204),
+            style: GoogleFonts.inter(
+              color: color.withOpacity(0.8),
               fontWeight: FontWeight.w700,
               fontSize: 13,
             ),
@@ -260,4 +389,3 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
     );
   }
 }
-

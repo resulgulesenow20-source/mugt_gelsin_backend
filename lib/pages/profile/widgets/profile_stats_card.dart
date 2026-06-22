@@ -23,7 +23,7 @@ class ProfileStatsCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -35,7 +35,7 @@ class ProfileStatsCard extends StatelessWidget {
           _buildStatItem(
             context,
             icon: Icons.account_balance_wallet_rounded,
-            value: "${balance.toStringAsFixed(2)} TL",
+            value: "${balance.toStringAsFixed(2)} TMT",
             label: "Cüzdan",
             color: Colors.blue,
           ),
@@ -72,7 +72,7 @@ class ProfileStatsCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
+            color: color.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: color, size: 24),
@@ -103,7 +103,7 @@ class ProfileStatsCard extends StatelessWidget {
     return Container(
       height: 40,
       width: 1,
-      color: Colors.grey.withAlpha(50),
+      color: Colors.grey.withOpacity(0.2),
     );
   }
 }

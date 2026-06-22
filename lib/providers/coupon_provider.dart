@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../models/coupon_model.dart';
 
 class CouponProvider with ChangeNotifier {
@@ -19,8 +19,8 @@ class CouponProvider with ChangeNotifier {
       Coupon(
         id: '1',
         code: 'YENI20',
-        title: 'Hoş Geldin İndirimi',
-        description: 'İlk siparişine özel %20 indirim!',
+        title: 'Hos Geldin Indirimi',
+        description: 'Ilk siparisine �zel %20 indirim!',
         discountAmount: 20,
         expiryDate: DateTime.now().add(const Duration(days: 30)),
         type: 'percentage',
@@ -28,8 +28,8 @@ class CouponProvider with ChangeNotifier {
       Coupon(
         id: '2',
         code: 'mugut50',
-        title: 'Hafta Sonu Fırsatı',
-        description: '50 TL ve üzeri siparişlerde 15 TL indirim.',
+        title: 'Hafta Sonu Firsati',
+        description: '50 TL ve �zeri siparislerde 15 TL indirim.',
         discountAmount: 15,
         expiryDate: DateTime.now().add(const Duration(days: 2)),
         type: 'amount',
@@ -37,8 +37,8 @@ class CouponProvider with ChangeNotifier {
       Coupon(
         id: '3',
         code: 'ESKI10',
-        title: 'Geçmiş Kupon',
-        description: 'Süresi dolmuş bir kupon örneği.',
+        title: 'Ge�mis Kupon',
+        description: 'S�resi dolmus bir kupon �rnegi.',
         discountAmount: 10,
         expiryDate: DateTime.now().subtract(const Duration(days: 5)),
         type: 'amount',

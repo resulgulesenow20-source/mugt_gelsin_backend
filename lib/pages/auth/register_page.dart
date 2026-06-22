@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mugut_gelsin/providers/auth_provider.dart' as app_auth;
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
-import 'package:mugut_gelsin/pages/main_screen.dart';
 import 'package:mugut_gelsin/providers/language_provider.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -37,7 +36,6 @@ class _RegisterPageState extends State<RegisterPage> {
       String fullPhone = "$_countryCode${_phoneController.text.trim().replaceAll(' ', '')}";
 
       if (!_codeSent) {
-        // Step 1: Send Code
         await authProvider.verifyPhoneNumber(
           phoneNumber: fullPhone,
           onCodeSent: (verificationId) {
@@ -46,7 +44,7 @@ class _RegisterPageState extends State<RegisterPage> {
               _isLoading = false;
             });
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Doğrulama kodu gönderildi.")),
+              SnackBar(content: Text(langProvider.get('code_sent_msg'))),
             );
           },
           onError: (error) {
@@ -57,9 +55,8 @@ class _RegisterPageState extends State<RegisterPage> {
           },
         );
       } else {
-        // Step 2: Verify OTP
         if (_codeController.text.isEmpty) {
-          throw "Lütfen doğrulama kodunu girin.";
+          throw langProvider.get('enter_code_error');
         }
         await authProvider.signInWithOTP(
           _codeController.text.trim(),
@@ -79,8 +76,10 @@ class _RegisterPageState extends State<RegisterPage> {
         );
       }
     } finally {
-      if (mounted && !_codeSent) {
-        setState(() => _isLoading = false);
+      if (mounted) {
+        if (_codeSent) {
+          setState(() => _isLoading = false);
+        }
       }
     }
   }
@@ -119,7 +118,6 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             const SizedBox(height: 32),
 
-            // Kayıt Alanları
             if (!_codeSent) ...[
               _buildTextField(
                 controller: _nameController,
@@ -132,6 +130,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 hintText: langProvider.translate('phone_label'),
                 icon: Icons.phone_outlined,
                 keyboardType: TextInputType.phone,
+                maxLength: _countryCode == '+993' ? 8 : 15,
+                counterText: "",
                 prefix: GestureDetector(
                   onTap: () {
                     _showCountryPicker(context);
@@ -154,17 +154,17 @@ class _RegisterPageState extends State<RegisterPage> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withAlpha(12),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: AppColors.primary.withAlpha(51)),
+                  color: AppColors.primary.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.2)),
                 ),
                 child: Column(
                   children: [
                     const Icon(Icons.sms_outlined, color: AppColors.primary, size: 48),
                     const SizedBox(height: 16),
-                    const Text(
-                      "Kodu Doğrula",
-                      style: TextStyle(
+                    Text(
+                      langProvider.get('verify_code'),
+                      style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
@@ -172,7 +172,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      "$_countryCode${_phoneController.text} numarasına bir SMS kodu gönderdik.",
+                      langProvider.get('sms_sent_to').replaceAll('{phone}', "$_countryCode${_phoneController.text}"),
                       textAlign: TextAlign.center,
                       style: const TextStyle(color: AppColors.textSecondary),
                     ),
@@ -196,11 +196,11 @@ class _RegisterPageState extends State<RegisterPage> {
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.grey.withAlpha(51)),
+                          borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.grey.withAlpha(51)),
+                          borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
                         ),
                       ),
                     ),
@@ -210,7 +210,6 @@ class _RegisterPageState extends State<RegisterPage> {
             ],
             const SizedBox(height: 32),
 
-            // Kayıt Ol Butonu
             SizedBox(
               width: double.infinity,
               height: 56,
@@ -226,9 +225,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
-                        _codeSent ? "DOĞRULA VE KAYIT OL" : langProvider.translate('register_title'),
+                        _codeSent ? langProvider.get('verify_and_register') : langProvider.translate('register_title'),
                         style: const TextStyle(
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
                         ),
@@ -238,11 +237,10 @@ class _RegisterPageState extends State<RegisterPage> {
             if (_codeSent)
               TextButton(
                 onPressed: () => setState(() => _codeSent = false),
-                child: const Text("Bilgileri Düzenle", style: TextStyle(color: AppColors.textSecondary)),
+                child: Text(langProvider.get('update'), style: const TextStyle(color: AppColors.textSecondary)),
               ),
             const SizedBox(height: 16),
 
-            // Giriş Yap Linki
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -276,12 +274,16 @@ class _RegisterPageState extends State<RegisterPage> {
     required IconData icon,
     TextInputType keyboardType = TextInputType.text,
     Widget? prefix,
+    int? maxLength,
+    String? counterText,
   }) {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
+      maxLength: maxLength,
       decoration: InputDecoration(
         labelText: hintText,
+        counterText: counterText,
         prefixIcon: prefix ?? Icon(icon, color: AppColors.textPrimary),
         filled: true,
         fillColor: Colors.grey[100],
@@ -336,4 +338,3 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
-

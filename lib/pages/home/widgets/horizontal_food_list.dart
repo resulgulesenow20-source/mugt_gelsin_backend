@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mugut_gelsin/models/restaurant_model.dart';
 import 'package:mugut_gelsin/presentation/common/cards/compact_food_card.dart';
 
@@ -22,6 +22,8 @@ class HorizontalFoodList extends StatelessWidget {
             food: item.food,
             restaurantId: item.restaurantId,
             restaurantName: item.restaurantName,
+            minOrderAmount: item.minOrderAmount,
+            restaurantIsOpen: item.restaurantIsOpen,
             onTap: onItemTap != null ? () => onItemTap!(item) : null,
           );
         },

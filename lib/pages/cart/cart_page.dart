@@ -51,13 +51,13 @@ class CartPage extends StatelessWidget {
                         background: Container(
                           alignment: Alignment.centerRight,
                           padding: const EdgeInsets.only(right: 20),
-                          color: Colors.redAccent.withValues(alpha: 0.1),
+                          color: Colors.redAccent.withOpacity(0.1),
                           child: const Icon(Icons.delete_outline, color: Colors.redAccent),
                         ),
                         onDismissed: (direction) {
                           cartProvider.removeFromCart(item); // ÃœrÃ¼nÃ¼ tamamen sildik (quantity gÃ¶zetmeksizin silmek iÃ§in dÃ¶ngÃ¼ye gerek yok, Map'ten siliyoruz)
                         },
-                        child: _buildCartItemCard(cartProvider, item),
+                        child: _buildCartItemCard(cartProvider, item, langProvider),
                       );
                     },
                   ),
@@ -91,7 +91,7 @@ class CartPage extends StatelessWidget {
     );
   }
 
-  Widget _buildCartItemCard(CartProvider cartProvider, dynamic item) {
+  Widget _buildCartItemCard(CartProvider cartProvider, dynamic item, LanguageProvider langProvider) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       padding: const EdgeInsets.all(10),
@@ -100,12 +100,12 @@ class CartPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(8),
+            color: Colors.black.withOpacity(0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(color: Colors.grey.withAlpha(25)),
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
       ),
       child: Row(
         children: [
@@ -135,7 +135,7 @@ class CartPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  "${item.food.price} TL",
+                  "${item.food.price.toStringAsFixed(2)} TMT",
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontSize: 12,
@@ -145,7 +145,7 @@ class CartPage extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 2),
                     child: Text(
-                      "Not: ${item.note}",
+                      "${langProvider.get('order_note')}: ${item.note}",
                       style: const TextStyle(
                         color: Colors.orange,
                         fontSize: 11,
@@ -159,7 +159,7 @@ class CartPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "${(item.food.price * item.quantity).toStringAsFixed(2)} TL",
+                      "${(item.food.price * item.quantity).toStringAsFixed(2)} TMT",
                       style: const TextStyle(
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.bold,
@@ -168,7 +168,7 @@ class CartPage extends StatelessWidget {
                     ),
                     Container(
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
+                        color: AppColors.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -224,7 +224,7 @@ class CartPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(40),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: AppColors.primary.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -235,12 +235,12 @@ class CartPage extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            lang.translate('empty_cart_msg'),
+            lang.get('empty_cart_msg'),
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           Text(
-            lang.translate('empty_cart_desc'),
+            lang.get('empty_cart_desc'),
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey[600], fontSize: 15),
           ),
@@ -254,7 +254,7 @@ class CartPage extends StatelessWidget {
                 backgroundColor: AppColors.textPrimary,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
               ),
-              child: Text(lang.translate('start_shopping'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              child: Text(lang.get('start_shopping'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
           ),
         ],
@@ -265,7 +265,7 @@ class CartPage extends StatelessWidget {
   Widget _buildOrderSummary(BuildContext context, CartProvider cart, LanguageProvider lang) {
     const double deliveryFee = 15.0;
     const double serviceFee = 5.0;
-    final double minOrderAmount = cart.minOrderAmount; // Minimum sipariş tutarı
+    final double minOrderAmount = cart.minOrderAmount; 
     final double total = cart.totalPrice + deliveryFee + serviceFee;
     final bool isBelowMinOrder = cart.totalPrice < minOrderAmount;
     final double remainingAmount = minOrderAmount - cart.totalPrice;
@@ -276,7 +276,7 @@ class CartPage extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(12),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 20,
             offset: const Offset(0, -5),
           ),
@@ -286,9 +286,9 @@ class CartPage extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildSummaryRow(lang.translate('subtotal'), "${cart.totalPrice.toStringAsFixed(2)} TL"),
-          _buildSummaryRow(lang.translate('delivery_fee'), "${deliveryFee.toStringAsFixed(2)} TL"),
-          _buildSummaryRow(lang.translate('service_fee'), "${serviceFee.toStringAsFixed(2)} TL"),
+          _buildSummaryRow(lang.get('subtotal'), "${cart.totalPrice.toStringAsFixed(2)} TMT"),
+          _buildSummaryRow(lang.get('delivery_fee'), "${deliveryFee.toStringAsFixed(2)} TMT"),
+          _buildSummaryRow(lang.get('service_fee'), "${serviceFee.toStringAsFixed(2)} TMT"),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
             child: Divider(),
@@ -297,11 +297,11 @@ class CartPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                lang.translate('total_price'),
+                lang.get('total_price'),
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               Text(
-                "${total.toStringAsFixed(2)} TL",
+                "${total.toStringAsFixed(2)} TMT",
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
@@ -325,7 +325,9 @@ class CartPage extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      "Minimum sipariş tutarı $minOrderAmount TL'dir. Sipariş vermek için sepetinize ${remainingAmount.toStringAsFixed(2)} TL'lik ürün daha ekleyin.",
+                      lang.get('min_order_warning')
+                          .replaceAll('{min}', minOrderAmount.toStringAsFixed(0))
+                          .replaceAll('{rem}', remainingAmount.toStringAsFixed(2)),
                       style: const TextStyle(color: Colors.red, fontSize: 13),
                     ),
                   ),

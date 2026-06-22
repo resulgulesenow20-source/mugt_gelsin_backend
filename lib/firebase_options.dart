@@ -41,7 +41,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBQD2typ01aRHrPftX36jMBYxc5ymA4s6A',
+    apiKey: 'AIzaSyCN9rccJKr3uDIQkCDImcqBD82fAWVE1hQ',
     appId: '1:337676615490:web:4b9d3d4422f6884b4de64f',
     messagingSenderId: '337676615490',
     projectId: 'mugt-gelsin',
@@ -50,15 +50,15 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBQD2typ01aRHrPftX36jMBYxc5ymA4s6A',
-    appId: '1:337676615490:android:843e812655584cc82e12db',
+    apiKey: 'AIzaSyCN9rccJKr3uDIQkCDImcqBD82fAWVE1hQ',
+    appId: '1:337676615490:android:addc76f7fd146d112e12db',
     messagingSenderId: '337676615490',
     projectId: 'mugt-gelsin',
     storageBucket: 'mugt-gelsin.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBQD2typ01aRHrPftX36jMBYxc5ymA4s6A',
+    apiKey: 'AIzaSyCN9rccJKr3uDIQkCDImcqBD82fAWVE1hQ',
     appId: '1:337676615490:ios:688aba74ad6d584f4de64f',
     messagingSenderId: '337676615490',
     projectId: 'mugt-gelsin',
@@ -67,7 +67,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBQD2typ01aRHrPftX36jMBYxc5ymA4s6A',
+    apiKey: 'AIzaSyCN9rccJKr3uDIQkCDImcqBD82fAWVE1hQ',
     appId: '1:337676615490:ios:688aba74ad6d584f4de64f',
     messagingSenderId: '337676615490',
     projectId: 'mugt-gelsin',
@@ -76,7 +76,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyBQD2typ01aRHrPftX36jMBYxc5ymA4s6A',
+    apiKey: 'AIzaSyCN9rccJKr3uDIQkCDImcqBD82fAWVE1hQ',
     appId: '1:337676615490:web:6df56e92065e1cc14de64f',
     messagingSenderId: '337676615490',
     projectId: 'mugt-gelsin',

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
 
 class HoverWrapper extends StatefulWidget {
@@ -32,7 +32,7 @@ class _HoverWrapperState extends State<HoverWrapper> {
           boxShadow: _isHovered 
             ? [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.12),
+                  color: Colors.black.withOpacity(0.12),
                   blurRadius: 16,
                   offset: const Offset(0, 8),
                 )

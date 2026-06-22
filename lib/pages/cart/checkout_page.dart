@@ -11,6 +11,8 @@ import 'package:mugut_gelsin/pages/orders/order_tracking_page.dart';
 import 'package:mugut_gelsin/providers/navigation_provider.dart';
 import 'package:mugut_gelsin/services/api_service.dart';
 import 'package:mugut_gelsin/pages/profile/my_addresses_page.dart';
+import 'package:mugut_gelsin/models/campaign_model.dart';
+import 'package:mugut_gelsin/providers/language_provider.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -23,13 +25,21 @@ class _CheckoutPageState extends State<CheckoutPage> {
   bool _isLoading = false;
   String _paymentMethod = 'kapida_nakit'; // 'kapida_nakit', 'kapida_kart', 'online_kart'
   String? _selectedCardId;
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
+  final TextEditingController _couponController = TextEditingController();
+  
+  Campaign? _appliedCampaign;
+  double _discountAmount = 0.0;
+  bool _isCheckingCoupon = false;
 
   @override
   void dispose() {
+    _nameController.dispose();
     _phoneController.dispose();
     _noteController.dispose();
+    _couponController.dispose();
     super.dispose();
   }
 
@@ -41,12 +51,69 @@ class _CheckoutPageState extends State<CheckoutPage> {
       context.read<AddressProvider>().fetchAddresses();
       context.read<PaymentProvider>().fetchCards();
       
-      // Varsayılan telefon numarasını AuthProvider'dan alıp dolduralım
+      // Varsayılan verileri AuthProvider'dan alıp dolduralım
       final auth = context.read<app_auth.AuthProvider>();
+      if (auth.userData?['name'] != null && auth.userData?['name'] != 'Kullanıcı') {
+        _nameController.text = auth.userData?['name'];
+      }
       if (auth.userData?['phone'] != null) {
         _phoneController.text = auth.userData?['phone'];
       }
     });
+  }
+
+  Future<void> _applyCoupon(CartProvider cart, LanguageProvider lang) async {
+    final code = _couponController.text.trim().toUpperCase();
+    if (code.isEmpty) return;
+
+    setState(() => _isCheckingCoupon = true);
+
+    try {
+      final apiService = ApiService();
+      final campaigns = await apiService.fetchCampaigns();
+      
+      final campaign = campaigns.firstWhere(
+        (c) => c.code?.toUpperCase() == code && (c.shopId == cart.restaurantId),
+        orElse: () => throw lang.get('invalid_coupon'),
+      );
+
+      if (cart.totalPrice < campaign.minAmount) {
+        throw "${lang.get('below_min_amount')}: ${campaign.minAmount.toStringAsFixed(0)} TMT";
+      }
+
+      double discount = 0.0;
+      if (campaign.type == 'percentage') {
+        discount = cart.totalPrice * (campaign.value / 100);
+      } else {
+        discount = campaign.value;
+      }
+
+      setState(() {
+        _appliedCampaign = campaign;
+        _discountAmount = discount;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("${lang.get('coupon_applied')} ${discount.toStringAsFixed(2)} TMT"),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+        );
+      }
+      setState(() {
+        _appliedCampaign = null;
+        _discountAmount = 0.0;
+      });
+    } finally {
+      setState(() => _isCheckingCoupon = false);
+    }
   }
 
   Future<void> _sendOrderToFirebase(
@@ -54,21 +121,21 @@ class _CheckoutPageState extends State<CheckoutPage> {
     CartProvider cart,
     Address? address,
     PaymentProvider paymentProvider,
+    LanguageProvider lang,
   ) async {
     if (_isLoading) return;
 
     if (address == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Lütfen bir teslimat adresi seçin.")),
+        SnackBar(content: Text(lang.get('select_address_error'))),
       );
       return;
     }
 
-    // Seçili online ödeme ise kart kontrolü yap
     if (_paymentMethod == 'online_kart') {
       if (paymentProvider.cards.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Lütfen önce bir ödeme yöntemi ekleyin.")),
+          SnackBar(content: Text(lang.get('add_payment_error'))),
         );
         return;
       }
@@ -81,46 +148,53 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
     try {
       final authProvider = context.read<app_auth.AuthProvider>();
-      final customerName = authProvider.userData?['name'] ?? "Bilinmeyen Müşteri";
+      final customerName = _nameController.text.trim();
       final customerPhone = _phoneController.text.trim();
       final orderNote = _noteController.text.trim();
       final customerUid = authProvider.user?.uid;
       
-      if (customerPhone.isEmpty) {
-        throw "Lütfen bir iletişim numarası girin.";
+      if (customerName.isEmpty || customerName == 'Kullanıcı') {
+        throw lang.get('enter_name_error');
       }
 
-      // Opsiyonel: Eğer profil telefonu boşsa veya kullanıcı farklı bir numara girmişse 
-      // profil bilgilerini güncellemeyi teklif edebiliriz veya doğrudan güncelleyebiliriz.
-      // Şimdilik sadece bu sipariş için kullanıyoruz.
-      // Gelecekte ana profili de güncelleyebiliriz:
+      if (customerPhone.isEmpty) {
+        throw lang.get('enter_phone_error');
+      }
+
+      final storedName = authProvider.userData?['name']?.toString() ?? "";
+      if (storedName != customerName) {
+        await authProvider.updateUserData({'name': customerName});
+      }
+
       final storedPhone = authProvider.userData?['phone']?.toString() ?? "";
       if (storedPhone != customerPhone) {
         await authProvider.updateUserData({'phone': customerPhone});
       }
 
-      // 1. Önce Firestore'dan bir doküman referansı oluşturup ID alıyoruz
       final orderRef = FirebaseFirestore.instance.collection('Emirler').doc();
       final firestoreId = orderRef.id;
 
       final orderData = {
-        'customerUid': customerUid, // History sayfası bu alanı bekliyor
-        'id': firestoreId, // Dashboard 'id' alanını bekliyor
+        'customerUid': customerUid,
+        'id': firestoreId,
         'firestore_id': firestoreId,
         'shop_id': cart.restaurantId ?? 'unknown_shop',
-        'shop_name': cart.restaurantName ?? 'İsimsiz Dükkan',
-        'customer': customerName, // Dashboard 'customer' bekliyor
+        'shop_name': cart.restaurantName ?? lang.get('unnamed_shop'),
+        'customer': customerName,
         'customerName': customerName,
-        'contact': customerPhone, // Dashboard 'contact' bekliyor
+        'contact': customerPhone,
         'customerPhone': customerPhone,
         'summary': cart.items
             .map((item) => "${item.quantity}x ${item.food.name}${item.note != null ? " (${item.note})" : ""}")
-            .join(", "), // Dashboard 'summary' bekliyor
+            .join(", "),
         'note': orderNote,
-        'total': cart.totalPrice.toStringAsFixed(2), // Dashboard 'total' (string/number) bekliyor
-        'totalPrice': cart.totalPrice,
+        'total': (cart.totalPrice - _discountAmount).toStringAsFixed(2),
+        'totalPrice': cart.totalPrice - _discountAmount,
+        'originalPrice': cart.totalPrice,
+        'discountAmount': _discountAmount,
+        'couponCode': _appliedCampaign?.code,
         'status': 'onay bekliyor',
-        'payment': _paymentMethod == 'online_kart' ? 'Online Kredi Kartı' : (_paymentMethod == 'kapida_nakit' ? 'Kapıda Nakit' : 'Kapıda Kredi Kartı'), // Dashboard 'payment' bekliyor
+        'payment': _paymentMethod == 'online_kart' ? lang.get('online_payment') : (_paymentMethod == 'kapida_nakit' ? lang.get('cash_on_delivery') : lang.get('card_on_delivery')),
         'paymentMethod': _paymentMethod,
         'platform': 'MUGUT GELSİN', 
         'items': cart.items.map((item) => {
@@ -128,25 +202,22 @@ class _CheckoutPageState extends State<CheckoutPage> {
           'quantity': item.quantity,
           'price': item.food.price,
           'note': item.note,
+          'imageUrl': item.food.imageUrl,
         }).toList(),
         'deliveryAddress': address.fullAddress,
         'latitude': address.latitude,
         'longitude': address.longitude,
-        'time': DateTime.now().toLocal().toString().substring(11, 16), // Dashboard 'time' bekliyor
-        'timestamp': FieldValue.serverTimestamp(), // Dashboard sorting bekliyor
+        'time': DateTime.now().toLocal().toString().substring(11, 16),
+        'timestamp': FieldValue.serverTimestamp(),
         'createdAt': FieldValue.serverTimestamp(),
       };
 
-      // 2. HEMEN Firestore'a Kaydet (Böylece sipariş geçmişinde hemen görünür)
       await orderRef.set(orderData);
 
-      // 3. SEKMEYİ DEĞİŞTİR VE TAKİBİ BAŞLAT (Alt menü açık kalır)
       cart.clearCart();
       if (mounted) {
         final navProvider = context.read<NavigationProvider>();
-        // Önce ödeme sayfasından çık (Sepet sekmesini temizle)
         Navigator.pop(context);
-        // Sonra Siparişler sekmesine geç ve takibi aç
         navProvider.switchToOrdersWithTracking(firestoreId);
       }
 
@@ -170,6 +241,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
   Widget build(BuildContext context) {
     final cartProvider = context.watch<CartProvider>();
     final addressProvider = context.watch<AddressProvider>();
+    final langProvider = context.watch<LanguageProvider>();
 
     final selectedAddress = addressProvider.addresses.isNotEmpty
         ? addressProvider.addresses.firstWhere(
@@ -180,7 +252,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Siparişi Tamamla"),
+        title: Text(langProvider.get('complete_order')),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textPrimary,
       ),
@@ -194,38 +266,47 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        "Teslimat Adresi",
-                        style: TextStyle(
+                      Text(
+                        langProvider.get('delivery_address'),
+                        style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 10),
-                      _buildAddressCard(selectedAddress),
+                      _buildAddressCard(selectedAddress, langProvider),
                       const SizedBox(height: 25),
-                      const Text(
-                        "Ödeme Yöntemi",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      Text(
+                        langProvider.get('payment_methods'),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 10),
-                      _buildPaymentMethods(context),
+                      _buildPaymentMethods(context, langProvider),
                       const SizedBox(height: 25),
-                      const Text(
-                        "İletişim Bilgileri",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      Text(
+                        langProvider.get('full_name'),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 10),
-                      _buildTextField(_phoneController, "Telefon Numarası", Icons.phone, TextInputType.phone),
+                      _buildTextField(_nameController, langProvider.get('full_name'), Icons.person, TextInputType.name),
                       const SizedBox(height: 20),
-                      const Text(
-                        "Sipariş Notu",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      Text(
+                        langProvider.get('phone_label'),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 10),
-                      _buildTextField(_noteController, "Notunuzu buraya yazabilirsiniz...", Icons.note_add, TextInputType.text),
+                      _buildTextField(_phoneController, langProvider.get('phone_label'), Icons.phone, TextInputType.phone, maxLength: 8),
+                      const SizedBox(height: 20),
+                      Text(
+                        langProvider.get('order_note'),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 10),
+                      _buildTextField(_noteController, "...", Icons.note_add, TextInputType.text),
+                      const SizedBox(height: 10),
+                      _buildCouponInput(cartProvider, langProvider),
                       const SizedBox(height: 25),
-                      const Text(
-                        "Sipariş Özeti",
-                        style: TextStyle(
+                      Text(
+                        langProvider.get('order_summary'),
+                        style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 10),
@@ -242,7 +323,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               ? Text(item.note!, style: const TextStyle(fontSize: 12, color: Colors.grey, fontStyle: FontStyle.italic))
                               : null,
                             trailing: Text(
-                              "${(item.food.price * item.quantity).toStringAsFixed(2)} TL",
+                              "${(item.food.price * item.quantity).toStringAsFixed(2)} TMT",
                             ),
                           );
                         },
@@ -251,12 +332,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   ),
                 ),
               ),
-              _buildPaymentBar(context, cartProvider, selectedAddress),
+              _buildPaymentBar(context, cartProvider, selectedAddress, langProvider),
             ],
           ),
           if (_isLoading)
             Container(
-              color: Colors.black.withAlpha(77),
+              color: Colors.black.withOpacity(0.3),
               child: const Center(
                 child: CircularProgressIndicator(),
               ),
@@ -266,12 +347,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, IconData icon, TextInputType type) {
+  Widget _buildTextField(TextEditingController controller, String label, IconData icon, TextInputType type, {int? maxLength}) {
     return TextField(
       controller: controller,
       keyboardType: type,
+      maxLength: maxLength,
       decoration: InputDecoration(
         hintText: label,
+        counterText: "",
         prefixIcon: Icon(icon, color: AppColors.primary),
         filled: true,
         fillColor: Colors.white,
@@ -287,7 +370,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  Widget _buildAddressCard(dynamic selectedAddress) {
+  Widget _buildAddressCard(dynamic selectedAddress, LanguageProvider lang) {
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -325,7 +408,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         ),
                       ],
                     )
-                  : const Text("Lütfen bir adres ekleyin"),
+                  : Text(lang.get('please_add_address')),
             ),
             const Icon(Icons.chevron_right, color: Colors.grey),
           ],
@@ -334,12 +417,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  Widget _buildPaymentMethods(BuildContext context) {
+  Widget _buildPaymentMethods(BuildContext context, LanguageProvider lang) {
     return Column(
       children: [
-        _buildPaymentOption('kapida_nakit', 'Kapıda Nakit', Icons.money),
-        _buildPaymentOption('kapida_kart', 'Kapıda Kredi Kartı', Icons.credit_card),
-        _buildPaymentOption('online_kart', 'Uygulama İçi Kredi Kartı', Icons.app_registration),
+        _buildPaymentOption('kapida_nakit', lang.get('cash_on_delivery'), Icons.money),
+        _buildPaymentOption('kapida_kart', lang.get('card_on_delivery'), Icons.credit_card),
+        _buildPaymentOption('online_kart', lang.get('online_payment'), Icons.app_registration),
       ],
     );
   }
@@ -371,6 +454,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     BuildContext context,
     CartProvider cart,
     Address? address,
+    LanguageProvider lang,
   ) {
     final double minOrderAmount = cart.minOrderAmount;
     final bool isBelowMinOrder = cart.totalPrice < minOrderAmount;
@@ -389,10 +473,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Toplam Tutar", style: TextStyle(fontSize: 16)),
+                Text(lang.get('total_price'), style: const TextStyle(fontSize: 16)),
                 Text(
-                  "${cart.totalPrice.toStringAsFixed(2)} TL",
-                  style: TextStyle(
+                  "${(cart.totalPrice - _discountAmount).toStringAsFixed(2)} TMT",
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -400,11 +484,21 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ),
               ],
             ),
+            if (_discountAmount > 0) ...[
+              const SizedBox(height: 5),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(lang.get('discount'), style: const TextStyle(color: Colors.green, fontSize: 14)),
+                  Text("-${_discountAmount.toStringAsFixed(2)} TMT", style: const TextStyle(color: Colors.green, fontSize: 14)),
+                ],
+              ),
+            ],
             const SizedBox(height: 15),
             GestureDetector(
               onTap: (_isLoading || isBelowMinOrder)
                   ? null
-                  : () => _sendOrderToFirebase(context, cart, address, paymentProvider),
+                  : () => _sendOrderToFirebase(context, cart, address, paymentProvider, lang),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 width: double.infinity,
@@ -418,7 +512,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       ? []
                       : [
                           BoxShadow(
-                            color: AppColors.primary.withAlpha(77),
+                            color: AppColors.primary.withOpacity(0.3),
                             blurRadius: 12,
                             offset: const Offset(0, 6),
                           ),
@@ -435,7 +529,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           ),
                         )
                       : Text(
-                          isBelowMinOrder ? "MİNİMUM TUTAR ALTINDA" : "SİPARİŞİ ONAYLA",
+                          isBelowMinOrder ? lang.get('below_min_amount') : lang.get('complete_order').toUpperCase(),
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w900,
@@ -448,6 +542,44 @@ class _CheckoutPageState extends State<CheckoutPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildCouponInput(CartProvider cart, LanguageProvider lang) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.black.withOpacity(0.1)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _couponController,
+              decoration: InputDecoration(
+                hintText: lang.get('coupon_hint'),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              textCapitalization: TextCapitalization.characters,
+            ),
+          ),
+          if (_isCheckingCoupon)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+            )
+          else
+            TextButton(
+              onPressed: () => _applyCoupon(cart, lang),
+              child: Text(
+                _appliedCampaign != null ? lang.get('update') : lang.get('apply'),
+                style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+              ),
+            ),
+        ],
       ),
     );
   }

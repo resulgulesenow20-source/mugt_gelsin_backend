@@ -38,7 +38,7 @@ class AppColors {
   // Shadows (Modern Soft UI)
   static final List<BoxShadow> softShadow = [
     BoxShadow(
-      color: Colors.black.withValues(alpha: 0.03),
+      color: Colors.black.withOpacity(0.03),
       blurRadius: 15,
       offset: const Offset(0, 5),
     ),
@@ -46,7 +46,7 @@ class AppColors {
   
   static final List<BoxShadow> premiumShadow = [
     BoxShadow(
-      color: primary.withValues(alpha: 0.15),
+      color: primary.withOpacity(0.15),
       blurRadius: 20,
       offset: const Offset(0, 8),
     ),

@@ -82,11 +82,31 @@ class CartProvider with ChangeNotifier {
     }
   }
 
+  bool canAddToCart(String? newRestaurantId) {
+    if (_items.isEmpty) return true;
+    return _restaurantId == newRestaurantId;
+  }
+
+  void clearAndAddToCart(Food food, {String? restaurantId, String? restaurantName, double? minOrderAmount, String? note}) {
+    clearCart();
+    addToCart(food, 
+      restaurantId: restaurantId, 
+      restaurantName: restaurantName, 
+      minOrderAmount: minOrderAmount, 
+      note: note
+    );
+  }
+
   void addToCart(Food food, {String? restaurantId, String? restaurantName, double? minOrderAmount, String? note}) {
     if (_items.isEmpty) {
       _restaurantId = restaurantId;
       _restaurantName = restaurantName;
       if (minOrderAmount != null) _minOrderAmount = minOrderAmount;
+    } else if (_restaurantId != restaurantId) {
+      // Different restaurant - in a strict implementation we might throw here, 
+      // but we'll rely on the UI calling canAddToCart first.
+      debugPrint("Farklı restoran ürünü eklenmeye çalışıldı. Mevcut: $_restaurantId, Yeni: $restaurantId");
+      return; 
     }
 
     final String itemKey = "${food.id}_${note ?? ""}";

@@ -116,7 +116,7 @@ class _AddCardPageState extends State<AddCardPage> {
         color: const Color(0xFF2B2B2B),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 10, offset: const Offset(0, 5)),
+          BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 5)),
         ],
       ),
       child: Padding(

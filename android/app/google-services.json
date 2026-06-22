@@ -9,13 +9,13 @@
       "client_info": {
         "mobilesdk_app_id": "1:337676615490:android:1c1de8e137a584db2e12db",
         "android_client_info": {
-          "package_name": "com.company.mugut_gelsin"
+          "package_name": "com.company.Mugt_gelsin"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBQD2typ01aRHrPftX36jMBYxc5ymA4s6A"
+          "current_key": "AIzaSyCN9rccJKr3uDIQkCDImcqBD82fAWVE1hQ"
         }
       ],
       "services": {
@@ -28,13 +28,32 @@
       "client_info": {
         "mobilesdk_app_id": "1:337676615490:android:843e812655584cc82e12db",
         "android_client_info": {
+          "package_name": "com.company.mugt_gelsin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCN9rccJKr3uDIQkCDImcqBD82fAWVE1hQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:337676615490:android:addc76f7fd146d112e12db",
+        "android_client_info": {
           "package_name": "com.company.mugut_gelsin"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBQD2typ01aRHrPftX36jMBYxc5ymA4s6A"
+          "current_key": "AIzaSyCN9rccJKr3uDIQkCDImcqBD82fAWVE1hQ"
         }
       ],
       "services": {

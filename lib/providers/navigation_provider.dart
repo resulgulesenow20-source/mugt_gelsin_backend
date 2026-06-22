@@ -54,7 +54,7 @@ class NavigationProvider with ChangeNotifier {
 
   // âœ… SipariÅŸ takibine geÃ§ (Sekme 2 iÃ§inde aÃ§Ä±lacak)
   void switchToOrdersWithTracking(String orderId) {
-    _selectedIndex = 2; // "SipariÅŸlerim" sekmesi
+    _selectedIndex = 1; // "SipariÅŸlerim" sekmesi
     _orderToTrack = orderId;
     notifyListeners();
   }

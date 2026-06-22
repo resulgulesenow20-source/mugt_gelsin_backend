@@ -38,6 +38,17 @@ class _HomePageState extends State<HomePage> {
   Timer? _searchDebounce; // âœ… Arama geciktirici (performans için)
   int _lastResetCounter = 0; // âœ… Sıfırlama takibi için
   final ScrollController _scrollController = ScrollController(); // âœ… Yukarı kaydırmak için
+  Set<String> _selectedFilters = {}; // Missing filter state
+
+  void _toggleFilter(String filter) {
+    setState(() {
+      if (_selectedFilters.contains(filter)) {
+        _selectedFilters.remove(filter);
+      } else {
+        _selectedFilters.add(filter);
+      }
+    });
+  }
 
   void _showAllFoods() {
     setState(() {
@@ -216,29 +227,57 @@ class _HomePageState extends State<HomePage> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(
-          langProvider.translate('app_name'),
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w900,
-            fontSize: 22,
-            letterSpacing: -1,
-          ),
-        ),
-      ),
+      backgroundColor: AppColors.background, // Beyaz/gri arka plan
       body: isLoading 
           ? const Center(child: CircularProgressIndicator()) 
           : Stack(
               children: [
+                // Pull-to-refresh sırasında tepede "bölünme" (beyazlık) görünmemesi için sadece en üste 300px turuncu atıyoruz.
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 300,
+                  child: Container(color: AppColors.primary),
+                ),
                 RefreshIndicator(
                   onRefresh: _loadData,
                   child: SingleChildScrollView(
                     controller: _scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(), // Important for stretch feel
                     child: Column(
                       children: [
-                    // ADRES VE ARAMA ÇUBUĞU YAN YANA
-                    Padding(
+                        // Kayan turuncu üst çubuk
+                        Container(
+                          width: double.infinity,
+                          color: AppColors.primary,
+                          padding: EdgeInsets.only(
+                            top: MediaQuery.of(context).padding.top + 16,
+                            bottom: 16,
+                            left: 16,
+                            right: 16,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            langProvider.translate('app_name'),
+                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              color: Colors.black, // User requested black text
+                              fontWeight: FontWeight.w900,
+                              fontSize: 22,
+                              letterSpacing: -1,
+                            ),
+                          ),
+                        ),
+                        // The rest of the content must have a white background
+                        Container(
+                          color: AppColors.background,
+                          constraints: BoxConstraints(
+                            minHeight: MediaQuery.of(context).size.height,
+                          ),
+                          child: Column(
+                            children: [
+                              // ADRES VE ARAMA ÇUBUĞU YAN YANA
+                              Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                       child: Row(
                         children: [
@@ -323,8 +362,15 @@ class _HomePageState extends State<HomePage> {
 
                               // 🏠 ANA SAYFA MODU: Banner, Kategori, Fırsatlar
                               if (_searchQuery.isEmpty) ...[
-                                const BannerSlider(),
-                                const FilterChips(),
+                                BannerSlider(
+                                  restaurants: allRestaurants,
+                                  onRestaurantSelected: _navigateToRestaurant,
+                                  onCategorySelected: _filterByCategory,
+                                ),
+                                FilterChips(
+                                  selectedFilters: _selectedFilters,
+                                  onFilterToggled: _toggleFilter,
+                                ),
                                   CategoryList(
                                     onCategorySelected: (category) => _filterByCategory(category),
                                   ),
@@ -380,10 +426,13 @@ class _HomePageState extends State<HomePage> {
                               ],
                             ],
                           ),
-                    const SizedBox(height: 120),
-                  ],
-                ),
-              ),
+                              const SizedBox(height: 120),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
             ),
           ],
         ),

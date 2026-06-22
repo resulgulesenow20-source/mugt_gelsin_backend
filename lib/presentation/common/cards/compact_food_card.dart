@@ -2,18 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mugut_gelsin/models/restaurant_model.dart';
 import 'package:mugut_gelsin/providers/cart_provider.dart';
-import 'package:mugut_gelsin/providers/favorite_provider.dart';
+import 'package:mugut_gelsin/providers/language_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
 import 'package:mugut_gelsin/providers/navigation_provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mugut_gelsin/presentation/common/widgets/hover_wrapper.dart';
+import 'package:mugut_gelsin/widgets/cart_dialogs.dart';
 
 class CompactFoodCard extends StatelessWidget {
   final Food food;
   final String? restaurantId;
   final String? restaurantName;
   final double? minOrderAmount;
+  final bool restaurantIsOpen;
   final VoidCallback? onTap;
 
   final GlobalKey _imageKey = GlobalKey();
@@ -24,11 +26,14 @@ class CompactFoodCard extends StatelessWidget {
     this.restaurantId,
     this.restaurantName,
     this.minOrderAmount,
+    this.restaurantIsOpen = true,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final langProvider = Provider.of<LanguageProvider>(context);
+
     return HoverWrapper(
       child: Container(
         width: 155,
@@ -36,7 +41,13 @@ class CompactFoodCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.grey.withValues(alpha: 0.1), width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            )
+          ],
         ),
       child: Material(
         color: Colors.transparent,
@@ -54,52 +65,59 @@ class CompactFoodCard extends StatelessWidget {
                       child: SizedBox(
                         key: _imageKey,
                         width: double.infinity,
-                        child: CachedNetworkImage(
-                          imageUrl: food.imageUrl,
-                          fit: BoxFit.cover,
-                          errorWidget: (context, url, error) => Container(
-                            color: Colors.grey[100],
-                            child: const Icon(Icons.fastfood, color: Colors.grey),
+                        child: restaurantIsOpen
+                            ? CachedNetworkImage(
+                                imageUrl: food.imageUrl,
+                                fit: BoxFit.cover,
+                                errorWidget: (context, url, error) => Container(
+                                  color: Colors.grey[100],
+                                  child: const Icon(Icons.fastfood, color: Colors.grey),
+                                ),
+                              )
+                            : ColorFiltered(
+                                colorFilter: const ColorFilter.matrix(<double>[
+                                  0.2126, 0.7152, 0.0722, 0, 0,
+                                  0.2126, 0.7152, 0.0722, 0, 0,
+                                  0.2126, 0.7152, 0.0722, 0, 0,
+                                  0,      0,      0,      1, 0,
+                                ]),
+                                child: Opacity(
+                                  opacity: 0.6,
+                                  child: CachedNetworkImage(
+                                    imageUrl: food.imageUrl,
+                                    fit: BoxFit.cover,
+                                    errorWidget: (context, url, error) => Container(
+                                      color: Colors.grey[100],
+                                      child: const Icon(Icons.fastfood, color: Colors.grey),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                      ),
+                    ),
+                    if (food.isCampaign || (food.oldPrice != null && food.oldPrice! > food.price))
+                      Positioned(
+                        top: 6,
+                        left: 6,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.redAccent,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            food.oldPrice != null && food.oldPrice! > food.price
+                                ? "-${((food.oldPrice! - food.price) / food.oldPrice! * 100).round()}%"
+                                : "KAMPANYA",
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Positioned(
-                      top: 6,
-                      right: 6,
-                      child: Consumer<FavoriteProvider>(
-                        builder: (context, favProvider, child) {
-                          final isFav = favProvider.isFoodFavorite(food);
-                          return GestureDetector(
-                            onTap: () => favProvider.toggleFoodFavorite(
-                              FoodWithRestaurant(
-                                food: food,
-                                restaurantId: restaurantId ?? "",
-                                restaurantName: restaurantName ?? "",
-                              ),
-                            ),
-                            child: Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.95),
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.1),
-                                    blurRadius: 4,
-                                  )
-                                ],
-                              ),
-                              child: Icon(
-                                isFav ? Icons.favorite : Icons.favorite_border,
-                                size: 16,
-                                color: isFav ? Colors.red : Colors.grey[600],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
+
                   ],
                 ),
               ),
@@ -117,7 +135,7 @@ class CompactFoodCard extends StatelessWidget {
                       food.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.outfit(
+                      style: GoogleFonts.inter(
                         fontWeight: FontWeight.w800,
                         fontSize: 14,
                         color: AppColors.textTitle,
@@ -130,71 +148,125 @@ class CompactFoodCard extends StatelessWidget {
                         restaurantName!,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.outfit(
+                        style: GoogleFonts.inter(
                           color: AppColors.textSecondary,
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
+
                   ],
                 ),
               ),
-              // ORANGE ACTION AREA
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                decoration: const BoxDecoration(
-                  gradient: AppColors.orangeGradient,
-                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(19)),
-                ),
+              // CLEAN ACTION AREA
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "${food.price} TL",
-                      style: GoogleFonts.outfit(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 16,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "${food.price} TMT",
+                          style: GoogleFonts.inter(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                        if (food.oldPrice != null && food.oldPrice! > food.price)
+                          Text(
+                            "${food.oldPrice} TMT",
+                            style: GoogleFonts.inter(
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 11,
+                              decoration: TextDecoration.lineThrough,
+                            ),
+                          ),
+                      ],
                     ),
                     GestureDetector(
                       onTap: () {
-                        context.read<CartProvider>().addToCart(
-                          food,
-                          restaurantId: restaurantId,
-                          restaurantName: restaurantName,
-                          minOrderAmount: minOrderAmount,
-                        );
-
-                        final navProvider = context.read<NavigationProvider>();
-                        if (navProvider.runAddToCartAnimation != null) {
-                          navProvider.runAddToCartAnimation!(_imageKey);
+                        if (!restaurantIsOpen) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(langProvider.get('shop_closed_warning')),
+                              backgroundColor: AppColors.error,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                          return;
                         }
 
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("${food.name} eklendi!"),
-                            duration: const Duration(seconds: 1),
-                            behavior: SnackBarBehavior.floating,
-                            backgroundColor: AppColors.primary,
-                          ),
-                        );
+                        final cartProvider = context.read<CartProvider>();
+                        
+                        if (cartProvider.canAddToCart(restaurantId)) {
+                          cartProvider.addToCart(
+                            food,
+                            restaurantId: restaurantId,
+                            restaurantName: restaurantName,
+                            minOrderAmount: minOrderAmount,
+                          );
+
+                          final navProvider = context.read<NavigationProvider>();
+                          if (navProvider.runAddToCartAnimation != null) {
+                            navProvider.runAddToCartAnimation!(_imageKey);
+                          }
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("${food.name} eklendi!"),
+                              duration: const Duration(seconds: 1),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: AppColors.primary,
+                            ),
+                          );
+                        } else {
+                          CartDialogs.showDifferentRestaurantDialog(
+                            context: context,
+                            food: food,
+                            restaurantId: restaurantId,
+                            restaurantName: restaurantName,
+                            minOrderAmount: minOrderAmount,
+                            onSuccess: () {
+                              final navProvider = context.read<NavigationProvider>();
+                              if (navProvider.runAddToCartAnimation != null) {
+                                navProvider.runAddToCartAnimation!(_imageKey);
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Sepet boşaltıldı ve ${food.name} eklendi!"),
+                                  duration: const Duration(seconds: 1),
+                                  behavior: SnackBarBehavior.floating,
+                                  backgroundColor: AppColors.primary,
+                                ),
+                              );
+                            },
+                          );
+                        }
                       },
                       child: Container(
-                        padding: const EdgeInsets.all(6),
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
+                          color: restaurantIsOpen ? AppColors.primary : Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: restaurantIsOpen ? [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
+                              color: AppColors.primary.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
                             )
-                          ],
+                          ] : null,
                         ),
-                        child: const Icon(Icons.add, size: 18, color: AppColors.primary),
+                        child: Icon(
+                          restaurantIsOpen ? Icons.add_rounded : Icons.lock_outline_rounded,
+                          size: 18,
+                          color: restaurantIsOpen ? Colors.white : Colors.grey.shade600,
+                        ),
                       ),
                     ),
                   ],
@@ -204,8 +276,7 @@ class CompactFoodCard extends StatelessWidget {
           ),
         ),
       ),
-    ),
-  );
+      ),
+    );
+  }
 }
-}
-

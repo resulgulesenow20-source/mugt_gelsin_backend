@@ -79,7 +79,7 @@ class _CouponsPageState extends State<CouponsPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -102,7 +102,7 @@ class _CouponsPageState extends State<CouponsPage> {
                     Text(
                       coupon.type == 'percentage' 
                         ? "%${coupon.discountAmount.toInt()}" 
-                        : "${coupon.discountAmount.toInt()} TL",
+                        : "${coupon.discountAmount.toInt()} TMT",
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -147,7 +147,7 @@ class _CouponsPageState extends State<CouponsPage> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: isUsed ? AppColors.primary.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+                                color: isUsed ? AppColors.primary.withOpacity(0.1) : Colors.red.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(

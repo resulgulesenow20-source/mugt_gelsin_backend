@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
 
 class CustomSearchField extends StatelessWidget {
@@ -25,7 +25,7 @@ class CustomSearchField extends StatelessWidget {
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: TextStyle(
-            color: AppColors.textSecondary.withValues(alpha: 0.5),
+            color: AppColors.textSecondary.withOpacity(0.5),
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),

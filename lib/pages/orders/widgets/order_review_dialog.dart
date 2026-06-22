@@ -35,11 +35,15 @@ class _OrderReviewDialogState extends State<OrderReviewDialog> {
     
     final provider = context.read<OrderTrackingProvider>();
     bool success = await provider.submitReview(
-      widget.order,
-      userId,
-      userName,
-      _rating,
-      _commentController.text.trim()
+      order: widget.order,
+      userId: userId,
+      userName: userName,
+      rating: _rating,
+      tasteRating: _rating,
+      speedRating: _rating,
+      serviceRating: _rating,
+      comment: _commentController.text.trim(),
+      tags: const [],
     );
 
     setState(() => _isLoading = false);

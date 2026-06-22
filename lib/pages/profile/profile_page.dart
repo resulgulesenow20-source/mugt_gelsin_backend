@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mugut_gelsin/pages/profile/my_addresses_page.dart';
+import 'package:mugut_gelsin/pages/profile/admin_panel_page.dart'; // ✅ Yönetici paneli import edildi
 import 'package:mugut_gelsin/pages/profile/help_support_page.dart';
 import 'package:mugut_gelsin/pages/profile/orders_page.dart';
 import 'package:mugut_gelsin/pages/profile/live_support_page.dart';
@@ -30,6 +31,7 @@ class ProfilePage extends StatelessWidget {
     final double balance = (userData?['balance'] ?? 0.0).toDouble();
     final int points = (userData?['points'] ?? 0).toInt();
     final String uid = authProvider.user?.uid ?? "";
+    final bool isAdmin = userData?['role'] == 'admin' || userData?['isAdmin'] == true; // ✅ Admin kontrolü
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -76,7 +78,14 @@ class ProfilePage extends StatelessWidget {
             const SizedBox(height: 24),
 
             // SECTION: Hesabım
-            _buildSectionHeader("HESABIM"),
+            _buildSectionHeader(langProvider.get('my_account')),
+            if (isAdmin) // ✅ Admin ise Yönetici Paneli seçeneği gösterilir
+              ProfileMenuItem(
+                icon: Icons.admin_panel_settings_rounded,
+                title: "Yönetici Paneli",
+                color: Colors.redAccent,
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminPanelPage())),
+              ),
             ProfileMenuItem(
               icon: Icons.location_on_rounded,
               title: langProvider.translate('addresses'),
@@ -99,7 +108,7 @@ class ProfilePage extends StatelessWidget {
             const SizedBox(height: 16),
 
             // SECTION: İşlemlerim
-            _buildSectionHeader("İŞLEMLERİM"),
+            _buildSectionHeader(langProvider.get('my_transactions')),
             ProfileMenuItem(
               icon: Icons.shopping_bag_rounded,
               title: langProvider.translate('orders'),
@@ -110,7 +119,7 @@ class ProfilePage extends StatelessWidget {
             const SizedBox(height: 16),
 
             // SECTION: Destek
-            _buildSectionHeader("DESTEK & YARDIM"),
+            _buildSectionHeader(langProvider.get('help_support_title')),
             ProfileMenuItem(
               icon: Icons.support_agent_rounded,
               title: langProvider.translate('mugut_support'),

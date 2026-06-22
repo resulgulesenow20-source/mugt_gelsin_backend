@@ -1,84 +1,64 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
+import 'package:mugut_gelsin/providers/language_provider.dart';
+import 'package:provider/provider.dart';
 
-class FilterChips extends StatefulWidget {
-  const FilterChips({super.key});
+class FilterChips extends StatelessWidget {
+  final Set<String> selectedFilters;
+  final ValueChanged<String> onFilterToggled;
 
-  @override
-  State<FilterChips> createState() => _FilterChipsState();
-}
-
-class _FilterChipsState extends State<FilterChips> {
-  final Set<String> _selectedFilters = {};
-
-  void _toggleFilter(String label) {
-    setState(() {
-      if (_selectedFilters.contains(label)) {
-        _selectedFilters.remove(label);
-      } else {
-        _selectedFilters.add(label);
-      }
-    });
-  }
+  const FilterChips({
+    super.key,
+    required this.selectedFilters,
+    required this.onFilterToggled,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+
     final filters = [
-      {"label": "Filtrele", "icon": Icons.tune_rounded, "isMain": true},
-      {"label": "Teslimat Süresi", "icon": Icons.access_time_rounded, "isMain": false},
-      {"label": "Restoran Puanı", "icon": Icons.star_rounded, "isMain": false},
-      {"label": "Mutfak", "icon": Icons.restaurant_menu_rounded, "isMain": false},
+      {"label": lang.get('delivery_time'), "icon": Icons.access_time_rounded},
     ];
 
     return Container(
       height: 44,
       margin: const EdgeInsets.symmetric(vertical: 12),
-      child: ListView.builder(
+      child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: filters.length,
-        itemBuilder: (context, index) {
-          final filter = filters[index];
+        children: filters.map((filter) {
           final String label = filter['label'] as String;
-          final bool isMain = filter['isMain'] as bool;
-          
-          final bool isSelected = _selectedFilters.contains(label);
-          final bool isActive = isMain || isSelected;
+          final bool isSelected = selectedFilters.contains(label);
 
           return Padding(
             padding: const EdgeInsets.only(right: 10),
             child: InkWell(
-              onTap: () {
-                if (!isMain) {
-                  _toggleFilter(label);
-                } else {
-                  // Filtrele butonuna tıklandığında yapılacaklar buraya eklenebilir
-                }
-              },
+              onTap: () => onFilterToggled(label),
               borderRadius: BorderRadius.circular(22),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  color: isActive ? AppColors.primary : Colors.white,
+                  color: isSelected ? AppColors.primary : Colors.white,
                   borderRadius: BorderRadius.circular(22),
-                  border: isActive ? null : Border.all(color: Colors.grey.shade200),
-                  boxShadow: isActive ? AppColors.premiumShadow : AppColors.softShadow,
+                  border: isSelected ? null : Border.all(color: Colors.grey.shade200),
+                  boxShadow: isSelected ? AppColors.premiumShadow : AppColors.softShadow,
                 ),
                 child: Row(
                   children: [
                     Icon(
                       filter['icon'] as IconData,
                       size: 18,
-                      color: isActive ? Colors.white : AppColors.primary,
+                      color: isSelected ? Colors.white : AppColors.primary,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       label,
                       style: TextStyle(
                         fontSize: 13,
-                        fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
-                        color: isActive ? Colors.white : AppColors.textPrimary,
+                        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                        color: isSelected ? Colors.white : AppColors.textPrimary,
                       ),
                     ),
                   ],
@@ -86,9 +66,8 @@ class _FilterChipsState extends State<FilterChips> {
               ),
             ),
           );
-        },
+        }).toList(),
       ),
     );
   }
 }
-

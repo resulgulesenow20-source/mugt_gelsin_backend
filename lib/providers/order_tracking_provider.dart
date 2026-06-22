@@ -32,18 +32,48 @@ class OrderTrackingProvider with ChangeNotifier {
     });
   }
 
-  Future<bool> submitReview(OrderModel order, String userId, String userName, double rating, String comment) async {
+  Future<bool> submitReview({
+    required OrderModel order,
+    required String userId,
+    required String userName,
+    required double rating,
+    required double tasteRating,
+    required double speedRating,
+    required double serviceRating,
+    required String comment,
+    required List<String> tags,
+  }) async {
     try {
-      await _firestore.collection('Yorumlar').add({
+      final itemsMap = order.items.map((item) => {
+        'name': item.name,
+        'quantity': item.quantity,
+        'price': item.price,
+        'imageUrl': item.imageUrl,
+      }).toList();
+
+      final reviewData = {
         'orderId': order.id,
         'shopId': order.shopId,
+        'shop_id': order.shopId,
         'shopName': order.shopName,
+        'restaurantId': order.shopId,
         'userId': userId,
         'userName': userName,
+        'customerName': userName,
         'rating': rating,
+        'tasteRating': tasteRating,
+        'speedRating': speedRating,
+        'serviceRating': serviceRating,
         'comment': comment,
+        'tags': tags,
+        'orderedItems': itemsMap,
         'createdAt': FieldValue.serverTimestamp(),
-      });
+        'timestamp': FieldValue.serverTimestamp(),
+      };
+
+      await _firestore.collection('Yorumlar').add(reviewData);
+      await _firestore.collection('Reviews').add(reviewData);
+
       await _firestore.collection('Emirler').doc(order.id).update({
         'isRated': true,
       });

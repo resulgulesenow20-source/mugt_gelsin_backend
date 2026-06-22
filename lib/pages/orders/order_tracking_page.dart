@@ -3,8 +3,10 @@ import 'package:mugut_gelsin/core/constants/app_colors.dart';
 import 'package:mugut_gelsin/models/order_model.dart';
 import 'package:mugut_gelsin/providers/order_tracking_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:mugut_gelsin/pages/orders/widgets/order_review_dialog.dart';
+import 'package:mugut_gelsin/pages/orders/widgets/premium_review_dialog.dart';
 import 'package:mugut_gelsin/pages/profile/live_support_page.dart';
+import 'package:mugut_gelsin/providers/language_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class OrderTrackingPage extends StatefulWidget {
   final String orderId;
@@ -29,7 +31,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
         await showDialog(
           context: context,
           barrierDismissible: false, // Değerlendirme yapmadan geçmesin (veya çıkınca pop olsun)
-          builder: (context) => OrderReviewDialog(order: order),
+          builder: (context) => PremiumReviewDialog(order: order),
         );
         
         // Dialog kapandığında (puan verildikten veya vazgeçildikten sonra) takip sayfasından çık
@@ -42,10 +44,12 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
 
   @override
   Widget build(BuildContext context) {
+    final langProvider = context.watch<LanguageProvider>();
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text("Sipariş Takibi"),
+        title: Text(langProvider.translate('order_tracking')),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -58,29 +62,30 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data == null) {
-            return const Center(child: Text("Sipariş bulunamadı."));
+            return Center(child: Text(langProvider.get('error')));
           }
-
           final order = snapshot.data!;
           
           // Otomatik değerlendirme kontrolü
-          _showReviewDialogIfNeeded(order);
+          if (order.status == OrderStatus.delivered && !order.isRated) {
+            _showReviewDialogIfNeeded(order);
+          }
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-                _buildHeader(order),
+                _buildHeader(order, langProvider),
                 const SizedBox(height: 24),
-                _buildStatusTimeline(order),
+                _buildStatusTimeline(order, langProvider),
                 const SizedBox(height: 24),
-                _buildOrderDetails(order),
+                _buildOrderDetails(order, langProvider),
                 if (order.status == OrderStatus.delivered && !order.isRated) ...[
                   const SizedBox(height: 24),
-                  _buildRateButton(context, order),
+                  _buildRateButton(context, order, langProvider),
                 ],
                 const SizedBox(height: 40),
-                _buildSupportButton(context),
+                _buildSupportButton(context, langProvider),
               ],
             ),
           );
@@ -89,7 +94,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
     );
   }
 
-  Widget _buildHeader(OrderModel order) {
+  Widget _buildHeader(OrderModel order, LanguageProvider langProvider) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -117,7 +122,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                   style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
                 ),
                 Text(
-                  "Sipariş No: ${order.id.substring(0, 8).toUpperCase()}",
+                  "${langProvider.translate('order_no')}: ${order.id.substring(0, 8).toUpperCase()}",
                   style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
                 ),
               ],
@@ -127,10 +132,10 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                "${order.totalPrice.toStringAsFixed(2)} TL",
+                "${order.totalPrice.toStringAsFixed(2)} TMT",
                 style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: AppColors.primary),
               ),
-              const Text("Toplam", style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              Text(langProvider.translate('total_price'), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
             ],
           ),
         ],
@@ -138,7 +143,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
     );
   }
 
-  Widget _buildStatusTimeline(OrderModel order) {
+  Widget _buildStatusTimeline(OrderModel order, LanguageProvider langProvider) {
     final status = order.status;
     return Container(
       padding: const EdgeInsets.all(24),
@@ -150,44 +155,48 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
       child: Column(
         children: [
           _buildTimelineStep(
-            "Sipariş Alındı",
-            "Siparişiniz dükkana iletildi",
+            langProvider.translate('order_received'),
+            langProvider.translate('order_received_desc'),
             Icons.check_circle_rounded,
             status.index >= OrderStatus.pending.index,
-            true,
+            status.index == OrderStatus.pending.index,
+            langProvider,
           ),
           _buildTimelineDivider(status.index > OrderStatus.pending.index),
           _buildTimelineStep(
-            "Hazırlanıyor",
-            "Dükkan siparişinizi hazırlıyor",
+            langProvider.translate('preparing'),
+            langProvider.translate('preparing_desc'),
             Icons.restaurant_rounded,
             status.index >= OrderStatus.preparing.index,
             status.index == OrderStatus.preparing.index,
+            langProvider,
           ),
           _buildTimelineDivider(status.index > OrderStatus.preparing.index),
           _buildTimelineStep(
-            "Yolda",
+            langProvider.translate('on_the_way'),
             order.status == OrderStatus.onWay && order.courierName != null
-                ? "${order.shopName} kuryesi ${order.courierName} siparişinizi getirmek için yola çıktı"
-                : "Kurye siparişinizi getirmek için yola çıktı",
+                ? "${order.shopName} ${langProvider.get('courier') ?? 'kuryesi'} ${order.courierName} ${langProvider.get('on_the_way_desc')}"
+                : langProvider.get('on_the_way_desc'),
             Icons.delivery_dining_rounded,
             status.index >= OrderStatus.onWay.index,
             status.index == OrderStatus.onWay.index,
+            langProvider,
           ),
           _buildTimelineDivider(status.index > OrderStatus.onWay.index),
           _buildTimelineStep(
-            "Teslim Edildi",
-            "Afiyet olsun!",
+            langProvider.translate('delivered'),
+            langProvider.translate('enjoy_meal'),
             Icons.home_rounded,
             status.index >= OrderStatus.delivered.index,
             status.index == OrderStatus.delivered.index,
+            langProvider,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTimelineStep(String title, String desc, IconData icon, bool isCompleted, bool isActive) {
+  Widget _buildTimelineStep(String title, String desc, IconData icon, bool isCompleted, bool isActive, LanguageProvider langProvider) {
     Color color = isCompleted ? AppColors.primary : Colors.grey.shade300;
     return Row(
       children: [
@@ -226,7 +235,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
               color: AppColors.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Text("Şu an", style: TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold)),
+            child: Text(langProvider.translate('now'), style: const TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold)),
           ),
       ],
     );
@@ -241,7 +250,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
     );
   }
 
-  Widget _buildOrderDetails(OrderModel order) {
+  Widget _buildOrderDetails(OrderModel order, LanguageProvider langProvider) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -252,20 +261,58 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Sipariş Özeti", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+          Text(langProvider.translate('order_summary'), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
           const SizedBox(height: 16),
           ...order.items.map((item) => Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("${item.quantity}x ${item.name}", style: const TextStyle(fontSize: 14)),
-                Text("${item.price.toStringAsFixed(2)} TL", style: const TextStyle(fontWeight: FontWeight.w600)),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: CachedNetworkImage(
+                    imageUrl: item.imageUrl ?? '',
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.cover,
+                    errorWidget: (context, url, error) => Container(
+                      width: 40,
+                      height: 40,
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.fastfood, color: Colors.grey, size: 16),
+                    ),
+                    placeholder: (context, url) => Container(
+                      width: 40,
+                      height: 40,
+                      color: Colors.grey[100],
+                      child: const Center(
+                        child: SizedBox(
+                          width: 12,
+                          height: 12,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 1.5,
+                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    "${item.quantity}x ${item.name}",
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                ),
+                Text(
+                  "${item.price.toStringAsFixed(2)} TMT",
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
               ],
             ),
           )),
           const Divider(height: 32),
-          const Text("Teslimat Adresi", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+          Text(langProvider.translate('delivery_address'), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -284,7 +331,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
     );
   }
 
-  Widget _buildSupportButton(BuildContext context) {
+  Widget _buildSupportButton(BuildContext context, LanguageProvider langProvider) {
     return SizedBox(
       width: double.infinity,
       height: 60,
@@ -296,7 +343,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
           );
         },
         icon: const Icon(Icons.support_agent_rounded, color: Colors.white),
-        label: const Text("mugut Destek'e Bağlan", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        label: Text(langProvider.translate('connect_support'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.textPrimary,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -306,7 +353,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
     );
   }
 
-  Widget _buildRateButton(BuildContext context, OrderModel order) {
+  Widget _buildRateButton(BuildContext context, OrderModel order, LanguageProvider langProvider) {
     return SizedBox(
       width: double.infinity,
       height: 60,
@@ -314,13 +361,13 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
         onPressed: () {
           showDialog(
             context: context,
-            builder: (context) => OrderReviewDialog(order: order),
+            builder: (context) => PremiumReviewDialog(order: order),
           ).then((_) {
             // Dialog elle kapatıldığında da çıkmak gerekirse eklenebilir
           });
         },
         icon: const Icon(Icons.star_rate_rounded, color: Colors.amber),
-        label: const Text("Siparişi Değerlendir", style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
+        label: Text(langProvider.translate('rate_order'), style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.amber.withOpacity(0.2),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

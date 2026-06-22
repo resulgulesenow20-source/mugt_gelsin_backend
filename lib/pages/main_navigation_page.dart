@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mugut_gelsin/pages/home/home_page.dart';
 import 'package:mugut_gelsin/pages/profile/profile_page.dart';
 import 'cart/cart_page.dart'; // Bu importu ekle
@@ -17,7 +17,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   final List<Widget> _pages = [
     const HomePage(),
     const Center(child: Text("Arama")),
-    const CartPage(), // Burayı güncelledik
+    const CartPage(), // Burayi g�ncelledik
     const ProfilePage(),
   ];
 

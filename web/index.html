@@ -19,10 +19,19 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
-
   <!-- iOS meta tags & icons -->
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: linear-gradient(to bottom, #FF6B00 0%, #FF6B00 50%, #F9FAFB 50%, #F9FAFB 100%);
+      background-attachment: fixed;
+    }
+  </style>
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#FF6B00">
   <meta name="apple-mobile-web-app-title" content="mugut_gelsin">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
@@ -31,12 +40,50 @@
 
   <title>mugut_gelsin</title>
   <link rel="manifest" href="manifest.json">
-  <style>
-    .grecaptcha-badge { visibility: hidden !important; }
-  </style>
+  <script>
+    // Clear and unregister old service workers safely
+    try {
+      if ('serviceWorker' in navigator && typeof navigator.serviceWorker.getRegistrations === 'function') {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          if (registrations && registrations.length > 0) {
+            for (var i = 0; i < registrations.length; i++) {
+              try {
+                registrations[i].unregister();
+              } catch (e) {
+                console.error("SW unregister error", e);
+              }
+            }
+          }
+        }).catch(function(err) {
+          console.error("SW registrations error", err);
+        });
+      }
+    } catch (e) {
+      console.error("SW check error", e);
+    }
+
+    try {
+      if ('caches' in window && typeof caches.keys === 'function') {
+        caches.keys().then(function(names) {
+          if (names && names.length > 0) {
+            for (var j = 0; j < names.length; j++) {
+              try {
+                caches.delete(names[j]);
+              } catch (e) {
+                console.error("Cache delete error", e);
+              }
+            }
+          }
+        }).catch(function(err) {
+          console.error("Cache keys error", err);
+        });
+      }
+    } catch (e) {
+      console.error("Cache check error", e);
+    }
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
-

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mugut_gelsin/presentation/common/inputs/custom_search_field.dart';
 import 'package:mugut_gelsin/pages/profile/live_support_page.dart';
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
@@ -28,7 +28,7 @@ class HomeSearchBar extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        // âœ… DESTEK SAYFASINA GİDEN BUTON
+        // ✅ DESTEK SAYFASINA GIDEN BUTON
         InkWell(
           onTap: () {
             Navigator.push(

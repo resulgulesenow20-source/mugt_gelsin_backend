@@ -4,6 +4,7 @@ import '../../providers/address_provider.dart';
 import '../../models/address_model.dart';
 import 'add_address_page.dart';
 import '../../core/constants/app_colors.dart';
+import '../../providers/language_provider.dart';
 
 class MyAddressesPage extends StatefulWidget {
   const MyAddressesPage({super.key});
@@ -34,10 +35,11 @@ class _MyAddressesPageState extends State<MyAddressesPage> {
   @override
   Widget build(BuildContext context) {
     final addressProvider = context.watch<AddressProvider>();
+    final langProvider = context.watch<LanguageProvider>();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Adreslerim", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(langProvider.get('addresses'), style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -54,13 +56,13 @@ class _MyAddressesPageState extends State<MyAddressesPage> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
           : addressProvider.addresses.isEmpty
-              ? _buildEmptyState()
+              ? _buildEmptyState(langProvider)
               : ListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: addressProvider.addresses.length,
                   itemBuilder: (context, index) {
                     final address = addressProvider.addresses[index];
-                    return _buildAddressCard(address, addressProvider);
+                    return _buildAddressCard(address, addressProvider, langProvider);
                   },
                 ),
       floatingActionButton: FloatingActionButton.extended(
@@ -69,22 +71,22 @@ class _MyAddressesPageState extends State<MyAddressesPage> {
           MaterialPageRoute(builder: (context) => const AddAddressPage()),
         ),
         backgroundColor: AppColors.primary,
-        label: const Text("YENİ ADRES EKLE", style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+        label: Text(langProvider.get('add_address').toUpperCase(), style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
         icon: const Icon(Icons.add, color: AppColors.textPrimary),
       ),
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(LanguageProvider lang) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.location_off_rounded, size: 80, color: Colors.grey.withAlpha(100)),
+          Icon(Icons.location_off_rounded, size: 80, color: Colors.grey.withOpacity(0.4)),
           const SizedBox(height: 16),
-          const Text(
-            "Henüz kayıtlı bir adresiniz yok.",
-            style: TextStyle(fontSize: 18, color: Colors.grey, fontWeight: FontWeight.bold),
+          Text(
+            lang.get('no_address'),
+            style: const TextStyle(fontSize: 18, color: Colors.grey, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
           ElevatedButton(
@@ -93,20 +95,20 @@ class _MyAddressesPageState extends State<MyAddressesPage> {
               MaterialPageRoute(builder: (context) => const AddAddressPage()),
             ),
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-            child: const Text("İLK ADRESİNİ EKLE", style: TextStyle(color: AppColors.textPrimary)),
+            child: Text(lang.get('add_first_address'), style: const TextStyle(color: AppColors.textPrimary)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAddressCard(Address address, AddressProvider provider) {
+  Widget _buildAddressCard(Address address, AddressProvider provider, LanguageProvider lang) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
         side: BorderSide(
-          color: address.isDefault ? AppColors.primary : Colors.black.withAlpha(20),
+          color: address.isDefault ? AppColors.primary : Colors.black.withOpacity(0.08),
           width: address.isDefault ? 2 : 1,
         ),
       ),
@@ -121,7 +123,7 @@ class _MyAddressesPageState extends State<MyAddressesPage> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: address.isDefault ? AppColors.primary : Colors.grey.withAlpha(30),
+                  color: address.isDefault ? AppColors.primary : Colors.grey.withOpacity(0.12),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -145,12 +147,12 @@ class _MyAddressesPageState extends State<MyAddressesPage> {
                             margin: const EdgeInsets.only(left: 8),
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.green.withAlpha(40),
+                              color: Colors.green.withOpacity(0.15),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text(
-                              "VARSAYILAN",
-                              style: TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold),
+                            child: Text(
+                              lang.get('default'),
+                              style: const TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold),
                             ),
                           ),
                       ],
@@ -176,7 +178,7 @@ class _MyAddressesPageState extends State<MyAddressesPage> {
               ),
               IconButton(
                 icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                onPressed: () => _confirmDelete(address, provider),
+                onPressed: () => _confirmDelete(address, provider, lang),
               ),
             ],
           ),
@@ -185,20 +187,20 @@ class _MyAddressesPageState extends State<MyAddressesPage> {
     );
   }
 
-  void _confirmDelete(Address address, AddressProvider provider) {
+  void _confirmDelete(Address address, AddressProvider provider, LanguageProvider lang) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Adresi Sil"),
-        content: const Text("Bu adresi silmek istediğinizden emin misiniz?"),
+        title: Text(lang.get('delete_address')),
+        content: Text(lang.get('delete_confirm')),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("VAZGEÇ")),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text(lang.get('cancel').toUpperCase())),
           TextButton(
             onPressed: () {
               provider.deleteAddress(address.id);
               Navigator.pop(context);
             },
-            child: const Text("SİL", style: TextStyle(color: Colors.red)),
+            child: Text(lang.get('clear').toUpperCase(), style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),

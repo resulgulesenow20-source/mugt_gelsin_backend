@@ -12,14 +12,24 @@ class OrderItem {
   final String name;
   final int quantity;
   final double price;
+  final String? imageUrl;
+  final String? note;
 
-  OrderItem({required this.name, required this.quantity, required this.price});
+  OrderItem({
+    required this.name,
+    required this.quantity,
+    required this.price,
+    this.imageUrl,
+    this.note,
+  });
 
   factory OrderItem.fromMap(Map<String, dynamic> map) {
     return OrderItem(
       name: map['name'] ?? '',
       quantity: map['quantity'] ?? 0,
       price: (map['price'] ?? 0).toDouble(),
+      imageUrl: map['imageUrl'] ?? map['image_url'] ?? map['Resim'],
+      note: map['note'],
     );
   }
 }
@@ -35,6 +45,12 @@ class OrderModel {
   final String? courierName;
   final DateTime timestamp;
   final bool isRated;
+  final String? payment;
+  final String? paymentMethod;
+  final double? originalPrice;
+  final double? discountAmount;
+  final String? couponCode;
+  final String? note;
 
   OrderModel({
     required this.id,
@@ -47,6 +63,12 @@ class OrderModel {
     this.courierName,
     required this.timestamp,
     this.isRated = false,
+    this.payment,
+    this.paymentMethod,
+    this.originalPrice,
+    this.discountAmount,
+    this.couponCode,
+    this.note,
   });
 
   factory OrderModel.fromFirestore(Map<String, dynamic> data, String id) {
@@ -63,6 +85,12 @@ class OrderModel {
       courierName: data['courier_name'],
       timestamp: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
       isRated: data['isRated'] ?? false,
+      payment: data['payment'],
+      paymentMethod: data['paymentMethod'],
+      originalPrice: (data['originalPrice'] ?? data['totalPrice'] ?? 0).toDouble(),
+      discountAmount: (data['discountAmount'] ?? 0).toDouble(),
+      couponCode: data['couponCode'],
+      note: data['note'],
     );
   }
 

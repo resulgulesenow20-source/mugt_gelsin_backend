@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,6 +15,7 @@ class AuthProvider with ChangeNotifier {
   bool _hasPersistedLogin = false; // WEB İÇİN GECİKME ÖNLEYİCİ
   String? _verificationId;
   final GlobalKey<ScaffoldMessengerState>? _messengerKey;
+  StreamSubscription<DocumentSnapshot>? _userDataSubscription;
 
   User? get user => _user;
   Map<String, dynamic>? get userData => _userData;
@@ -24,6 +26,27 @@ class AuthProvider with ChangeNotifier {
 
   AuthProvider([this._messengerKey]) {
     _init();
+  }
+
+  void _listenToUserData(String uid) {
+    _userDataSubscription?.cancel();
+    _userDataSubscription = _firestore
+        .collection('users')
+        .doc(uid)
+        .snapshots()
+        .listen((doc) {
+      if (doc.exists) {
+        _userData = doc.data();
+        notifyListeners();
+      }
+    }, onError: (error) {
+      debugPrint("Kullanıcı verisi dinleme hatası: $error");
+    });
+  }
+
+  void _cancelUserDataSubscription() {
+    _userDataSubscription?.cancel();
+    _userDataSubscription = null;
   }
 
   Future<void> _init() async {
@@ -43,9 +66,11 @@ class AuthProvider with ChangeNotifier {
       _user = user;
       if (user == null) {
         _userData = null;
+        _cancelUserDataSubscription();
       } else {
         prefs.setBool('isLoggedIn', true); // Giriş yapmışsa hemen true olarak kaydet
         _hasPersistedLogin = true;
+        _listenToUserData(user.uid);
       }
       
       // Eğer sistem zaten başlatılıp UI'a haber verildiyse, yeni değişiklikleri bildir
@@ -73,12 +98,11 @@ class AuthProvider with ChangeNotifier {
       _hasPersistedLogin = true;
       // Kullanıcı verilerini ÇEK ve BEKLE (UI açılmadan verilerin hazır olması önemli)
       await _fetchUserData(_user!.uid);
-      await _saveUserToFirestore(_user!);
+      _saveUserToFirestore(_user!); // Arkada çalışsın, UI'ı bloklamasın
     } else {
-      // Eğer user gerçekten yoksa, login flag'ini temizle
-      if (!_hasPersistedLogin) {
-        await prefs.setBool('isLoggedIn', false);
-      }
+      // Eğer user gerçekten yoksa, login flag'ini kesin olarak temizle
+      _hasPersistedLogin = false;
+      await prefs.setBool('isLoggedIn', false);
     }
 
     // 3. UI'a uygulamanın hazır olduğunu bildir
@@ -122,15 +146,15 @@ class AuthProvider with ChangeNotifier {
 
     UserCredential userCredential = await _auth.signInWithCredential(credential);
     
-    // Giriş başarılı olduktan sonra Firestore kaydını arka planda yap
-    // AWAIT etmiyoruz, çünkü Firebase offline olarak sıraya alır ve internet/bağlantı gelince yazar.
-    // Bu sayede bağlantı yavaşsa bile kullanıcı anında uygulamaya girer.
-    _saveUserToFirestore(userCredential.user!, name: name);
+    // Giriş başarılı olduktan sonra Firestore kaydını ve veri çekmeyi await edelim.
+    // Böylece kullanıcı ana sayfaya yönlendirilmeden önce profil verileri tamamen yüklenmiş olur.
+    await _saveUserToFirestore(userCredential.user!, name: name);
+    await _fetchUserData(userCredential.user!.uid);
   }
 
   Future<void> _saveUserToFirestore(User user, {String? name}) async {
     try {
-      debugPrint("Auth Service: Firestore'a kullanıcı kaydediliyor/güncelleniyor. Arka planda çalışıyor.");
+      debugPrint("Auth Service: Firestore'a kullanıcı kaydediliyor/güncelleniyor.");
       
       final userDoc = _firestore.collection('users').doc(user.uid);
       
@@ -149,26 +173,26 @@ class AuthProvider with ChangeNotifier {
             'lastLogin': FieldValue.serverTimestamp(),
             'balance': 0.0,
             'points': 0,
-          });
+          }).timeout(const Duration(seconds: 3));
         } else {
           Map<String, dynamic> updates = {'lastLogin': FieldValue.serverTimestamp()};
           if (name != null) updates['name'] = name;
-          await userDoc.update(updates);
+          await userDoc.update(updates).timeout(const Duration(seconds: 3));
         }
       } catch (e) {
         // Eğer Get işlemi timeout yemişse (örneğin Emulator kaynaklı gRPC bağlantı sorunu),
-        await userDoc.set({
+        // Mevcut kullanıcının puan/bakiye gibi önemli verilerini sıfırlamamak için 
+        // balance ve points alanlarını buradan kaldırıyoruz (sadece merge ile temel alanları güncelliyoruz).
+        Map<String, dynamic> offlineData = {
           'phone': user.phoneNumber ?? '',
           'uid': user.uid,
           'lastLogin': FieldValue.serverTimestamp(),
-          'balance': 0.0,
-          'points': 0,
-        }, SetOptions(merge: true));
+        };
+        if (name != null) offlineData['name'] = name;
+        await userDoc.set(offlineData, SetOptions(merge: true)).timeout(const Duration(seconds: 3));
       }
     } catch (e) {
       debugPrint("!!!!!!!! FIRESTORE KAYIT HATASI !!!!!!!!: $e");
-      // SADECE GİRİŞ/KAYIT BLOĞU DIŞINDA OLDUĞU İÇİN EKRANDA KIRMIZI UYARI ÇIKARTMIYORUZ
-      // ARTIK KULLANICIYI ENGELLEMEYECEK
     }
   }
 
@@ -220,6 +244,7 @@ class AuthProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isLoggedIn', false); // Flag'i kesin olarak temizle
     _userData = null;
+    _cancelUserDataSubscription();
     notifyListeners();
   }
 }
