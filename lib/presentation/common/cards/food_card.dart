@@ -117,6 +117,7 @@ class FoodCard extends StatelessWidget {
                         children: [
                           Container(
                             key: _imageKey,
+                            padding: const EdgeInsets.all(6),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(16),
                               child: _buildSmartImage(food.imageUrl),

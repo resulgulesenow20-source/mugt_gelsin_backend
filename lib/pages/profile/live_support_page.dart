@@ -31,7 +31,7 @@ class _LiveSupportPageState extends State<LiveSupportPage> {
     if (text.isEmpty || currentUser == null) return;
 
     _messageController.clear();
-    await _chatService.sendMessage(currentUser!.uid, text, type: 'customer');
+    await _chatService.sendMessage(currentUser?.uid ?? 'guest', text, type: 'customer');
     _scrollToBottom();
   }
 
@@ -83,7 +83,7 @@ class _LiveSupportPageState extends State<LiveSupportPage> {
         children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _chatService.getMessages(currentUser!.uid),
+              stream: _chatService.getMessages(currentUser?.uid ?? 'guest'),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -113,7 +113,7 @@ class _LiveSupportPageState extends State<LiveSupportPage> {
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final data = messages[index].data() as Map<String, dynamic>;
-                    final bool isMe = data['senderId'] == currentUser!.uid;
+                    final bool isMe = data['senderId'] == (currentUser?.uid ?? 'guest');
                     final timestamp = data['timestamp'] as Timestamp?;
                     
                     return _buildMessageBubble(

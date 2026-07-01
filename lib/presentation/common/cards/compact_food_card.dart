@@ -250,22 +250,16 @@ class CompactFoodCard extends StatelessWidget {
                         }
                       },
                       child: Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: restaurantIsOpen ? AppColors.primary : Colors.grey.shade300,
+                          color: restaurantIsOpen ? Colors.white : Colors.grey.shade300,
                           borderRadius: BorderRadius.circular(10),
-                          boxShadow: restaurantIsOpen ? [
-                            BoxShadow(
-                              color: AppColors.primary.withOpacity(0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3),
-                            )
-                          ] : null,
+                          border: Border.all(color: Colors.grey.shade200, width: 1.5),
                         ),
                         child: Icon(
                           restaurantIsOpen ? Icons.add_rounded : Icons.lock_outline_rounded,
-                          size: 18,
-                          color: restaurantIsOpen ? Colors.white : Colors.grey.shade600,
+                          size: 20,
+                          color: restaurantIsOpen ? const Color(0xFFFF6600) : Colors.grey.shade600,
                         ),
                       ),
                     ),

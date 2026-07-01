@@ -8,6 +8,8 @@ import 'package:mugut_gelsin/providers/navigation_provider.dart';
 import 'package:mugut_gelsin/providers/language_provider.dart';
 import 'package:mugut_gelsin/providers/cart_provider.dart';
 import 'package:mugut_gelsin/pages/orders/order_tracking_page.dart';
+import 'package:mugut_gelsin/pages/home/widgets/guest_welcome_overlay.dart';
+import 'package:mugut_gelsin/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:add_to_cart_animation/add_to_cart_animation.dart';
 
@@ -19,7 +21,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  // âœ… Her tab için ayrı NavigatorKey tanımlıyoruz
+  // ✅ Her tab için ayrı NavigatorKey tanımlıyoruz
   final GlobalKey<NavigatorState> _homeNavKey = GlobalKey<NavigatorState>();
   final GlobalKey<NavigatorState> _ordersNavKey = GlobalKey<NavigatorState>();
   final GlobalKey<NavigatorState> _cartNavKey = GlobalKey<NavigatorState>();
@@ -32,9 +34,20 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    // âœ… Navigasyon sinyallerini dinle
+    // ✅ Navigasyon sinyallerini dinle
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final navProvider = context.read<NavigationProvider>();
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+      // Uygulama açıldıktan 5 saniye sonra kullanıcı giriş yapmamışsa karşılama ekranını göster
+      if (!authProvider.isLoggedIn) {
+        Future.delayed(const Duration(seconds: 5), () {
+          if (mounted && !authProvider.isLoggedIn) {
+            GuestWelcomeOverlay.show(context);
+          }
+        });
+      }
+
       navProvider.addListener(() {
         if (!mounted) return;
         final orderId = navProvider.orderToTrack;
@@ -137,9 +150,9 @@ class _MainScreenState extends State<MainScreen> {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
@@ -162,7 +175,7 @@ class _MainScreenState extends State<MainScreen> {
                       key: cartKey,
                       icon: Icon(
                         isSelected ? activeIcon : inactiveIcon,
-                        color: isSelected ? AppColors.primary : Colors.black, // <-- Koyu siyah dış çizgi
+                        color: isSelected ? AppColors.primary : Colors.black54,
                         size: 26,
                       ),
                       badgeOptions: const BadgeOptions(active: false),
@@ -173,20 +186,18 @@ class _MainScreenState extends State<MainScreen> {
             else
               Icon(
                 isSelected ? activeIcon : inactiveIcon,
-                color: isSelected ? AppColors.primary : Colors.black, // <-- Koyu siyah dış çizgi
+                color: isSelected ? AppColors.primary : Colors.black54,
                 size: 26,
               ),
-            if (isSelected)
-              const SizedBox(height: 4),
-            if (isSelected)
-              Container(
-                width: 4,
-                height: 4,
-                decoration: const BoxDecoration(
-                  color: AppColors.primary,
-                  shape: BoxShape.circle,
-                ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+                color: isSelected ? AppColors.primary : Colors.black54,
               ),
+            ),
           ],
         ),
       ),

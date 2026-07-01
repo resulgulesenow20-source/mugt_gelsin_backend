@@ -15,24 +15,22 @@ class CustomSearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.grey.shade100,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade100),
-        boxShadow: AppColors.softShadow,
       ),
       child: TextField(
         onChanged: onChanged,
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: TextStyle(
-            color: AppColors.textSecondary.withOpacity(0.5),
+            color: Colors.grey.shade600,
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
-          prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primary, size: 20),
+          prefixIcon: Icon(Icons.search_rounded, color: Colors.grey.shade800, size: 20),
           filled: false,
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
         ),
       ),
     );

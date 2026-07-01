@@ -34,8 +34,7 @@ class _BannerSliderState extends State<BannerSlider> {
   void initState() {
     super.initState();
     final campaigns = widget.campaigns ?? [];
-    final featuredRestaurants = widget.restaurants.take(6).toList();
-    final totalCount = campaigns.length + featuredRestaurants.length;
+    final totalCount = campaigns.length;
     
     // Set a large initial page that is a multiple of totalCount to allow scrolling in both directions
     int initialPage = 0;
@@ -43,7 +42,7 @@ class _BannerSliderState extends State<BannerSlider> {
       initialPage = totalCount * 100;
     }
     _currentPage = initialPage;
-    _pageController = PageController(initialPage: initialPage);
+    _pageController = PageController(initialPage: initialPage, viewportFraction: 0.78);
 
     _startAutoScroll();
   }
@@ -51,8 +50,7 @@ class _BannerSliderState extends State<BannerSlider> {
   void _startAutoScroll() {
     _timer = Timer.periodic(const Duration(seconds: 4), (timer) {
       final campaigns = widget.campaigns ?? [];
-      final featuredRestaurants = widget.restaurants.take(6).toList();
-      int totalItems = campaigns.length + featuredRestaurants.length;
+      int totalItems = campaigns.length;
       if (totalItems <= 1) return;
 
       _currentPage++;
@@ -77,15 +75,14 @@ class _BannerSliderState extends State<BannerSlider> {
   @override
   Widget build(BuildContext context) {
     final campaigns = widget.campaigns ?? [];
-    final featuredRestaurants = widget.restaurants.take(6).toList();
-    final totalCount = campaigns.length + featuredRestaurants.length;
+    final totalCount = campaigns.length;
 
     if (totalCount == 0) {
       return const SizedBox.shrink();
     }
 
     return SizedBox(
-      height: 180,
+      height: 210,
       child: PageView.builder(
         controller: _pageController,
         onPageChanged: (index) {
@@ -95,11 +92,25 @@ class _BannerSliderState extends State<BannerSlider> {
         },
         itemBuilder: (context, index) {
           final realIndex = index % totalCount;
-          if (realIndex < campaigns.length) {
-            return _buildCampaignItem(campaigns[realIndex], realIndex, totalCount);
-          }
-          final restaurantIndex = realIndex - campaigns.length;
-          return _buildRestaurantBannerItem(featuredRestaurants[restaurantIndex], realIndex, totalCount);
+          Widget bannerItem = _buildCampaignItem(campaigns[realIndex], realIndex, totalCount);
+
+          return AnimatedBuilder(
+            animation: _pageController,
+            builder: (context, child) {
+              double scale = 1.0;
+              if (_pageController.position.haveDimensions) {
+                scale = _pageController.page! - index;
+                scale = (1 - (scale.abs() * 0.1)).clamp(0.90, 1.0);
+              } else {
+                scale = _currentPage == index ? 1.0 : 0.90;
+              }
+              return Transform.scale(
+                scale: scale,
+                child: child,
+              );
+            },
+            child: bannerItem,
+          );
         },
       ),
     );
@@ -108,10 +119,7 @@ class _BannerSliderState extends State<BannerSlider> {
   Widget _buildCampaignItem(Campaign camp, int itemIndex, int totalCount) {
     final bool hasImage = camp.imageUrl != null && camp.imageUrl!.isNotEmpty;
     
-    return AnimatedScale(
-      scale: (_currentPage % totalCount) == itemIndex ? 1.0 : 0.95,
-      duration: const Duration(milliseconds: 500),
-      child: Consumer<LanguageProvider>(
+    return Consumer<LanguageProvider>(
         builder: (context, lang, child) => GestureDetector(
           onTap: () {
             if (camp.shopId.isNotEmpty) {
@@ -119,9 +127,10 @@ class _BannerSliderState extends State<BannerSlider> {
             }
           },
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.white, width: 2),
               gradient: hasImage
                   ? null
                   : const LinearGradient(
@@ -186,29 +195,16 @@ class _BannerSliderState extends State<BannerSlider> {
                         color: Colors.white.withOpacity(0.1),
                       ),
                     ),
-                  Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: hasImage ? AppColors.secondary : Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            camp.type == 'coupon' ? lang.get('coupon_code_label') : lang.get('special_offer_label'),
-                            style: TextStyle(
-                              color: hasImage ? AppColors.textPrimary : AppColors.primary,
-                              fontWeight: FontWeight.w900,
-                              fontSize: 9,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
                         Text(
                           camp.title,
                           style: const TextStyle(
@@ -218,15 +214,17 @@ class _BannerSliderState extends State<BannerSlider> {
                             letterSpacing: -0.5,
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          camp.description,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
+                        if (camp.description.trim().isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            camp.description,
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.9),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
+                        ],
                         if (camp.code != null && camp.code!.isNotEmpty) ...[
                           const SizedBox(height: 12),
                           Container(
@@ -246,7 +244,8 @@ class _BannerSliderState extends State<BannerSlider> {
                             ),
                           ),
                         ],
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -254,19 +253,15 @@ class _BannerSliderState extends State<BannerSlider> {
             ),
           ),
         ),
-      ),
     );
   }
 
   Widget _buildRestaurantBannerItem(Restaurant res, int itemIndex, int totalCount) {
-    return AnimatedScale(
-      scale: (_currentPage % totalCount) == itemIndex ? 1.0 : 0.95,
-      duration: const Duration(milliseconds: 500),
-      child: Consumer<LanguageProvider>(
+    return Consumer<LanguageProvider>(
         builder: (context, lang, child) => GestureDetector(
           onTap: () => widget.onRestaurantSelected(res.id),
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
@@ -380,7 +375,6 @@ class _BannerSliderState extends State<BannerSlider> {
             ),
           ),
         ),
-      ),
     );
   }
 }

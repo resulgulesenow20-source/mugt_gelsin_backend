@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/address_provider.dart';
+import '../../providers/region_provider.dart';
 import '../../models/address_model.dart';
+import '../../models/region_model.dart';
 import '../../core/constants/app_colors.dart';
+import '../../providers/language_provider.dart';
 import 'location_picker_page.dart';
 
 class AddAddressPage extends StatefulWidget {
@@ -25,6 +28,10 @@ class _AddAddressPageState extends State<AddAddressPage> {
   late TextEditingController _doorNoController;
   late TextEditingController _detailsController;
   
+
+  String? _selectedCity;
+  String? _selectedDistrict;
+  bool _isRegionsLoaded = false;
   String _selectedType = 'home';
   bool _isLoading = false;
   double? _latitude;
@@ -42,6 +49,17 @@ class _AddAddressPageState extends State<AddAddressPage> {
     _doorNoController = TextEditingController(text: widget.existingAddress?.doorNo ?? '');
     _detailsController = TextEditingController(text: widget.existingAddress?.fullAddress ?? '');
     
+
+    _selectedCity = widget.existingAddress?.city;
+    _selectedDistrict = widget.existingAddress?.district;
+    
+    // Load regions when page opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<RegionProvider>().fetchRegions().then((_) {
+        if (mounted) setState(() => _isRegionsLoaded = true);
+      });
+    });
+
     _selectedType = widget.existingAddress?.type ?? 'home';
     _latitude = widget.existingAddress?.latitude;
     _longitude = widget.existingAddress?.longitude;
@@ -67,8 +85,8 @@ class _AddAddressPageState extends State<AddAddressPage> {
       final newAddress = Address(
         id: widget.existingAddress?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         title: _titleController.text.trim(),
-        city: _cityController.text.trim(),
-        district: _districtController.text.trim(),
+        city: _selectedCity ?? '',
+        district: _selectedDistrict ?? '',
         street: _streetController.text.trim(),
         buildingNo: _buildingNoController.text.trim(),
         floor: _floorController.text.trim(),
@@ -131,6 +149,8 @@ class _AddAddressPageState extends State<AddAddressPage> {
 
   @override
   Widget build(BuildContext context) {
+    final langProvider = context.watch<LanguageProvider>();
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
@@ -157,12 +177,69 @@ class _AddAddressPageState extends State<AddAddressPage> {
               _buildSectionTitle("ADRES BİLGİLERİ"),
               _buildInput(_titleController, "Adres Başlığı (Örn: Ev, İş, Annemler)", Icons.label_important_outline),
               
-              Row(
-                children: [
-                  Expanded(child: _buildInput(_cityController, "Şehir", Icons.location_city_rounded)),
-                  const SizedBox(width: 12),
-                  Expanded(child: _buildInput(_districtController, "İlçe", Icons.map_outlined)),
-                ],
+              Consumer<RegionProvider>(
+                builder: (context, regionProvider, child) {
+                  if (regionProvider.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  
+                  final regions = regionProvider.regions;
+                  Region? currentRegion;
+                  try {
+                    currentRegion = regions.firstWhere((r) => r.name == _selectedCity);
+                  } catch (e) {
+                    currentRegion = null;
+                  }
+
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          value: _selectedCity,
+                          decoration: InputDecoration(
+                            labelText: langProvider.translate('city_label'),
+                            prefixIcon: const Icon(Icons.location_city_rounded, color: AppColors.primary),
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
+                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
+                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.primary, width: 2)),
+                          ),
+                          items: regions.map((r) => DropdownMenuItem(value: r.name, child: Text(r.name))).toList(),
+                          onChanged: (val) {
+                            setState(() {
+                              _selectedCity = val;
+                              _selectedDistrict = null; // Reset district when city changes
+                            });
+                          },
+                          validator: (val) => val == null || val.isEmpty ? langProvider.translate('select_city') : null,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          value: _selectedDistrict,
+                          decoration: InputDecoration(
+                            labelText: langProvider.translate('district_label'),
+                            prefixIcon: const Icon(Icons.map_outlined, color: AppColors.primary),
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
+                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
+                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.primary, width: 2)),
+                          ),
+                          items: currentRegion?.districts.map((d) => DropdownMenuItem(value: d, child: Text(d))).toList() ?? [],
+                          onChanged: (val) {
+                            setState(() {
+                              _selectedDistrict = val;
+                            });
+                          },
+                          validator: (val) => val == null || val.isEmpty ? langProvider.translate('select_district') : null,
+                        ),
+                      ),
+                    ],
+                  );
+                }
               ),
               
               _buildInput(_streetController, "Sokak / Cadde", Icons.add_road_rounded),

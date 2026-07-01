@@ -7,7 +7,7 @@ class AppColors {
   static const Color secondary = Color(0xFF1A1A1A); // Deeper black for better contrast
   
   // ✅ Lively / Premium UI Colors
-  static const Color background = Color(0xFFF9FAFB); // Cleaner gray-white
+  static const Color background = Color(0xFFF0F2F5); // Gölge/derinlik hissi veren hafif gri
   static const Color surface = Colors.white;
   static const Color surfaceSubtle = Color(0xFFF3F4F6);
   

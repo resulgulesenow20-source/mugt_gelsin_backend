@@ -16,6 +16,7 @@ import 'package:mugut_gelsin/providers/payment_provider.dart';
 import 'package:mugut_gelsin/providers/coupon_provider.dart';
 import 'package:mugut_gelsin/providers/navigation_provider.dart';
 import 'package:mugut_gelsin/providers/language_provider.dart';
+import 'package:mugut_gelsin/providers/region_provider.dart';
 import 'package:mugut_gelsin/pages/splash/splash_screen.dart';
 import 'package:mugut_gelsin/providers/order_tracking_provider.dart';
 import 'firebase_options.dart';
@@ -59,6 +60,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => CouponProvider()),
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
         ChangeNotifierProvider(create: (_) => LanguageProvider()),
+        ChangeNotifierProvider(create: (_) => RegionProvider()),
         ChangeNotifierProvider(create: (_) => OrderTrackingProvider()),
       ],
       child: const MugutGelsinApp(),
@@ -97,25 +99,8 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = context.watch<app_auth.AuthProvider>();
-
-    if (!authProvider.isInitialized) {
-      return const SplashScreen();
-    }
-
-    // Kullanıcı giriş yapmışsa (Firebase User doluysa)
-    if (authProvider.isLoggedIn) {
-      return const MainScreen();
-    }
-
-    // Eğer AuthProvider henüz 'null' diyorsa ama SharedPreferences'a göre giriş yapıldıysa
-    // bu Web platformundaki IndexedDB gecikmesidir; yükleme ekranı göstererek Stream'in güncellenmesini bekle.
-    if (authProvider.hasPersistedLogin) {
-      return const SplashScreen(); 
-    }
-
-    // Aksi halde giriş ekranına gönder
-    return const LoginPage();
+    // Uygulama açıldığında direkt ana ekrana geç, kayıt veya giriş sorma
+    return const MainScreen();
   }
 }
 

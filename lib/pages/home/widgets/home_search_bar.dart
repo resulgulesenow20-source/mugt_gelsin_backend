@@ -19,45 +19,9 @@ class HomeSearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final langProvider = Provider.of<LanguageProvider>(context);
 
-    return Row(
-      children: [
-        Expanded(
-          child: CustomSearchField(
-            onChanged: onSearchChanged,
-            hintText: langProvider.translate('search_hint'),
-          ),
-        ),
-        const SizedBox(width: 8),
-        // ✅ DESTEK SAYFASINA GIDEN BUTON
-        InkWell(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const LiveSupportPage(),
-              ),
-            );
-          },
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            height: 48,
-            width: 48,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade100),
-              boxShadow: AppColors.softShadow,
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.support_agent_rounded, 
-                color: AppColors.primary, 
-                size: 24
-              ),
-            ),
-          ),
-        ),
-      ],
+    return CustomSearchField(
+      onChanged: onSearchChanged,
+      hintText: langProvider.translate('search_hint'),
     );
   }
 }

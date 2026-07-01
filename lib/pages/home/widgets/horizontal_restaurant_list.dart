@@ -18,19 +18,19 @@ class HorizontalRestaurantList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: isCompact ? 275 : 320, // Height adjusts based on compactness (increased for campaigns)
+      height: isCompact ? 235 : 240, // Height increased to fix bottom text clipping
       child: ListView.builder(
         scrollDirection: Axis.horizontal, // Yana kaymayı sağlar
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), // Shadow breathing room
         itemCount: restaurants.length,
         itemBuilder: (context, index) {
           return Container(
-            width: isCompact ? 160 : 250, // Width adjusts based on compactness
+            width: 290, // Wider cards to match visual 2
             margin: const EdgeInsets.only(right: 16),
             child: RestaurantCard(
               res: restaurants[index],
-              isCompact: isCompact, // Pass down compactness
-              imageHeight: isCompact ? 100 : 120, // Image height adjusts
+              isCompact: isCompact, // Keep compact layout for texts if needed, but size is bigger
+              imageHeight: 150, // Image height adjusts
               campaigns: campaigns,
             ),
           );

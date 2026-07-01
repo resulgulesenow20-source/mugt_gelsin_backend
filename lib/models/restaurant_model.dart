@@ -97,6 +97,7 @@ class Restaurant {
   final String? closingTime;
   final double? latitude;
   final double? longitude;
+  final String city;
   final List<String> deliveryDistricts;
 
   Restaurant({
@@ -115,6 +116,7 @@ class Restaurant {
     this.closingTime,
     this.latitude,
     this.longitude,
+    this.city = 'Aşkabat',
     this.deliveryDistricts = const [],
   });
 
@@ -134,6 +136,7 @@ class Restaurant {
     'closingTime': closingTime,
     'latitude': latitude,
     'longitude': longitude,
+    'city': city,
     'deliveryDistricts': deliveryDistricts,
   };
 
@@ -153,6 +156,7 @@ class Restaurant {
     closingTime: json['closingTime'],
     latitude: (json['latitude'] as num?)?.toDouble(),
     longitude: (json['longitude'] as num?)?.toDouble(),
+    city: json['city']?.toString() ?? json['region']?.toString() ?? json['Bölge']?.toString() ?? 'Aşkabat',
     deliveryDistricts: (json['deliveryDistricts'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
   );
 

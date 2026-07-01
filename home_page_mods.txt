@@ -1,0 +1,946 @@
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Make home page app bar orange and text white.",
+  "Instruction": "Set AppBar backgroundColor to AppColors.primary and title text color to Colors.white",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 648,
+      "ReplacementContent": "      appBar: AppBar(\n        backgroundColor: AppColors.primary,\n        title: Text(\n          langProvider.get('app_name'),\n          style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n            color: Colors.white,\n            fontWeight: FontWeight.w900,\n            fontSize: 22,\n            letterSpacing: -1,\n          ),\n        ),\n      ),",
+      "StartLine": 639,
+      "TargetContent": "      appBar: AppBar(\n        title: Text(\n          langProvider.get('app_name'),\n          style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n            fontWeight: FontWeight.w900,\n            fontSize: 22,\n            letterSpacing: -1,\n          ),\n        ),\n      ),"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Editing home_page.dart",
+  "toolSummary": "Make AppBar orange"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Make the AppBar scroll with the content.",
+  "Instruction": "Remove the appBar from Scaffold and insert a scrolling Container at the top of the Column.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 662,
+      "ReplacementContent": "    return Scaffold(\n      backgroundColor: AppColors.background,\n      body: isLoading \n          ? const Center(child: CircularProgressIndicator()) \n          : Stack(\n              children: [\n                RefreshIndicator(\n                  onRefresh: _loadData,\n                  child: SingleChildScrollView(\n                    controller: _scrollController,\n                    child: Column(\n                      children: [\n                        Container(\n                          width: double.infinity,\n                          color: AppColors.primary,\n                          padding: EdgeInsets.only(\n                            top: MediaQuery.of(context).padding.top + 16,\n                            bottom: 16,\n                            left: 16,\n                            right: 16,\n                          ),\n                          child: Text(\n                            langProvider.get('app_name'),\n                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n                              color: Colors.white,\n                              fontWeight: FontWeight.w900,\n                              fontSize: 22,\n                              letterSpacing: -1,\n                            ),\n                          ),\n                        ),\n                        // ADRES VE ARAMA ÇUBUĞU YAN YANA\n                        Padding(",
+      "StartLine": 637,
+      "TargetContent": "    return Scaffold(\n      backgroundColor: AppColors.background,\n      appBar: AppBar(\n        backgroundColor: AppColors.primary,\n        title: Text(\n          langProvider.get('app_name'),\n          style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n            color: Colors.white,\n            fontWeight: FontWeight.w900,\n            fontSize: 22,\n            letterSpacing: -1,\n          ),\n        ),\n      ),\n      body: isLoading \n          ? const Center(child: CircularProgressIndicator()) \n          : Stack(\n              children: [\n                RefreshIndicator(\n                  onRefresh: _loadData,\n                  child: SingleChildScrollView(\n                    controller: _scrollController,\n                    child: Column(\n                      children: [\n                    // ADRES VE ARAMA ÇUBUĞU YAN YANA\n                    Padding("
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Editing home_page.dart",
+  "toolSummary": "Make AppBar scrollable"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Fix split orange color and center text on home page",
+  "Instruction": "Change Scaffold background to AppColors.primary. Center the app_name text and make it black. Wrap the rest of the column content (below the top bar) in a Container with AppColors.background and minHeight.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 662,
+      "ReplacementContent": "    return Scaffold(\n      backgroundColor: AppColors.primary,\n      body: isLoading \n          ? const Center(child: CircularProgressIndicator()) \n          : Stack(\n              children: [\n                RefreshIndicator(\n                  onRefresh: _loadData,\n                  child: SingleChildScrollView(\n                    controller: _scrollController,\n                    physics: const AlwaysScrollableScrollPhysics(),\n                    child: Column(\n                      children: [\n                        Container(\n                          width: double.infinity,\n                          color: AppColors.primary,\n                          padding: EdgeInsets.only(\n                            top: MediaQuery.of(context).padding.top + 16,\n                            bottom: 16,\n                            left: 16,\n                            right: 16,\n                          ),\n                          alignment: Alignment.center,\n                          child: Text(\n                            langProvider.get('app_name'),\n                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n                              color: Colors.black,\n                              fontWeight: FontWeight.w900,\n                              fontSize: 22,\n                              letterSpacing: -1,\n                            ),\n                          ),\n                        ),\n                        Container(\n                          color: AppColors.background,\n                          constraints: BoxConstraints(\n                            minHeight: MediaQuery.of(context).size.height,\n                          ),\n                          child: Column(\n                            children: [\n                              // ADRES VE ARAMA ÇUBUĞU YAN YANA\n                              Padding(",
+      "StartLine": 637,
+      "TargetContent": "    return Scaffold(\n      backgroundColor: AppColors.background,\n      body: isLoading \n          ? const Center(child: CircularProgressIndicator()) \n          : Stack(\n              children: [\n                RefreshIndicator(\n                  onRefresh: _loadData,\n                  child: SingleChildScrollView(\n                    controller: _scrollController,\n                    child: Column(\n                      children: [\n                        Container(\n                          width: double.infinity,\n                          color: AppColors.primary,\n                          padding: EdgeInsets.only(\n                            top: MediaQuery.of(context).padding.top + 16,\n                            bottom: 16,\n                            left: 16,\n                            right: 16,\n                          ),\n                          child: Text(\n                            langProvider.get('app_name'),\n                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n                              color: Colors.white,\n                              fontWeight: FontWeight.w900,\n                              fontSize: 22,\n                              letterSpacing: -1,\n                            ),\n                          ),\n                        ),\n                        // ADRES VE ARAMA ÇUBUĞU YAN YANA\n                        Padding("
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 867,
+      "ReplacementContent": "                                  ),\n                                ),\n                            ],\n                          ),\n                        ),\n                      ],\n                    ),\n                  ),",
+      "StartLine": 865,
+      "TargetContent": "                                  ),\n                                ),\n                      ],\n                    ),\n                  ),"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Editing home_page.dart",
+  "toolSummary": "Fix split top bar"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Fix split orange color and center text on home page",
+  "Instruction": "Remove AppBar, add orange container at top of ScrollView, wrap rest in white container to prevent split color.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 242,
+      "ReplacementContent": "    return Scaffold(\n      backgroundColor: AppColors.primary, // Orange background for overscroll\n      body: isLoading \n          ? const Center(child: CircularProgressIndicator()) \n          : Stack(\n              children: [\n                RefreshIndicator(\n                  onRefresh: _loadData,\n                  child: SingleChildScrollView(\n                    controller: _scrollController,\n                    physics: const AlwaysScrollableScrollPhysics(), // Important for stretch feel\n                    child: Column(\n                      children: [\n                        // Kayan turuncu üst çubuk\n                        Container(\n                          width: double.infinity,\n                          color: AppColors.primary,\n                          padding: EdgeInsets.only(\n                            top: MediaQuery.of(context).padding.top + 16,\n                            bottom: 16,\n                            left: 16,\n                            right: 16,\n                          ),\n                          alignment: Alignment.center,\n                          child: Text(\n                            langProvider.translate('app_name'),\n                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n                              color: Colors.black, // User requested black text\n                              fontWeight: FontWeight.w900,\n                              fontSize: 22,\n                              letterSpacing: -1,\n                            ),\n                          ),\n                        ),\n                        // The rest of the content must have a white background\n                        Container(\n                          color: AppColors.background,\n                          constraints: BoxConstraints(\n                            minHeight: MediaQuery.of(context).size.height,\n                          ),\n                          child: Column(\n                            children: [\n                              // ADRES VE ARAMA ÇUBUĞU YAN YANA\n                              Padding(",
+      "StartLine": 218,
+      "TargetContent": "    return Scaffold(\n      backgroundColor: AppColors.background,\n      appBar: AppBar(\n        title: Text(\n          langProvider.translate('app_name'),\n          style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n            fontWeight: FontWeight.w900,\n            fontSize: 22,\n            letterSpacing: -1,\n          ),\n        ),\n      ),\n      body: isLoading \n          ? const Center(child: CircularProgressIndicator()) \n          : Stack(\n              children: [\n                RefreshIndicator(\n                  onRefresh: _loadData,\n                  child: SingleChildScrollView(\n                    controller: _scrollController,\n                    child: Column(\n                      children: [\n                    // ADRES VE ARAMA ÇUBUĞU YAN YANA\n                    Padding("
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 386,
+      "ReplacementContent": "                          ),\n                              const SizedBox(height: 120),\n                            ],\n                          ),\n                        ),\n                      ],\n                    ),\n                  ),",
+      "StartLine": 382,
+      "TargetContent": "                          ),\n                    const SizedBox(height: 120),\n                  ],\n                ),\n              ),"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Editing home_page.dart",
+  "toolSummary": "Fix split top bar"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Fix compilation errors in home_page.dart",
+  "Instruction": "Add missing state variables and parameters for BannerSlider and FilterChips.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 40,
+      "ReplacementContent": "  Timer? _searchDebounce; // âœ… Arama geciktirici (performans için)\n  int _lastResetCounter = 0; // âœ… Sıfırlama takibi için\n  final ScrollController _scrollController = ScrollController(); // âœ… Yukarı kaydırmak için\n  Set<String> _selectedFilters = {}; // Missing filter state\n\n  void _toggleFilter(String filter) {\n    setState(() {\n      if (_selectedFilters.contains(filter)) {\n        _selectedFilters.remove(filter);\n      } else {\n        _selectedFilters.add(filter);\n      }\n    });\n  }",
+      "StartLine": 38,
+      "TargetContent": "  Timer? _searchDebounce; // âœ… Arama geciktirici (performans için)\n  int _lastResetCounter = 0; // âœ… Sıfırlama takibi için\n  final ScrollController _scrollController = ScrollController(); // âœ… Yukarı kaydırmak için"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 347,
+      "ReplacementContent": "                              // 🏠 ANA SAYFA MODU: Banner, Kategori, Fırsatlar\n                              if (_searchQuery.isEmpty) ...[\n                                BannerSlider(\n                                  restaurants: allRestaurants,\n                                  onRestaurantSelected: _navigateToRestaurant,\n                                  onCategorySelected: _filterByCategory,\n                                ),\n                                FilterChips(\n                                  selectedFilters: _selectedFilters,\n                                  onFilterToggled: _toggleFilter,\n                                ),",
+      "StartLine": 344,
+      "TargetContent": "                              // 🏠 ANA SAYFA MODU: Banner, Kategori, Fırsatlar\n                              if (_searchQuery.isEmpty) ...[\n                                const BannerSlider(),\n                                const FilterChips(),"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Fixing compile errors",
+  "toolSummary": "Fix compile errors"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Fix bottom safe area orange color",
+  "Instruction": "Change Scaffold backgroundColor back to AppColors.background. Add a 300px high AppColors.primary container at the top of the Stack behind the RefreshIndicator to keep the pull-to-refresh overscroll orange.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 233,
+      "ReplacementContent": "    return Scaffold(\n      backgroundColor: AppColors.background, // Beyaz/gri arka plan\n      body: isLoading \n          ? const Center(child: CircularProgressIndicator()) \n          : Stack(\n              children: [\n                // Pull-to-refresh sırasında tepede \"bölünme\" (beyazlık) görünmemesi için sadece en üste 300px turuncu atıyoruz.\n                Positioned(\n                  top: 0,\n                  left: 0,\n                  right: 0,\n                  height: 300,\n                  child: Container(color: AppColors.primary),\n                ),\n                RefreshIndicator(",
+      "StartLine": 218,
+      "TargetContent": "    return Scaffold(\n      backgroundColor: AppColors.primary, // Orange background for overscroll\n      body: isLoading \n          ? const Center(child: CircularProgressIndicator()) \n          : Stack(\n              children: [\n                RefreshIndicator("
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Editing home_page.dart",
+  "toolSummary": "Fix bottom orange color"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Use non-compact restaurant cards",
+  "Instruction": "Pass isCompact: false to HorizontalRestaurantList to restore the large food style layout.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 394,
+      "ReplacementContent": "                                HorizontalRestaurantList(restaurants: displayedRestaurants, isCompact: false),",
+      "StartLine": 392,
+      "TargetContent": "                                HorizontalRestaurantList(restaurants: displayedRestaurants),"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Changing to non-compact cards",
+  "toolSummary": "Update home_page layout"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Use large layout for horizontal lists",
+  "Instruction": "Set isCompact: false for HorizontalRestaurantList to restore the full food style cards.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 394,
+      "ReplacementContent": "                                HorizontalRestaurantList(restaurants: displayedRestaurants, isCompact: false),",
+      "StartLine": 392,
+      "TargetContent": "                                HorizontalRestaurantList(restaurants: displayedRestaurants),"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Setting isCompact to false in home_page",
+  "toolSummary": "Update home_page"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Add orange background behind safe area",
+  "Instruction": "Add an orange Positioned container behind the scroll view in home_page.dart to ensure the top safe area is always orange.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 238,
+      "ReplacementContent": "      body: isLoading \n          ? const Center(child: CircularProgressIndicator()) \n          : Stack(\n              children: [\n                // Top safe area background fill\n                Positioned(\n                  top: 0,\n                  left: 0,\n                  right: 0,\n                  height: 300,\n                  child: Container(color: AppColors.primary),\n                ),\n                RefreshIndicator(",
+      "StartLine": 235,
+      "TargetContent": "      body: isLoading \n          ? const Center(child: CircularProgressIndicator()) \n          : Stack(\n              children: [\n                RefreshIndicator("
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Fixing top safe area color in home_page.dart",
+  "toolSummary": "Fix safe area color"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Move search and address bar to orange header",
+  "Instruction": "Move the address and search bar into the orange header container to match the Trendyol Go layout requested by the user.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 303,
+      "ReplacementContent": "                        // Kayan turuncu üst çubuk\n                        Container(\n                          width: double.infinity,\n                          color: AppColors.primary,\n                          padding: EdgeInsets.only(\n                            top: MediaQuery.of(context).padding.top + 16,\n                            bottom: 16,\n                            left: 16,\n                            right: 16,\n                          ),\n                          child: Column(\n                            children: [\n                              Text(\n                                langProvider.translate('app_name'),\n                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n                                  color: Colors.black, // User requested black text\n                                  fontWeight: FontWeight.w900,\n                                  fontSize: 22,\n                                  letterSpacing: -1,\n                                ),\n                              ),\n                              const SizedBox(height: 16),\n                              // ADRES VE ARAMA ÇUBUĞU YAN YANA\n                              Row(\n                                children: [\n                                  // Adres Seçimi (Sol Taraf)\n                                  const Expanded(\n                                    flex: 4,\n                                    child: SizedBox(\n                                      height: 48,\n                                      child: HomeAddressBar(),\n                                    ),\n                                  ),\n                                  const SizedBox(width: 8),\n                                  // Arama Çubuğu (Sağ Taraf)\n                                  Expanded(\n                                    flex: 6,\n                                    child: HomeSearchBar(\n                                        onSearchChanged: _filterRestaurants,\n                                        onRefresh: _loadData,\n                                    ),\n                                  ),\n                                ],\n                              ),\n                            ],\n                          ),\n                        ),\n                        // The rest of the content must have a white background\n                        Container(\n                          color: AppColors.background,\n                          constraints: BoxConstraints(\n                            minHeight: MediaQuery.of(context).size.height,\n                          ),\n                          child: Column(\n                            children: [",
+      "StartLine": 250,
+      "TargetContent": "                        // Kayan turuncu üst çubuk\n                        Container(\n                          width: double.infinity,\n                          color: AppColors.primary,\n                          padding: EdgeInsets.only(\n                            top: MediaQuery.of(context).padding.top + 16,\n                            bottom: 16,\n                            left: 16,\n                            right: 16,\n                          ),\n                          alignment: Alignment.center,\n                          child: Text(\n                            langProvider.translate('app_name'),\n                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n                              color: Colors.black, // User requested black text\n                              fontWeight: FontWeight.w900,\n                              fontSize: 22,\n                              letterSpacing: -1,\n                            ),\n                          ),\n                        ),\n                        // The rest of the content must have a white background\n                        Container(\n                          color: AppColors.background,\n                          constraints: BoxConstraints(\n                            minHeight: MediaQuery.of(context).size.height,\n                          ),\n                          child: Column(\n                            children: [\n                              // ADRES VE ARAMA ÇUBUĞU YAN YANA\n                              Padding(\n                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),\n                      child: Row(\n                        children: [\n                          // Adres Seçimi (Sol Taraf)\n                          const Expanded(\n                            flex: 4,\n                            child: SizedBox(\n                              height: 48,\n                              child: HomeAddressBar(),\n                            ),\n                          ),\n                          const SizedBox(width: 8),\n                          // Arama Çubuğu (Sağ Taraf)\n                          Expanded(\n                            flex: 6,\n                            child: HomeSearchBar(\n                                onSearchChanged: _filterRestaurants,\n                                onRefresh: _loadData,\n                            ),\n                          ),\n                        ],\n                      ),\n                    ),"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Moving elements into orange header",
+  "toolSummary": "Update layout"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Add curve to orange header",
+  "Instruction": "Add a bottom border radius to the orange header container to match Trendyol Go style, and remove the background positioned container so the curves are visible.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 242,
+      "ReplacementContent": "                // Top safe area background is handled by index.html in PWA.\n                // We removed the Positioned container so the curved corners of the header below are visible.",
+      "StartLine": 235,
+      "TargetContent": "                // Top safe area background fill\n                Positioned(\n                  top: 0,\n                  left: 0,\n                  right: 0,\n                  height: 300,\n                  child: Container(color: AppColors.primary),\n                ),"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 253,
+      "ReplacementContent": "                          width: double.infinity,\n                          decoration: const BoxDecoration(\n                            color: AppColors.primary,\n                            borderRadius: BorderRadius.only(\n                              bottomLeft: Radius.circular(24),\n                              bottomRight: Radius.circular(24),\n                            ),\n                          ),",
+      "StartLine": 252,
+      "TargetContent": "                          width: double.infinity,\n                          color: AppColors.primary,"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Curving the bottom of the orange header",
+  "toolSummary": "Add curve to header"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Extend orange header downwards",
+  "Instruction": "Add a SizedBox at the bottom of the orange header column to extend the orange color further down towards the banner.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 292,
+      "ReplacementContent": "                                  ),\n                                ],\n                              ),\n                              const SizedBox(height: 24), // Extends the orange background downwards\n                            ],\n                          ),\n                        ),",
+      "StartLine": 287,
+      "TargetContent": "                                  ),\n                                ],\n                              ),\n                            ],\n                          ),\n                        ),"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Extending orange header downwards",
+  "toolSummary": "Extend header"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Revert the downward extension of the orange header",
+  "Instruction": "Remove the SizedBox(height: 24) to bring the orange header length back to what it was right before.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 294,
+      "ReplacementContent": "                                  ),\n                                ],\n                              ),\n                            ],\n                          ),\n                        ),",
+      "StartLine": 289,
+      "TargetContent": "                                  ),\n                                ],\n                              ),\n                              const SizedBox(height: 24), // Extends the orange background downwards\n                            ],\n                          ),\n                        ),"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Reverting header length",
+  "toolSummary": "Revert header length"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Revert orange header changes",
+  "Instruction": "Revert the header back to its previous state by moving the address and search bars back out of the orange container and removing the border radius.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 296,
+      "ReplacementContent": "                        // Kayan turuncu üst çubuk\n                        Container(\n                          width: double.infinity,\n                          color: AppColors.primary,\n                          padding: EdgeInsets.only(\n                            top: MediaQuery.of(context).padding.top + 16,\n                            bottom: 16,\n                            left: 16,\n                            right: 16,\n                          ),\n                          alignment: Alignment.center,\n                          child: Text(\n                            langProvider.translate('app_name'),\n                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n                              color: Colors.black, // User requested black text\n                              fontWeight: FontWeight.w900,\n                              fontSize: 22,\n                              letterSpacing: -1,\n                            ),\n                          ),\n                        ),",
+      "StartLine": 244,
+      "TargetContent": "                        // Kayan turuncu üst çubuk\n                        Container(\n                          width: double.infinity,\n                          decoration: const BoxDecoration(\n                            color: AppColors.primary,\n                            borderRadius: BorderRadius.only(\n                              bottomLeft: Radius.circular(24),\n                              bottomRight: Radius.circular(24),\n                            ),\n                          ),\n                          padding: EdgeInsets.only(\n                            top: MediaQuery.of(context).padding.top + 16,\n                            bottom: 16,\n                            left: 16,\n                            right: 16,\n                          ),\n                          child: Column(\n                            children: [\n                              Text(\n                                langProvider.translate('app_name'),\n                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n                                  color: Colors.black, // User requested black text\n                                  fontWeight: FontWeight.w900,\n                                  fontSize: 22,\n                                  letterSpacing: -1,\n                                ),\n                              ),\n                              const SizedBox(height: 16),\n                              // ADRES VE ARAMA ÇUBUĞU YAN YANA\n                              Row(\n                                children: [\n                                  // Adres Seçimi (Sol Taraf)\n                                  const Expanded(\n                                    flex: 4,\n                                    child: SizedBox(\n                                      height: 48,\n                                      child: HomeAddressBar(),\n                                    ),\n                                  ),\n                                  const SizedBox(width: 8),\n                                  // Arama Çubuğu (Sağ Taraf)\n                                  Expanded(\n                                    flex: 6,\n                                    child: HomeSearchBar(\n                                        onSearchChanged: _filterRestaurants,\n                                        onRefresh: _loadData,\n                                    ),\n                                  ),\n                                ],\n                              ),\n                            ],\n                          ),\n                        ),"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 302,
+      "ReplacementContent": "                          child: Column(\n                            children: [\n                              // ADRES VE ARAMA ÇUBUĞU YAN YANA\n                              Padding(\n                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),\n                      child: Row(\n                        children: [\n                          // Adres Seçimi (Sol Taraf)\n                          const Expanded(\n                            flex: 4,\n                            child: SizedBox(\n                              height: 48,\n                              child: HomeAddressBar(),\n                            ),\n                          ),\n                          const SizedBox(width: 8),\n                          // Arama Çubuğu (Sağ Taraf)\n                          Expanded(\n                            flex: 6,\n                            child: HomeSearchBar(\n                                onSearchChanged: _filterRestaurants,\n                                onRefresh: _loadData,\n                            ),\n                          ),\n                        ],\n                      ),\n                    ),",
+      "StartLine": 301,
+      "TargetContent": "                          child: Column(\n                            children: ["
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Reverting all header changes",
+  "toolSummary": "Revert header"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Restore address and search bar",
+  "Instruction": "Put the address and search bar back where it originally was.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 273,
+      "ReplacementContent": "                          child: Column(\n                            children: [\n                              // ADRES VE ARAMA ÇUBUĞU YAN YANA\n                              Padding(\n                                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),\n                                child: Row(\n                                  children: [\n                                    // Adres Seçimi (Sol Taraf)\n                                    const Expanded(\n                                      flex: 4,\n                                      child: SizedBox(\n                                        height: 48,\n                                        child: HomeAddressBar(),\n                                      ),\n                                    ),\n                                    const SizedBox(width: 8),\n                                    // Arama Çubuğu (Sağ Taraf)\n                                    Expanded(\n                                      flex: 6,\n                                      child: HomeSearchBar(\n                                          onSearchChanged: _filterRestaurants,\n                                          onRefresh: _loadData,\n                                      ),\n                                    ),\n                                  ],\n                                ),\n                              ),\n                    (_searchQuery.isNotEmpty && displayedRestaurants.isEmpty && matchedFoods.isEmpty) ||",
+      "StartLine": 271,
+      "TargetContent": "                          child: Column(\n                            children: [\n                    (_searchQuery.isNotEmpty && displayedRestaurants.isEmpty && matchedFoods.isEmpty) ||"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Restoring address bar into white area",
+  "toolSummary": "Restore address bar"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Make header background white",
+  "Instruction": "Change the background color of the header container holding the app name from orange to white.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 252,
+      "ReplacementContent": "                        // Üst başlık (Beyaz zemin)\n                        Container(\n                          width: double.infinity,\n                          color: AppColors.background, // Beyaz zemin\n                          padding: EdgeInsets.only(",
+      "StartLine": 248,
+      "TargetContent": "                        // Kayan turuncu üst çubuk\n                        Container(\n                          width: double.infinity,\n                          color: AppColors.primary,\n                          padding: EdgeInsets.only("
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Changing header background to white",
+  "toolSummary": "Change header color"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Change app name layout",
+  "Instruction": "Change the app title to be aligned to the left, split into two lines 'Mugut' and 'gelsin', and made smaller as requested.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 263,
+      "ReplacementContent": "                          alignment: Alignment.centerLeft,\n                          child: Column(\n                            crossAxisAlignment: CrossAxisAlignment.start,\n                            children: [\n                              Text(\n                                \"Mugut\",\n                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n                                  color: Colors.black,\n                                  fontWeight: FontWeight.w900,\n                                  fontSize: 18,\n                                  letterSpacing: -0.5,\n                                  height: 1.0,\n                                ),\n                              ),\n                              Text(\n                                \"gelsin\",\n                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n                                  color: AppColors.primary,\n                                  fontWeight: FontWeight.w900,\n                                  fontSize: 18,\n                                  letterSpacing: -0.5,\n                                  height: 1.0,\n                                ),\n                              ),\n                            ],\n                          ),",
+      "StartLine": 254,
+      "TargetContent": "                          alignment: Alignment.center,\n                          child: Text(\n                            langProvider.translate('app_name'),\n                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n                              color: Colors.black, // User requested black text\n                              fontWeight: FontWeight.w900,\n                              fontSize: 22,\n                              letterSpacing: -1,\n                            ),\n                          ),"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Updating app name layout",
+  "toolSummary": "Update title"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Move address bar to header",
+  "Instruction": "Move the HomeAddressBar to be next to the 'Mugut gelsin' text, make it thinner (height: 36), and make the HomeSearchBar take the full width in its own row.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 279,
+      "ReplacementContent": "                          child: Row(\n                            crossAxisAlignment: CrossAxisAlignment.center,\n                            children: [\n                              Column(\n                                crossAxisAlignment: CrossAxisAlignment.start,\n                                children: [\n                                  Text(\n                                    \"Mugut\",\n                                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n                                      color: Colors.black,\n                                      fontWeight: FontWeight.w900,\n                                      fontSize: 18,\n                                      letterSpacing: -0.5,\n                                      height: 1.0,\n                                    ),\n                                  ),\n                                  Text(\n                                    \"gelsin\",\n                                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n                                      color: AppColors.primary,\n                                      fontWeight: FontWeight.w900,\n                                      fontSize: 18,\n                                      letterSpacing: -0.5,\n                                      height: 1.0,\n                                    ),\n                                  ),\n                                ],\n                              ),\n                              const SizedBox(width: 16),\n                              // Adres Seçimi (Daha ince ve ortaya)\n                              const Expanded(\n                                child: SizedBox(\n                                  height: 36, // İnceltildi\n                                  child: HomeAddressBar(),\n                                ),\n                              ),\n                            ],\n                          ),",
+      "StartLine": 255,
+      "TargetContent": "                          child: Column(\n                            crossAxisAlignment: CrossAxisAlignment.start,\n                            children: [\n                              Text(\n                                \"Mugut\",\n                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n                                  color: Colors.black,\n                                  fontWeight: FontWeight.w900,\n                                  fontSize: 18,\n                                  letterSpacing: -0.5,\n                                  height: 1.0,\n                                ),\n                              ),\n                              Text(\n                                \"gelsin\",\n                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n                                  color: AppColors.primary,\n                                  fontWeight: FontWeight.w900,\n                                  fontSize: 18,\n                                  letterSpacing: -0.5,\n                                  height: 1.0,\n                                ),\n                              ),\n                            ],\n                          ),"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 313,
+      "ReplacementContent": "                              // ARAMA ÇUBUĞU\n                              Padding(\n                                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),\n                                child: HomeSearchBar(\n                                    onSearchChanged: _filterRestaurants,\n                                    onRefresh: _loadData,\n                                ),\n                              ),",
+      "StartLine": 289,
+      "TargetContent": "                              // ADRES VE ARAMA ÇUBUĞU YAN YANA\n                              Padding(\n                                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),\n                                child: Row(\n                                  children: [\n                                    // Adres Seçimi (Sol Taraf)\n                                    const Expanded(\n                                      flex: 4,\n                                      child: SizedBox(\n                                        height: 48,\n                                        child: HomeAddressBar(),\n                                      ),\n                                    ),\n                                    const SizedBox(width: 8),\n                                    // Arama Çubuğu (Sağ Taraf)\n                                    Expanded(\n                                      flex: 6,\n                                      child: HomeSearchBar(\n                                          onSearchChanged: _filterRestaurants,\n                                          onRefresh: _loadData,\n                                      ),\n                                    ),\n                                  ],\n                                ),\n                              ),"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Moving address bar to header",
+  "toolSummary": "Update layout"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Shorten address bar width",
+  "Instruction": "Remove the Expanded widget from the HomeAddressBar and give it a fixed width to make it shorter.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 290,
+      "ReplacementContent": "                              // Adres Seçimi (Daha ince, ortaya yakın ve daha kısa)\n                              const SizedBox(\n                                width: 160, // Genişlik kısaltıldı (yaklaşık yarısı)\n                                height: 36, // İnceltildi\n                                child: HomeAddressBar(),\n                              ),\n                              const Spacer(), // Sağa doğru uzamasını engeller ve ortada tutar",
+      "StartLine": 284,
+      "TargetContent": "                              // Adres Seçimi (Daha ince ve ortaya)\n                              const Expanded(\n                                child: SizedBox(\n                                  height: 36, // İnceltildi\n                                  child: HomeAddressBar(),\n                                ),\n                              ),"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Shortening address bar width",
+  "toolSummary": "Shorten address bar"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Align address bar to green lines",
+  "Instruction": "Make the address bar take up the exact space between the logo and the right alignment of the search box, as indicated by the user's green lines, by using Expanded and adding a fixed right padding to match the profile button below.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 292,
+      "ReplacementContent": "                              // Adres Seçimi (Yeşil çizgilere tam oturması için Expanded ve sağdan boşluk)\n                              const Expanded(\n                                child: SizedBox(\n                                  height: 36,\n                                  child: HomeAddressBar(),\n                                ),\n                              ),\n                              const SizedBox(width: 56), // Sağdaki profil butonunun hizasına gelmesi için boşluk",
+      "StartLine": 284,
+      "TargetContent": "                              // Adres Seçimi (Daha ince, ortaya yakın ve daha kısa)\n                              const SizedBox(\n                                width: 160, // Genişlik kısaltıldı (yaklaşık yarısı)\n                                height: 36, // İnceltildi\n                                child: HomeAddressBar(),\n                              ),\n                              const Spacer(), // Sağa doğru uzamasını engeller ve ortada tutar"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Aligning address bar to green lines",
+  "toolSummary": "Align address bar"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Add notification button",
+  "Instruction": "Add a notifications button next to the address bar.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 291,
+      "ReplacementContent": "                              const Expanded(\n                                child: SizedBox(\n                                  height: 36,\n                                  child: HomeAddressBar(),\n                                ),\n                              ),\n                              const SizedBox(width: 8),\n                              // Bildirimler Butonu\n                              Container(\n                                height: 36,\n                                width: 36,\n                                decoration: BoxDecoration(\n                                  color: Colors.white,\n                                  shape: BoxShape.circle,\n                                  boxShadow: AppColors.softShadow,\n                                ),\n                                child: IconButton(\n                                  padding: EdgeInsets.zero,\n                                  icon: const Icon(Icons.notifications_none_rounded, color: Colors.black87, size: 20),\n                                  onPressed: () {\n                                    // Notification action\n                                  },\n                                ),\n                              ),",
+      "StartLine": 285,
+      "TargetContent": "                              const Expanded(\n                                child: SizedBox(\n                                  height: 36,\n                                  child: HomeAddressBar(),\n                                ),\n                              ),\n                              const SizedBox(width: 56), // Sağdaki profil butonunun hizasına gelmesi için boşluk"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Adding notification button",
+  "toolSummary": "Update home page"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Remove bell from address bar",
+  "Instruction": "Remove the incorrectly placed bell from the address bar in home_page.dart.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 309,
+      "ReplacementContent": "                            ],",
+      "StartLine": 291,
+      "TargetContent": "                              const SizedBox(width: 8),\n                              // Bildirimler Butonu\n                              Container(\n                                height: 36,\n                                width: 36,\n                                decoration: BoxDecoration(\n                                  color: Colors.white,\n                                  shape: BoxShape.circle,\n                                  boxShadow: AppColors.softShadow,\n                                ),\n                                child: IconButton(\n                                  padding: EdgeInsets.zero,\n                                  icon: const Icon(Icons.notifications_none_rounded, color: Colors.black87, size: 20),\n                                  onPressed: () {\n                                    // Notification action\n                                  },\n                                ),\n                              ),\n                            ],"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Removing old bell location",
+  "toolSummary": "Fix old bell"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Handle Meşhur category filter",
+  "Instruction": "Update _filterByCategory to handle the 'Meşhur' category by querying Firebase for sponsored restaurants.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 184,
+      "ReplacementContent": "  void _filterByCategory(String categoryName) async {\n    setState(() {\n      _searchQuery = \"\"; // Kategori seçilince aramayı temizle\n      isLoading = true; // Yükleme göster\n    });\n\n    if (categoryName == \"Hepsi\") {\n      setState(() {\n        displayedRestaurants = List<Restaurant>.from(allRestaurants);\n        isLoading = false;\n      });\n    } else if (categoryName == \"Meşhur\") {\n      try {\n        // Firebase'den sponsorlu restoranların ID'lerini çek\n        final snapshot = await FirebaseFirestore.instance.collection('SponsorluRestoranlar').get();\n        final sponsoredIds = snapshot.docs.map((doc) => doc.id).toList();\n        \n        setState(() {\n          // allRestaurants içinde, ID'si sponsorlu listesinde olanları veya manuel isSponsored eklenmiş olanları filtrele\n          displayedRestaurants = allRestaurants.where((res) {\n            return sponsoredIds.contains(res.id) || sponsoredIds.contains(res.phone);\n          }).toList();\n          isLoading = false;\n        });\n      } catch (e) {\n        debugPrint(\"Sponsorlu restoranlar çekilemedi: $e\");\n        setState(() => isLoading = false);\n      }\n    } else {\n      setState(() {\n        displayedRestaurants = allRestaurants\n            .where(\n              (res) => res.category.toLowerCase() == categoryName.toLowerCase(),\n            )\n            .toList();\n        isLoading = false;\n      });\n    }\n  }",
+      "StartLine": 171,
+      "TargetContent": "  void _filterByCategory(String categoryName) {\n    setState(() {\n      _searchQuery = \"\"; // Kategori seçilince aramayı temizle\n      if (categoryName == \"Hepsi\") {\n        displayedRestaurants = List<Restaurant>.from(allRestaurants);\n      } else {\n        displayedRestaurants = allRestaurants\n            .where(\n              (res) => res.category.toLowerCase() == categoryName.toLowerCase(),\n            )\n            .toList();\n      }\n    });\n  }"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Handling Meşhur category click in home_page.dart",
+  "toolSummary": "Edit home_page.dart"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Fix flutter build errors",
+  "Instruction": "Add cloud_firestore import and fix phone property access on Restaurant model.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 14,
+      "ReplacementContent": "import 'package:mugut_gelsin/utils/dummy_data.dart';\nimport 'package:provider/provider.dart';\nimport 'package:mugut_gelsin/providers/navigation_provider.dart';\nimport 'package:mugut_gelsin/providers/address_provider.dart';\nimport 'package:cloud_firestore/cloud_firestore.dart';",
+      "StartLine": 10,
+      "TargetContent": "import 'package:mugut_gelsin/utils/dummy_data.dart';\nimport 'package:provider/provider.dart';\nimport 'package:mugut_gelsin/providers/navigation_provider.dart';\nimport 'package:mugut_gelsin/providers/address_provider.dart';"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 191,
+      "ReplacementContent": "        setState(() {\n          // allRestaurants içinde, ID'si veya docId'si sponsorlu listesinde olanları filtrele\n          displayedRestaurants = allRestaurants.where((res) {\n            return sponsoredIds.contains(res.id) || (res.docId != null && sponsoredIds.contains(res.docId));\n          }).toList();\n          isLoading = false;",
+      "StartLine": 186,
+      "TargetContent": "        setState(() {\n          // allRestaurants içinde, ID'si sponsorlu listesinde olanları veya manuel isSponsored eklenmiş olanları filtrele\n          displayedRestaurants = allRestaurants.where((res) {\n            return sponsoredIds.contains(res.id) || sponsoredIds.contains(res.phone);\n          }).toList();\n          isLoading = false;"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Fixing flutter build errors",
+  "toolSummary": "Fix Build Errors"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Fetch full documents from SponsorluRestoranlar",
+  "Instruction": "Update the Meşhur category filter to fetch full documents from SponsorluRestoranlar and parse them to Restaurant objects instead of just filtering allRestaurants.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 194,
+      "ReplacementContent": "    } else if (categoryName == \"Meşhur\") {\n      try {\n        // Firebase'den sponsorlu restoranları tam doküman olarak çek\n        final snapshot = await FirebaseFirestore.instance.collection('SponsorluRestoranlar').get();\n        final apiService = ApiService();\n        \n        final sponsoredRestaurants = snapshot.docs.map((doc) {\n          final data = doc.data();\n          // doc.data() is Map<String, dynamic>\n          return apiService.mapFirestoreToRestaurant(data, doc.id);\n        }).toList();\n        \n        setState(() {\n          // Doğrudan SponsorluRestoranlar'dan gelen dokümanları ekranda göster\n          displayedRestaurants = sponsoredRestaurants;\n          isLoading = false;\n        });\n      } catch (e) {\n        debugPrint(\"Sponsorlu restoranlar çekilemedi: $e\");\n        setState(() => isLoading = false);\n      }\n    } else {",
+      "StartLine": 181,
+      "TargetContent": "    } else if (categoryName == \"Meşhur\") {\n      try {\n        // Firebase'den sponsorlu restoranların ID'lerini çek\n        final snapshot = await FirebaseFirestore.instance.collection('SponsorluRestoranlar').get();\n        final sponsoredIds = snapshot.docs.map((doc) => doc.id).toList();\n        \n        setState(() {\n          // allRestaurants içinde, ID'si veya docId'si sponsorlu listesinde olanları filtrele\n          displayedRestaurants = allRestaurants.where((res) {\n            return sponsoredIds.contains(res.id) || (res.docId != null && sponsoredIds.contains(res.docId));\n          }).toList();\n          isLoading = false;\n        });\n      } catch (e) {\n        debugPrint(\"Sponsorlu restoranlar çekilemedi: $e\");\n        setState(() => isLoading = false);\n      }\n    } else {"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Fetching sponsored restaurants data",
+  "toolSummary": "Edit home_page.dart"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Pass allRestaurants to CategoryList",
+  "Instruction": "Pass the full allRestaurants list to CategoryList so it can use the fully populated restaurant objects (including menus).",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 414,
+      "ReplacementContent": "                                  CategoryList(\n                                    allRestaurants: allRestaurants,\n                                    onCategorySelected: (category) => _filterByCategory(category),\n                                  ),",
+      "StartLine": 412,
+      "TargetContent": "                                  CategoryList(\n                                    onCategorySelected: (category) => _filterByCategory(category),\n                                  ),"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Passing allRestaurants to CategoryList",
+  "toolSummary": "Edit home_page.dart"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Fetch and pass campaigns to UI",
+  "Instruction": "Update home_page.dart to fetch and pass campaigns to BannerSlider and RestaurantGrid",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 25,
+      "ReplacementContent": "import 'package:mugut_gelsin/pages/restaurant/restaurant_detail_page.dart';\nimport 'package:mugut_gelsin/providers/address_provider.dart';\nimport 'package:mugut_gelsin/models/campaign_model.dart';",
+      "StartLine": 24,
+      "TargetContent": "import 'package:mugut_gelsin/pages/restaurant/restaurant_detail_page.dart';\nimport 'package:mugut_gelsin/providers/address_provider.dart';"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 40,
+      "ReplacementContent": "  List<FoodWithRestaurant> matchedFoods = []; // âœ… Arama ile eşleşen yemekler\n  List<Campaign> _campaigns = []; // âœ… Kampanyalar listesi\n  String _searchQuery = \"\"; // âœ… Mevcut arama sorgusu",
+      "StartLine": 38,
+      "TargetContent": "  List<FoodWithRestaurant> matchedFoods = []; // âœ… Arama ile eşleşen yemekler\n  String _searchQuery = \"\"; // âœ… Mevcut arama sorgusu"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 95,
+      "ReplacementContent": "  Future<void> _loadData() async {\n    final apiService = ApiService();\n    final restaurants = await apiService.fetchRestaurants();\n    final campaignsData = await apiService.fetchCampaigns();\n    \n    if (!mounted) return;\n    setState(() {\n      _campaigns = campaignsData;\n      if (restaurants.isEmpty) {",
+      "StartLine": 91,
+      "TargetContent": "  Future<void> _loadData() async {\n    final apiService = ApiService();\n    final restaurants = await apiService.fetchRestaurants();\n    setState(() {\n      if (restaurants.isEmpty) {"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 400,
+      "ReplacementContent": "                                ),\n                                RestaurantGrid(\n                                  restaurants: displayedRestaurants,\n                                  campaigns: _campaigns,\n                                ),\n                              ],",
+      "StartLine": 397,
+      "TargetContent": "                                ),\n                                RestaurantGrid(restaurants: displayedRestaurants),\n                              ],"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 406,
+      "ReplacementContent": "                              if (_searchQuery.isEmpty) ...[\n                                BannerSlider(\n                                  campaigns: _campaigns,\n                                  restaurants: allRestaurants,\n                                  onRestaurantSelected: _navigateToRestaurant,\n                                  onCategorySelected: _filterByCategory,\n                                ),",
+      "StartLine": 402,
+      "TargetContent": "                              if (_searchQuery.isEmpty) ...[\n                                BannerSlider(\n                                  restaurants: allRestaurants,\n                                  onRestaurantSelected: _navigateToRestaurant,\n                                  onCategorySelected: _filterByCategory,\n                                ),"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 466,
+      "ReplacementContent": "                                ),\n                                RestaurantGrid(\n                                  restaurants: displayedRestaurants,\n                                  campaigns: _campaigns,\n                                ),\n                              ],",
+      "StartLine": 463,
+      "TargetContent": "                                ),\n                                RestaurantGrid(restaurants: displayedRestaurants),\n                              ],"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Updating home_page.dart campaigns",
+  "toolSummary": "Edit home_page.dart"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Filter restaurants by region",
+  "Instruction": "Filter the fetched restaurants based on the user's default address city (region) before setting allRestaurants",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 115,
+      "ReplacementContent": "      if (restaurants.isEmpty) {\n        allRestaurants = dummyRestaurants; // âœ… Hata durumunda dummy veri göster\n        // Hata durumunda kullanıcıyı bilgilendir\n        ScaffoldMessenger.of(context).showSnackBar(\n          SnackBar(\n            content: const Text(\"Sunucuya bağlanılamadı, demo veriler gösteriliyor.\"),\n            backgroundColor: AppColors.primary,\n            duration: const Duration(seconds: 3),\n          ),\n        );\n      } else {\n        // --- BÖLGE FİLTRELEMESİ ---\n        final addressProvider = context.read<AddressProvider>();\n        final defaultAddress = addressProvider.defaultAddress;\n        final String userCity = defaultAddress?.city ?? 'Aşgabat';\n        \n        allRestaurants = restaurants.where((r) => r.region.toLowerCase() == userCity.toLowerCase() || r.region == 'Atanmadı').toList();\n        \n        // Eğer bölgede hiç restoran yoksa, Aşgabat restoranlarını göster (kullanıcıyı boş sayfa ile bırakmamak için)\n        if (allRestaurants.isEmpty) {\n            allRestaurants = restaurants.where((r) => r.region.toLowerCase() == 'aşgabat').toList();\n        }\n      }\n\n      // âœ… EN UCUZ YEMEKLERİ HESAPLA",
+      "StartLine": 101,
+      "TargetContent": "      if (restaurants.isEmpty) {\n        allRestaurants = dummyRestaurants; // âœ… Hata durumunda dummy veri göster\n        // Hata durumunda kullanıcıyı bilgilendir\n        ScaffoldMessenger.of(context).showSnackBar(\n          SnackBar(\n            content: const Text(\"Sunucuya bağlanılamadı, demo veriler gösteriliyor.\"),\n            backgroundColor: AppColors.primary,\n            duration: const Duration(seconds: 3),\n          ),\n        );\n      } else {\n        allRestaurants = restaurants;\n      }\n\n      // âœ… EN UCUZ YEMEKLERİ HESAPLA"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Adding region filter to home_page",
+  "toolSummary": "Edit home_page.dart"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Convert home_page to real-time stream",
+  "Instruction": "Use getRestaurantsStream() instead of fetchRestaurants() for real-time updates",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 47,
+      "ReplacementContent": "  int _lastResetCounter = 0; // âœ… Sıfırlama takibi için\n  final ScrollController _scrollController = ScrollController(); // âœ… Yukarı kaydırmak için\n  Set<String> _selectedFilters = {}; // Missing filter state\n  StreamSubscription<List<Restaurant>>? _restaurantSub;",
+      "StartLine": 44,
+      "TargetContent": "  int _lastResetCounter = 0; // âœ… Sıfırlama takibi için\n  final ScrollController _scrollController = ScrollController(); // âœ… Yukarı kaydırmak için\n  Set<String> _selectedFilters = {}; // Missing filter state"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 91,
+      "ReplacementContent": "  @override\n  void dispose() {\n    _searchDebounce?.cancel(); // âœ… Timer'ı temizle\n    _scrollController.dispose(); // âœ… Controller'ı temizle\n    _restaurantSub?.cancel(); // Stream dinleyicisini temizle\n    super.dispose();\n  }",
+      "StartLine": 86,
+      "TargetContent": "  @override\n  void dispose() {\n    _searchDebounce?.cancel(); // âœ… Timer'ı temizle\n    _scrollController.dispose(); // âœ… Controller'ı temizle\n    super.dispose();\n  }"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 146,
+      "ReplacementContent": "  Future<void> _loadData() async {\n    final apiService = ApiService();\n    \n    // Kampanyaları bir kere çek\n    final campaignsData = await apiService.fetchCampaigns();\n    if (mounted) {\n      setState(() {\n        _campaigns = campaignsData;\n      });\n    }\n\n    // Restoranları canlı stream olarak dinle\n    _restaurantSub?.cancel();\n    _restaurantSub = apiService.getRestaurantsStream().listen((restaurants) {\n      if (!mounted) return;\n      setState(() {\n        if (restaurants.isEmpty) {\n          allRestaurants = dummyRestaurants; // Hata durumunda dummy veri göster\n        } else {\n          // --- BÖLGE FİLTRELEMESİ ---\n          final addressProvider = context.read<AddressProvider>();\n          final defaultAddress = addressProvider.defaultAddress;\n          final String userCity = defaultAddress?.city ?? 'Aşgabat';\n          \n          allRestaurants = restaurants.where((r) => r.region.toLowerCase() == userCity.toLowerCase() || r.region == 'Atanmadı').toList();\n          \n          // Eğer bölgede hiç restoran yoksa, Aşgabat restoranlarını göster\n          if (allRestaurants.isEmpty) {\n              allRestaurants = restaurants.where((r) => r.region.toLowerCase() == 'aşgabat').toList();\n          }\n        }\n\n        // âœ… EN UCUZ YEMEKLERİ HESAPLA\n        cheapestFoods = [];\n        for (var res in allRestaurants) {\n          for (var food in res.menu) {\n            cheapestFoods.add(FoodWithRestaurant(\n              food: food,\n              restaurantId: res.id,\n              restaurantName: res.name,\n            ));\n          }\n        }\n        cheapestFoods.sort((a, b) => a.food.price.compareTo(b.food.price));\n        if (cheapestFoods.length > 10) {\n          cheapestFoods = cheapestFoods.sublist(0, 10);\n        }\n\n        // Arama sorgusuna göre filtrelemeyi tekrar uygula\n        if (_searchQuery.isNotEmpty && _searchQuery != \"Tüm Ürünler\") {\n          final lowercaseQuery = _searchQuery.toLowerCase();\n          displayedRestaurants = allRestaurants.where((res) {\n            final nameMatch = res.name.toLowerCase().contains(lowercaseQuery);\n            final foodMatch = res.menu.any((food) => \n              food.name.toLowerCase().contains(lowercaseQuery) || \n              food.description.toLowerCase().contains(lowercaseQuery)\n            );\n            return nameMatch || foodMatch;\n          }).toList();\n        } else {\n          displayedRestaurants = List.from(allRestaurants);\n        }\n        \n        isLoading = false;\n      });\n    }, onError: (error) {\n       debugPrint(\"Stream error: $error\");\n       if (mounted) {\n         setState(() {\n           isLoading = false;\n           allRestaurants = dummyRestaurants;\n           displayedRestaurants = dummyRestaurants;\n         });\n       }\n    });\n  }",
+      "StartLine": 93,
+      "TargetContent": "  Future<void> _loadData() async {\n    final apiService = ApiService();\n    final restaurants = await apiService.fetchRestaurants();\n    final campaignsData = await apiService.fetchCampaigns();\n    \n    if (!mounted) return;\n    setState(() {\n      _campaigns = campaignsData;\n      if (restaurants.isEmpty) {\n        allRestaurants = dummyRestaurants; // âœ… Hata durumunda dummy veri göster\n        // Hata durumunda kullanıcıyı bilgilendir\n        ScaffoldMessenger.of(context).showSnackBar(\n          SnackBar(\n            content: const Text(\"Sunucuya bağlanılamadı, demo veriler gösteriliyor.\"),\n            backgroundColor: AppColors.primary,\n            duration: const Duration(seconds: 3),\n          ),\n        );\n      } else {\n        // --- BÖLGE FİLTRELEMESİ ---\n        final addressProvider = context.read<AddressProvider>();\n        final defaultAddress = addressProvider.defaultAddress;\n        final String userCity = defaultAddress?.city ?? 'Aşgabat';\n        \n        allRestaurants = restaurants.where((r) => r.region.toLowerCase() == userCity.toLowerCase() || r.region == 'Atanmadı').toList();\n        \n        // Eğer bölgede hiç restoran yoksa, Aşgabat restoranlarını göster (kullanıcıyı boş sayfa ile bırakmamak için)\n        if (allRestaurants.isEmpty) {\n            allRestaurants = restaurants.where((r) => r.region.toLowerCase() == 'aşgabat').toList();\n        }\n      }\n\n      // âœ… EN UCUZ YEMEKLERİ HESAPLA\n      cheapestFoods = [];\n      for (var res in allRestaurants) {\n        for (var food in res.menu) {\n          cheapestFoods.add(FoodWithRestaurant(\n            food: food,\n            restaurantId: res.id,\n            restaurantName: res.name,\n          ));\n        }\n      }\n      // Fiyata göre sırala ve ilk 10'u al\n      cheapestFoods.sort((a, b) => a.food.price.compareTo(b.food.price));\n      if (cheapestFoods.length > 10) {\n        cheapestFoods = cheapestFoods.sublist(0, 10);\n      }\n\n      displayedRestaurants = List.from(allRestaurants);\n      isLoading = false;\n    });\n  }"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Converting home page to listen to firestore stream for instant updates",
+  "toolSummary": "Edit home_page.dart"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Make region filter strict and default to Aşgabat",
+  "Instruction": "Remove Atanmadı fallback from filter and default region to Aşgabat",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 120,
+      "ReplacementContent": "          final String userCity = defaultAddress?.city ?? 'Aşgabat';\n          \n          allRestaurants = restaurants.where((r) => r.region.toLowerCase() == userCity.toLowerCase()).toList();",
+      "StartLine": 117,
+      "TargetContent": "          final String userCity = defaultAddress?.city ?? 'Aşgabat';\n          \n          allRestaurants = restaurants.where((r) => r.region.toLowerCase() == userCity.toLowerCase() || r.region == 'Atanmadı').toList();"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Making region filter strict in home_page.dart",
+  "toolSummary": "Edit home_page.dart"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Remove the empty region fallback",
+  "Instruction": "Delete the fallback to Aşgabat if allRestaurants is empty",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 125,
+      "ReplacementContent": "          final String userCity = defaultAddress?.city ?? 'Aşgabat';\n          \n          allRestaurants = restaurants.where((r) => r.region.toLowerCase() == userCity.toLowerCase()).toList();\n        }",
+      "StartLine": 116,
+      "TargetContent": "          final defaultAddress = addressProvider.defaultAddress;\n          final String userCity = defaultAddress?.city ?? 'Aşgabat';\n          \n          allRestaurants = restaurants.where((r) => r.region.toLowerCase() == userCity.toLowerCase()).toList();\n          \n          // Eğer bölgede hiç restoran yoksa, Aşgabat restoranlarını göster\n          if (allRestaurants.isEmpty) {\n              allRestaurants = restaurants.where((r) => r.region.toLowerCase() == 'aşgabat').toList();\n          }\n        }"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Removing the region fallback bug in home_page.dart",
+  "toolSummary": "Edit home_page.dart"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Fix missing defaultAddress variable",
+  "Instruction": "Restore defaultAddress variable definition",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 116,
+      "ReplacementContent": "          final addressProvider = context.read<AddressProvider>();\n          final defaultAddress = addressProvider.defaultAddress;\n          final String userCity = defaultAddress?.city ?? 'Aşgabat';",
+      "StartLine": 115,
+      "TargetContent": "          final addressProvider = context.read<AddressProvider>();\n          final String userCity = defaultAddress?.city ?? 'Aşgabat';"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Fixing variable definition in home_page.dart",
+  "toolSummary": "Edit home_page.dart"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Use DistanceCalculator for GPS-based filtering",
+  "Instruction": "Import distance_calculator.dart and replace region matching with GPS distance filtering",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 27,
+      "ReplacementContent": "import 'package:mugut_gelsin/models/campaign_model.dart';\nimport 'package:mugut_gelsin/utils/distance_calculator.dart';",
+      "StartLine": 26,
+      "TargetContent": "import 'package:mugut_gelsin/models/campaign_model.dart';"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 120,
+      "ReplacementContent": "          // --- BÖLGE YERİNE GPS (MESAFE) FİLTRELEMESİ ---\n          final addressProvider = context.read<AddressProvider>();\n          final defaultAddress = addressProvider.defaultAddress;\n          \n          allRestaurants = DistanceCalculator.filterAndSortRestaurants(\n            restaurants: restaurants,\n            userAddress: defaultAddress,\n            maxDistanceKm: 50.0, // 50 km yarıçapında olanları listele\n            hideWithoutCoordinates: true, // Koordinatı olmayan (eski) dükkanları gizle\n          );\n        }",
+      "StartLine": 114,
+      "TargetContent": "          // --- BÖLGE FİLTRELEMESİ ---\n          final addressProvider = context.read<AddressProvider>();\n          final defaultAddress = addressProvider.defaultAddress;\n          final String userCity = defaultAddress?.city ?? 'Aşgabat';\n          \n          allRestaurants = restaurants.where((r) => r.region.toLowerCase() == userCity.toLowerCase()).toList();\n        }"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Implementing GPS filtering in home_page.dart",
+  "toolSummary": "Edit home_page.dart"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Refactor filtering logic to react to address changes",
+  "Instruction": "Add _rawRestaurants, _lastAddress, didChangeDependencies, and extract _applyFilters",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 48,
+      "ReplacementContent": "  Set<String> _selectedFilters = {}; // Missing filter state\n  StreamSubscription<List<Restaurant>>? _restaurantSub;\n  List<Restaurant> _rawRestaurants = []; // Firestore'dan gelen ham veri\n  Address? _lastAddress;\n\n  @override\n  void didChangeDependencies() {\n    super.didChangeDependencies();\n    final currentAddress = Provider.of<AddressProvider>(context).defaultAddress;\n    if (_lastAddress?.id != currentAddress?.id || _lastAddress?.city != currentAddress?.city) {\n      _lastAddress = currentAddress;\n      if (_rawRestaurants.isNotEmpty) {\n        // Build içinde setState çağırmamak için post frame\n        WidgetsBinding.instance.addPostFrameCallback((_) {\n          if (mounted) _applyFilters();\n        });\n      }\n    }\n  }",
+      "StartLine": 47,
+      "TargetContent": "  Set<String> _selectedFilters = {}; // Missing filter state\n  StreamSubscription<List<Restaurant>>? _restaurantSub;"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 169,
+      "ReplacementContent": "    // Restoranları canlı stream olarak dinle\n    _restaurantSub?.cancel();\n    _restaurantSub = apiService.getRestaurantsStream().listen((restaurants) {\n      if (!mounted) return;\n      _rawRestaurants = restaurants;\n      _applyFilters();\n    }, onError: (error) {\n       debugPrint(\"Stream error: $error\");\n       if (mounted) {\n         setState(() {\n           isLoading = false;\n           _rawRestaurants = [];\n           allRestaurants = dummyRestaurants;\n           displayedRestaurants = dummyRestaurants;\n         });\n       }\n    });\n  }\n\n  void _applyFilters() {\n    if (!mounted) return;\n    setState(() {\n      if (_rawRestaurants.isEmpty) {\n        allRestaurants = dummyRestaurants; // Hata durumunda dummy veri göster\n      } else {\n        // --- GPS (MESAFE) FİLTRELEMESİ ---\n        final defaultAddress = context.read<AddressProvider>().defaultAddress;\n        \n        allRestaurants = DistanceCalculator.filterAndSortRestaurants(\n          restaurants: _rawRestaurants,\n          userAddress: defaultAddress,\n          maxDistanceKm: 50.0, // 50 km yarıçapında olanları listele\n          hideWithoutCoordinates: true, // Koordinatı olmayan (eski) dükkanları gizle\n        );\n      }\n\n      // EN UCUZ YEMEKLERİ HESAPLA\n      cheapestFoods = [];\n      for (var res in allRestaurants) {\n        for (var food in res.menu) {\n          cheapestFoods.add(FoodWithRestaurant(\n            food: food,\n            restaurantId: res.id,\n            restaurantName: res.name,\n          ));\n        }\n      }\n      cheapestFoods.sort((a, b) => a.food.price.compareTo(b.food.price));\n      if (cheapestFoods.length > 10) {\n        cheapestFoods = cheapestFoods.sublist(0, 10);\n      }\n\n      // Arama sorgusuna göre filtrelemeyi tekrar uygula\n      if (_searchQuery.isNotEmpty && _searchQuery != \"Tüm Ürünler\") {\n        final lowercaseQuery = _searchQuery.toLowerCase();\n        displayedRestaurants = allRestaurants.where((res) {\n          final nameMatch = res.name.toLowerCase().contains(lowercaseQuery);\n          final foodMatch = res.menu.any((food) => \n            food.name.toLowerCase().contains(lowercaseQuery) || \n            food.description.toLowerCase().contains(lowercaseQuery)\n          );\n          return nameMatch || foodMatch;\n        }).toList();\n      } else {\n        displayedRestaurants = List.from(allRestaurants);\n      }\n      \n      isLoading = false;\n    });\n  }",
+      "StartLine": 107,
+      "TargetContent": "    // Restoranları canlı stream olarak dinle\n    _restaurantSub?.cancel();\n    _restaurantSub = apiService.getRestaurantsStream().listen((restaurants) {\n      if (!mounted) return;\n      setState(() {\n        if (restaurants.isEmpty) {\n          allRestaurants = dummyRestaurants; // Hata durumunda dummy veri göster\n        } else {\n          // --- BÖLGE YERİNE GPS (MESAFE) FİLTRELEMESİ ---\n          final addressProvider = context.read<AddressProvider>();\n          final defaultAddress = addressProvider.defaultAddress;\n          \n          allRestaurants = DistanceCalculator.filterAndSortRestaurants(\n            restaurants: restaurants,\n            userAddress: defaultAddress,\n            maxDistanceKm: 50.0, // 50 km yarıçapında olanları listele\n            hideWithoutCoordinates: true, // Koordinatı olmayan (eski) dükkanları gizle\n          );\n        }\n\n        // âœ… EN UCUZ YEMEKLERİ HESAPLA\n        cheapestFoods = [];\n        for (var res in allRestaurants) {\n          for (var food in res.menu) {\n            cheapestFoods.add(FoodWithRestaurant(\n              food: food,\n              restaurantId: res.id,\n              restaurantName: res.name,\n            ));\n          }\n        }\n        cheapestFoods.sort((a, b) => a.food.price.compareTo(b.food.price));\n        if (cheapestFoods.length > 10) {\n          cheapestFoods = cheapestFoods.sublist(0, 10);\n        }\n\n        // Arama sorgusuna göre filtrelemeyi tekrar uygula\n        if (_searchQuery.isNotEmpty && _searchQuery != \"Tüm Ürünler\") {\n          final lowercaseQuery = _searchQuery.toLowerCase();\n          displayedRestaurants = allRestaurants.where((res) {\n            final nameMatch = res.name.toLowerCase().contains(lowercaseQuery);\n            final foodMatch = res.menu.any((food) => \n              food.name.toLowerCase().contains(lowercaseQuery) || \n              food.description.toLowerCase().contains(lowercaseQuery)\n            );\n            return nameMatch || foodMatch;\n          }).toList();\n        } else {\n          displayedRestaurants = List.from(allRestaurants);\n        }\n        \n        isLoading = false;\n      });\n    }, onError: (error) {\n       debugPrint(\"Stream error: $error\");\n       if (mounted) {\n         setState(() {\n           isLoading = false;\n           allRestaurants = dummyRestaurants;\n           displayedRestaurants = dummyRestaurants;\n         });\n       }\n    });\n  }"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Fixing the filter update bug in home_page.dart",
+  "toolSummary": "Edit home_page.dart"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Import address_model.dart",
+  "Instruction": "Add import for address_model.dart",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 28,
+      "ReplacementContent": "import 'package:mugut_gelsin/utils/distance_calculator.dart';\nimport 'package:mugut_gelsin/models/address_model.dart';",
+      "StartLine": 27,
+      "TargetContent": "import 'package:mugut_gelsin/utils/distance_calculator.dart';"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Fixing compilation error by importing Address model",
+  "toolSummary": "Edit home_page.dart"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Remove FilterChips from home page",
+  "Instruction": "Remove the FilterChips widget from home_page.dart",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 480,
+      "ReplacementContent": "",
+      "StartLine": 477,
+      "TargetContent": "                                FilterChips(\n                                  selectedFilters: _selectedFilters,\n                                  onFilterToggled: _toggleFilter,\n                                ),"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Removing FilterChips from home page",
+  "toolSummary": "Edit home_page.dart"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Move notification and live support icons to the top bar",
+  "Instruction": "Add LiveSupportPage import. Add the notification and support icons next to the HomeAddressBar in the top row.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 25,
+      "ReplacementContent": "import 'package:mugut_gelsin/pages/home/widgets/horizontal_food_list.dart';\nimport 'package:mugut_gelsin/presentation/common/cards/food_card.dart';\nimport 'package:mugut_gelsin/pages/restaurant/restaurant_detail_page.dart';\nimport 'package:mugut_gelsin/pages/profile/live_support_page.dart';\nimport 'package:mugut_gelsin/providers/address_provider.dart';",
+      "StartLine": 22,
+      "TargetContent": "import 'package:mugut_gelsin/pages/home/widgets/horizontal_food_list.dart';\nimport 'package:mugut_gelsin/presentation/common/cards/food_card.dart';\nimport 'package:mugut_gelsin/pages/restaurant/restaurant_detail_page.dart';\nimport 'package:mugut_gelsin/providers/address_provider.dart';"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 388,
+      "ReplacementContent": "                              // Adres Seçimi (Yeşil çizgilere tam oturması için Expanded ve sağdan boşluk)\n                              const Expanded(\n                                child: SizedBox(\n                                  height: 36,\n                                  child: HomeAddressBar(),\n                                ),\n                              ),\n                              const SizedBox(width: 8),\n                              // BİLDİRİMLER BUTONU\n                              InkWell(\n                                onTap: () {\n                                  // Notification action\n                                },\n                                borderRadius: BorderRadius.circular(12),\n                                child: Container(\n                                  height: 36,\n                                  width: 36,\n                                  decoration: BoxDecoration(\n                                    color: Colors.white,\n                                    borderRadius: BorderRadius.circular(12),\n                                    border: Border.all(color: Colors.grey.shade200),\n                                    boxShadow: [\n                                      BoxShadow(\n                                        color: Colors.black.withOpacity(0.02),\n                                        blurRadius: 4,\n                                        offset: const Offset(0, 2),\n                                      ),\n                                    ],\n                                  ),\n                                  child: const Center(\n                                    child: Icon(Icons.notifications_none_rounded, color: AppColors.primary, size: 20),\n                                  ),\n                                ),\n                              ),\n                              const SizedBox(width: 8),\n                              // DESTEK BUTONU\n                              InkWell(\n                                onTap: () {\n                                  Navigator.push(context, MaterialPageRoute(builder: (context) => const LiveSupportPage()));\n                                },\n                                borderRadius: BorderRadius.circular(12),\n                                child: Container(\n                                  height: 36,\n                                  width: 36,\n                                  decoration: BoxDecoration(\n                                    color: Colors.white,\n                                    borderRadius: BorderRadius.circular(12),\n                                    border: Border.all(color: Colors.grey.shade200),\n                                    boxShadow: [\n                                      BoxShadow(\n                                        color: Colors.black.withOpacity(0.02),\n                                        blurRadius: 4,\n                                        offset: const Offset(0, 2),\n                                      ),\n                                    ],\n                                  ),\n                                  child: const Center(\n                                    child: Icon(Icons.support_agent_rounded, color: AppColors.primary, size: 20),\n                                  ),\n                                ),\n                              ),\n                            ],",
+      "StartLine": 381,
+      "TargetContent": "                              // Adres Seçimi (Yeşil çizgilere tam oturması için Expanded ve sağdan boşluk)\n                              const Expanded(\n                                child: SizedBox(\n                                  height: 36,\n                                  child: HomeAddressBar(),\n                                ),\n                              ),\n                            ],"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Adding icons to top bar",
+  "toolSummary": "Edit home_page.dart"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Filter BannerSlider campaigns by isAppBanner",
+  "Instruction": "Filter the campaigns passed to BannerSlider to only include those with isAppBanner == true.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 401,
+      "ReplacementContent": "                                BannerSlider(\n                                  campaigns: _campaigns.where((c) => c.isAppBanner).toList(),\n                                  restaurants: allRestaurants,",
+      "StartLine": 399,
+      "TargetContent": "                                BannerSlider(\n                                  campaigns: _campaigns,\n                                  restaurants: allRestaurants,"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Filtering BannerSlider campaigns",
+  "toolSummary": "Edit home_page.dart"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Add onTap action to notification bell",
+  "Instruction": "Add NotificationService import and update the onTap for the notification bell to call initialize() and show a snackbar.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 27,
+      "ReplacementContent": "import 'package:mugut_gelsin/pages/live_support/live_support_page.dart';\nimport 'package:mugut_gelsin/services/notification_service.dart';\nimport 'package:provider/provider.dart';",
+      "StartLine": 25,
+      "TargetContent": "import 'package:mugut_gelsin/pages/live_support/live_support_page.dart';\nimport 'package:provider/provider.dart';"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 396,
+      "ReplacementContent": "                                  onTap: () async {\n                                    // Butona basıldığında bildirim izni iste (Web tarayıcıları kullanıcı tıklaması olmadan izin penceresi açmayı engelleyebiliyor)\n                                    await NotificationService.initialize();\n                                    \n                                    if (context.mounted) {\n                                      ScaffoldMessenger.of(context).showSnackBar(\n                                        const SnackBar(\n                                          content: Text('Şu an için yeni bir bildiriminiz bulunmuyor.'),\n                                          duration: Duration(seconds: 2),\n                                          backgroundColor: AppColors.primary,\n                                        ),\n                                      );\n                                    }\n                                  },\n                                  borderRadius: BorderRadius.circular(12),",
+      "StartLine": 391,
+      "TargetContent": "                                  onTap: () {\n                                    // Notification action\n                                  },\n                                  borderRadius: BorderRadius.circular(12),"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Making notification bell clickable",
+  "toolSummary": "Edit home_page.dart"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Navigate to Notifications Page",
+  "Instruction": "Import notifications_page and replace the snackbar logic in the bell icon onTap with a Navigator.push call.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 26,
+      "ReplacementContent": "import 'package:mugut_gelsin/pages/live_support/live_support_page.dart';\nimport 'package:mugut_gelsin/pages/home/notifications_page.dart';\nimport 'package:mugut_gelsin/services/notification_service.dart';",
+      "StartLine": 24,
+      "TargetContent": "import 'package:mugut_gelsin/pages/restaurant/restaurant_detail_page.dart';\nimport 'package:mugut_gelsin/pages/live_support/live_support_page.dart';\nimport 'package:mugut_gelsin/services/notification_service.dart';"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 404,
+      "ReplacementContent": "                                  // Butona basıldığında bildirim izni iste (Eğer henüz verilmediyse)\n                                  await NotificationService.initialize();\n                                  \n                                  if (context.mounted) {\n                                    Navigator.push(\n                                      context,\n                                      MaterialPageRoute(builder: (context) => const NotificationsPage()),\n                                    );\n                                  }\n                                },",
+      "StartLine": 392,
+      "TargetContent": "                                  // Butona basıldığında bildirim izni iste (Web tarayıcıları kullanıcı tıklaması olmadan izin penceresi açmayı engelleyebiliyor)\n                                  await NotificationService.initialize();\n                                  \n                                  if (context.mounted) {\n                                    ScaffoldMessenger.of(context).showSnackBar(\n                                      const SnackBar(\n                                        content: Text('Şu an için yeni bir bildiriminiz bulunmuyor.'),\n                                        duration: Duration(seconds: 2),\n                                        backgroundColor: AppColors.primary,\n                                      ),\n                                    );\n                                  }\n                                },"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Navigation to notifications page",
+  "toolSummary": "Edit home_page.dart"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Fix wrong live support import",
+  "Instruction": "Fix the broken live_support_page.dart import path that was accidentally changed in the previous edit.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 26,
+      "ReplacementContent": "import 'package:mugut_gelsin/pages/profile/live_support_page.dart';\nimport 'package:mugut_gelsin/pages/home/notifications_page.dart';\nimport 'package:mugut_gelsin/services/notification_service.dart';",
+      "StartLine": 22,
+      "TargetContent": "import 'package:mugut_gelsin/pages/live_support/live_support_page.dart';\nimport 'package:mugut_gelsin/pages/home/notifications_page.dart';\nimport 'package:mugut_gelsin/services/notification_service.dart';"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Fixing broken import path",
+  "toolSummary": "Edit home_page.dart"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Make header orange and move logo above location bar",
+  "Instruction": "Restructure the header Container in home_page.dart to have an orange background, place the white Mugut Gelsin logo and buttons in a Row at the top, and put the HomeAddressBar below them.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 452,
+      "ReplacementContent": "                        // Üst başlık (Turuncu zemin)\n                        Container(\n                          width: double.infinity,\n                          color: AppColors.primary, // Turuncu zemin\n                          padding: EdgeInsets.only(\n                            top: MediaQuery.of(context).padding.top + 16,\n                            bottom: 16,\n                            left: 16,\n                            right: 16,\n                          ),\n                          child: Column(\n                            crossAxisAlignment: CrossAxisAlignment.start,\n                            children: [\n                              // Üst Satır: Logo ve Butonlar\n                              Row(\n                                mainAxisAlignment: MainAxisAlignment.spaceBetween,\n                                children: [\n                                  // Logo\n                                  Row(\n                                    crossAxisAlignment: CrossAxisAlignment.baseline,\n                                    textBaseline: TextBaseline.alphabetic,\n                                    children: [\n                                      Text(\n                                        \"Mugut\",\n                                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n                                          color: Colors.white,\n                                          fontWeight: FontWeight.w900,\n                                          fontSize: 22,\n                                          letterSpacing: -0.5,\n                                        ),\n                                      ),\n                                      const SizedBox(width: 4),\n                                      Text(\n                                        \"gelsin\",\n                                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n                                          color: Colors.white.withOpacity(0.9),\n                                          fontWeight: FontWeight.w900,\n                                          fontSize: 22,\n                                          letterSpacing: -0.5,\n                                        ),\n                                      ),\n                                    ],\n                                  ),\n                                  // Butonlar\n                                  Row(\n                                    children: [\n                                      // BİLDİRİMLER BUTONU\n                                      InkWell(\n                                        onTap: () async {\n                                          await NotificationService.initialize();\n                                          if (context.mounted) {\n                                            Navigator.push(\n                                              context,\n                                              MaterialPageRoute(builder: (context) => const NotificationsPage()),\n                                            );\n                                          }\n                                        },\n                                        borderRadius: BorderRadius.circular(12),\n                                        child: Container(\n                                          height: 38,\n                                          width: 38,\n                                          decoration: BoxDecoration(\n                                            color: Colors.white.withOpacity(0.2),\n                                            borderRadius: BorderRadius.circular(12),\n                                          ),\n                                          child: const Center(\n                                            child: Icon(Icons.notifications_none_rounded, color: Colors.white, size: 22),\n                                          ),\n                                        ),\n                                      ),\n                                      const SizedBox(width: 8),\n                                      // DESTEK BUTONU\n                                      InkWell(\n                                        onTap: () {\n                                          Navigator.push(context, MaterialPageRoute(builder: (context) => const LiveSupportPage()));\n                                        },\n                                        borderRadius: BorderRadius.circular(12),\n                                        child: Container(\n                                          height: 38,\n                                          width: 38,\n                                          decoration: BoxDecoration(\n                                            color: Colors.white.withOpacity(0.2),\n                                            borderRadius: BorderRadius.circular(12),\n                                          ),\n                                          child: const Center(\n                                            child: Icon(Icons.support_agent_rounded, color: Colors.white, size: 22),\n                                          ),\n                                        ),\n                                      ),\n                                    ],\n                                  ),\n                                ],\n                              ),\n                              const SizedBox(height: 16),\n                              // Alt Satır: Adres Seçimi\n                              const SizedBox(\n                                height: 42,\n                                child: HomeAddressBar(),\n                              ),\n                            ],\n                          ),\n                        ),",
+      "StartLine": 344,
+      "TargetContent": "                        // Üst başlık (Beyaz zemin)\n                        Container(\n                          width: double.infinity,\n                          color: AppColors.background, // Beyaz zemin\n                          padding: EdgeInsets.only(\n                            top: MediaQuery.of(context).padding.top + 16,\n                            bottom: 16,\n                            left: 16,\n                            right: 16,\n                          ),\n                          alignment: Alignment.centerLeft,\n                          child: Row(\n                            crossAxisAlignment: CrossAxisAlignment.center,\n                            children: [\n                              Column(\n                                crossAxisAlignment: CrossAxisAlignment.start,\n                                children: [\n                                  Text(\n                                    \"Mugut\",\n                                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n                                      color: Colors.black,\n                                      fontWeight: FontWeight.w900,\n                                      fontSize: 18,\n                                      letterSpacing: -0.5,\n                                      height: 1.0,\n                                    ),\n                                  ),\n                                  Text(\n                                    \"gelsin\",\n                                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(\n                                      color: AppColors.primary,\n                                      fontWeight: FontWeight.w900,\n                                      fontSize: 18,\n                                      letterSpacing: -0.5,\n                                      height: 1.0,\n                                    ),\n                                  ),\n                                ],\n                              ),\n                              const SizedBox(width: 16),\n                              // Adres Seçimi (Yeşil çizgilere tam oturması için Expanded ve sağdan boşluk)\n                              const Expanded(\n                                child: SizedBox(\n                                  height: 36,\n                                  child: HomeAddressBar(),\n                                ),\n                              ),\n                              const SizedBox(width: 8),\n                              // BİLDİRİMLER BUTONU\n                              InkWell(\n                                onTap: () async {\n                                  // Butona basıldığında bildirim izni iste (Eğer henüz verilmediyse)\n                                  await NotificationService.initialize();\n                                  \n                                  if (context.mounted) {\n                                    Navigator.push(\n                                      context,\n                                      MaterialPageRoute(builder: (context) => const NotificationsPage()),\n                                    );\n                                  }\n                                },\n                                borderRadius: BorderRadius.circular(12),\n                                child: Container(\n                                  height: 36,\n                                  width: 36,\n                                  decoration: BoxDecoration(\n                                    color: Colors.white,\n                                    borderRadius: BorderRadius.circular(12),\n                                    border: Border.all(color: Colors.grey.shade200),\n                                    boxShadow: [\n                                      BoxShadow(\n                                        color: Colors.black.withOpacity(0.02),\n                                        blurRadius: 4,\n                                        offset: const Offset(0, 2),\n                                      ),\n                                    ],\n                                  ),\n                                  child: const Center(\n                                    child: Icon(Icons.notifications_none_rounded, color: AppColors.primary, size: 20),\n                                  ),\n                                ),\n                              ),\n                              const SizedBox(width: 8),\n                              // DESTEK BUTONU\n                              InkWell(\n                                onTap: () {\n                                  Navigator.push(context, MaterialPageRoute(builder: (context) => const LiveSupportPage()));\n                                },\n                                borderRadius: BorderRadius.circular(12),\n                                child: Container(\n                                  height: 36,\n                                  width: 36,\n                                  decoration: BoxDecoration(\n                                    color: Colors.white,\n                                    borderRadius: BorderRadius.circular(12),\n                                    border: Border.all(color: Colors.grey.shade200),\n                                    boxShadow: [\n                                      BoxShadow(\n                                        color: Colors.black.withOpacity(0.02),\n                                        blurRadius: 4,\n                                        offset: const Offset(0, 2),\n                                      ),\n                                    ],\n                                  ),\n                                  child: const Center(\n                                    child: Icon(Icons.support_agent_rounded, color: AppColors.primary, size: 20),\n                                  ),\n                                ),\n                              ),\n                            ],\n                          ),\n                        ),"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Redesigning header in home_page",
+  "toolSummary": "Edit home_page.dart"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Add rounded bottom corners to header",
+  "Instruction": "Change the header Container color to a BoxDecoration with bottom rounded corners.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 347,
+      "ReplacementContent": "                        // Üst başlık (Turuncu zemin)\n                        Container(\n                          width: double.infinity,\n                          decoration: const BoxDecoration(\n                            color: AppColors.primary, // Turuncu zemin\n                            borderRadius: BorderRadius.only(\n                              bottomLeft: Radius.circular(24),\n                              bottomRight: Radius.circular(24),\n                            ),\n                          ),\n                          padding: EdgeInsets.only(",
+      "StartLine": 344,
+      "TargetContent": "                        // Üst başlık (Turuncu zemin)\n                        Container(\n                          width: double.infinity,\n                          color: AppColors.primary, // Turuncu zemin\n                          padding: EdgeInsets.only("
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Adding curved bottom corners to header",
+  "toolSummary": "Edit home_page.dart"
+}
+
+--- TOOL CALL: multi_replace_file_content ---
+{
+  "Description": "Revert orange corners and round top white corners",
+  "Instruction": "Remove the bottom radius from the orange header. Then wrap the main content container in an orange container and give the inner white container a top-left and top-right border radius.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 351,
+      "ReplacementContent": "                        // Üst başlık (Turuncu zemin)\n                        Container(\n                          width: double.infinity,\n                          color: AppColors.primary, // Turuncu zemin, köşesiz\n                          padding: EdgeInsets.only(",
+      "StartLine": 344,
+      "TargetContent": "                        // Üst başlık (Turuncu zemin)\n                        Container(\n                          width: double.infinity,\n                          decoration: const BoxDecoration(\n                            color: AppColors.primary, // Turuncu zemin\n                            borderRadius: BorderRadius.only(\n                              bottomLeft: Radius.circular(24),\n                              bottomRight: Radius.circular(24),\n                            ),\n                          ),\n                          padding: EdgeInsets.only("
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 454,
+      "ReplacementContent": "                        // The rest of the content must have a white background, overlapping the orange\n                        Container(\n                          color: AppColors.primary, // Arkada turuncu gözüksün\n                          child: Container(\n                            decoration: const BoxDecoration(\n                              color: AppColors.background,\n                              borderRadius: BorderRadius.only(\n                                topLeft: Radius.circular(30),\n                                topRight: Radius.circular(30),\n                              ),\n                            ),",
+      "StartLine": 452,
+      "TargetContent": "                        // The rest of the content must have a white background\n                        Container(\n                          color: AppColors.background,"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 463,
+      "ReplacementContent": "                            constraints: BoxConstraints(\n                              minHeight: MediaQuery.of(context).size.height,\n                            ),\n                            child: Column(\n                              children: [\n                                // Üstten biraz boşluk (köşelerin belirginleşmesi için)\n                                const SizedBox(height: 12),\n                                // ARAMA ÇUBUĞU\n                                Padding(\n                                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),",
+      "StartLine": 455,
+      "TargetContent": "                          constraints: BoxConstraints(\n                            minHeight: MediaQuery.of(context).size.height,\n                          ),\n                          child: Column(\n                            children: [\n                              // ARAMA ÇUBUĞU\n                              Padding(\n                                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 585,
+      "ReplacementContent": "                              ],\n                            ),\n                          ),\n                        ),",
+      "StartLine": 584,
+      "TargetContent": "                              ],\n                            ),"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\pages\\home\\home_page.dart",
+  "toolAction": "Rounding white top corners",
+  "toolSummary": "Edit home_page.dart"
+}
+

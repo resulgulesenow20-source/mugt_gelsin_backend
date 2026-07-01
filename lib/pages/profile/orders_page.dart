@@ -409,7 +409,7 @@ class _OrdersPageState extends State<OrdersPage> {
           : StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('Emirler')
-                  .where('customerUid', isEqualTo: currentUser.uid)
+                  .where('customerUid', isEqualTo: currentUser?.uid ?? 'guest')
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {

@@ -38,4 +38,28 @@ class GeocodingHelper {
     }
     return null;
   }
+
+  static Future<List<Map<String, dynamic>>> searchAddress(String query) async {
+    try {
+      final url = Uri.parse(
+        'https://nominatim.openstreetmap.org/search?q=$query&format=json&limit=5'
+      );
+      
+      final response = await http.get(url, headers: {
+        'User-Agent': 'mugut_gelsin_app_v1'
+      }).timeout(const Duration(seconds: 5));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        return data.map((item) => {
+          'lat': double.tryParse(item['lat'].toString()) ?? 0.0,
+          'lon': double.tryParse(item['lon'].toString()) ?? 0.0,
+          'displayName': item['display_name'] ?? query,
+        }).toList();
+      }
+    } catch (e) {
+      return [];
+    }
+    return [];
+  }
 }

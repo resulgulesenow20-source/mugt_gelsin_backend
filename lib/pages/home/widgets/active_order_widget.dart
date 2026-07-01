@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mugut_gelsin/pages/orders/order_tracking_page.dart';
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
+import 'package:mugut_gelsin/providers/language_provider.dart';
 
 class ActiveOrderWidget extends StatefulWidget {
   const ActiveOrderWidget({super.key});
@@ -27,12 +29,14 @@ class _ActiveOrderWidgetState extends State<ActiveOrderWidget> {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return const SizedBox.shrink();
+    
+    final langProvider = Provider.of<LanguageProvider>(context);
 
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('Emirler')
           .where('customerUid', isEqualTo: user.uid)
-          .where('status', whereIn: ['pending', 'hazÄ±rlanÄ±yor', 'yolda', 'yola Ã§Ä±ktÄ±', 'onay bekliyor', 'onaylanÄ±yor', 'on_the_way'])
+          .where('status', whereIn: ['pending', 'hazırlanıyor', 'yolda', 'yola çıktı', 'onay bekliyor', 'onaylanıyor', 'on_the_way'])
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
@@ -44,14 +48,13 @@ class _ActiveOrderWidgetState extends State<ActiveOrderWidget> {
           return const SizedBox.shrink();
         }
 
-        // ✅ Siparişleri Tarihe Göre (En Yeni En Üstte) Sıralayalım
         final docs = snapshot.data!.docs.toList();
         docs.sort((a, b) {
           final aTime = (a.data() as Map<String, dynamic>)['timestamp'];
           final bTime = (b.data() as Map<String, dynamic>)['timestamp'];
           
           if (aTime is Timestamp && bTime is Timestamp) {
-            return bTime.compareTo(aTime); // En yeni en önce
+            return bTime.compareTo(aTime); 
           }
           return 0;
         });
@@ -65,7 +68,7 @@ class _ActiveOrderWidgetState extends State<ActiveOrderWidget> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    docs.length > 1 ? "Aktif Siparişlerin (${docs.length})" : "Siparişini Takip Et",
+                    docs.length > 1 ? "${langProvider.translate('orders')} (${docs.length})" : langProvider.translate('orders'),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                       fontSize: 17,
@@ -90,7 +93,7 @@ class _ActiveOrderWidgetState extends State<ActiveOrderWidget> {
             ),
             
             SizedBox(
-              height: 125, // Sabit yÃ¼kseklik
+              height: 155, 
               child: PageView.builder(
                 controller: _pageController,
                 itemCount: docs.length,
@@ -102,7 +105,7 @@ class _ActiveOrderWidgetState extends State<ActiveOrderWidget> {
                 itemBuilder: (context, index) {
                   final orderDoc = docs[index];
                   final orderData = orderDoc.data() as Map<String, dynamic>;
-                  final String status = orderData['status'] ?? 'hazÄ±rlanÄ±yor';
+                  final String status = orderData['status'] ?? 'hazırlanıyor';
                   final String shopName = orderData['shop_name'] ?? 'Restoran';
 
                   return GestureDetector(
@@ -129,46 +132,54 @@ class _ActiveOrderWidgetState extends State<ActiveOrderWidget> {
                         ],
                         border: Border.all(color: AppColors.primary.withOpacity(0.1), width: 1.5),
                       ),
-                      child: Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                           _buildOrderImage(orderData, status),
-                           const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  shopName,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    _buildOrderImage(orderData, status),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        shopName,
                                   style: GoogleFonts.inter(
                                     fontWeight: FontWeight.w900,
-                                    fontSize: 15,
+                                    fontSize: 16,
                                     color: AppColors.textPrimary,
-                                    letterSpacing: 0,
+                                    letterSpacing: -0.3,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                  ],
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  _getStatusText(status),
-                                  style: GoogleFonts.inter(
-                                    color: _getStatusColor(status),
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 13,
-                                  ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surfaceSubtle,
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                              ],
-                            ),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      langProvider.translate('order_detail'),
+                                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    const Icon(Icons.arrow_forward_ios_rounded, size: 10, color: AppColors.primary),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: AppColors.surfaceSubtle,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppColors.textPrimary),
-                          ),
+                          const SizedBox(height: 16),
+                          _buildTimeline(status, langProvider),
                         ],
                       ),
                     ),
@@ -179,6 +190,86 @@ class _ActiveOrderWidgetState extends State<ActiveOrderWidget> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildTimeline(String status, LanguageProvider langProvider) {
+    int currentStep = 0;
+    final s = status.toLowerCase();
+    if (s.contains('onay') || s.contains('pending')) {
+      currentStep = 0;
+    } else if (s.contains('hazırlanıyor') || s.contains('hazirlaniyor')) {
+      currentStep = 1;
+    } else if (s.contains('yolda') || s.contains('yola çıktı') || s.contains('on_the_way')) {
+      currentStep = 2;
+    } else if (s.contains('teslim') || s.contains('delivered')) {
+      currentStep = 3;
+    } else {
+      currentStep = 1; 
+    }
+
+    final steps = [
+      langProvider.translate('order_received'),
+      langProvider.translate('preparing'),
+      langProvider.translate('on_the_way'),
+      langProvider.translate('delivered'),
+    ];
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: List.generate(steps.length * 2 - 1, (index) {
+        if (index % 2 != 0) {
+          int stepIndex = index ~/ 2;
+          bool isCompleted = currentStep > stepIndex;
+          return Expanded(
+            child: Container(
+              margin: const EdgeInsets.only(top: 10),
+              height: 3,
+              decoration: BoxDecoration(
+                color: isCompleted ? Colors.green : Colors.grey[200],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          );
+        } else {
+          int stepIndex = index ~/ 2;
+          bool isActive = currentStep >= stepIndex;
+          bool isCurrent = currentStep == stepIndex;
+          
+          return Column(
+            children: [
+              Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isActive ? Colors.green : Colors.grey[200],
+                  border: isCurrent ? Border.all(color: Colors.green.withOpacity(0.3), width: 4) : null,
+                  boxShadow: isCurrent ? [BoxShadow(color: Colors.green.withOpacity(0.3), blurRadius: 6)] : null,
+                ),
+                child: isActive 
+                    ? const Icon(Icons.check, size: 14, color: Colors.white) 
+                    : null,
+              ),
+              const SizedBox(height: 6),
+              SizedBox(
+                width: 55,
+                child: Text(
+                  steps[stepIndex],
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+                    color: isActive ? Colors.green : Colors.grey[500],
+                    height: 1.1,
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
+      }),
     );
   }
 

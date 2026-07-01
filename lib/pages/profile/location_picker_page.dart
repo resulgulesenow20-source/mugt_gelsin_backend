@@ -31,8 +31,36 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
       _currentPosition = widget.initialLocation!;
     }
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      _determinePosition();
+      _showLocationPrompt();
     });
+  }
+
+  void _showLocationPrompt() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text("Mevcut Konum", style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text("Harita üzerinde şu an bulunduğunuz konuma gitmek ister misiniz?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Hayır", style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _determinePosition();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text("Konumumu Bul", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _determinePosition() async {
@@ -169,6 +197,81 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
                   tileDisplay: const TileDisplay.fadeIn(),
                 ),
               ],
+            ),
+            
+            // Search Bar
+            Positioned(
+              top: 16,
+              left: 16,
+              right: 16,
+              child: Autocomplete<Map<String, dynamic>>(
+                optionsBuilder: (TextEditingValue textEditingValue) async {
+                  if (textEditingValue.text.isEmpty || textEditingValue.text.length < 3) {
+                    return const Iterable<Map<String, dynamic>>.empty();
+                  }
+                  final results = await GeocodingHelper.searchAddress(textEditingValue.text);
+                  return results;
+                },
+                displayStringForOption: (option) => option['displayName'] ?? '',
+                onSelected: (option) {
+                  FocusScope.of(context).unfocus();
+                  final lat = option['lat'] as double;
+                  final lon = option['lon'] as double;
+                  setState(() {
+                    _currentPosition = LatLng(lat, lon);
+                    _mapController.move(_currentPosition, 16);
+                  });
+                  _getAddressFromLatLng(_currentPosition);
+                },
+                fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5)),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: controller,
+                      focusNode: focusNode,
+                      onEditingComplete: onEditingComplete,
+                      decoration: InputDecoration(
+                        hintText: "Konum arayın...",
+                        prefixIcon: const Icon(Icons.search, color: AppColors.primary),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      ),
+                    ),
+                  );
+                },
+                optionsViewBuilder: (context, onSelected, options) {
+                  return Align(
+                    alignment: Alignment.topLeft,
+                    child: Material(
+                      elevation: 4,
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        width: MediaQuery.of(context).size.width - 32,
+                        constraints: const BoxConstraints(maxHeight: 200),
+                        child: ListView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          itemCount: options.length,
+                          itemBuilder: (context, index) {
+                            final option = options.elementAt(index);
+                            return ListTile(
+                              leading: const Icon(Icons.location_on, color: AppColors.primary),
+                              title: Text(option['displayName'] ?? '', maxLines: 2, overflow: TextOverflow.ellipsis),
+                              onTap: () => onSelected(option),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
             
             // Static Center Pin

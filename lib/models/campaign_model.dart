@@ -46,8 +46,8 @@ class Campaign {
       code: data['code'],
       minAmount: double.tryParse(data['minAmount']?.toString() ?? '') ?? 0.0,
       isActive: data['isActive'] ?? true,
-      startDate: (data['startDate'] as Timestamp?)?.toDate(),
-      endDate: (data['endDate'] as Timestamp?)?.toDate(),
+      startDate: data['startDate'] is Timestamp ? (data['startDate'] as Timestamp).toDate() : null,
+      endDate: data['endDate'] is Timestamp ? (data['endDate'] as Timestamp).toDate() : null,
       imageUrl: rawImageUrl,
     );
   }

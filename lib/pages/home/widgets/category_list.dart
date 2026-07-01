@@ -3,27 +3,33 @@ import 'package:mugut_gelsin/utils/dummy_data.dart';
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
 import 'package:mugut_gelsin/providers/language_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:mugut_gelsin/models/top_category_model.dart';
 
 class CategoryList extends StatelessWidget {
   final Function(String) onCategorySelected;
+  final List<TopCategory>? topCategories;
 
-  const CategoryList({super.key, required this.onCategorySelected});
-
-  String _getTranslatedName(String name, LanguageProvider lang) {
-    if (name.contains("Burger")) return lang.get("burger");
-    if (name.contains("Pizza")) return lang.get("pizza");
-    if (name.contains("Kebap")) return lang.get("kebab");
-    if (name.contains("Tatli")) return lang.get("dessert");
-    if (name.contains("Deniz")) return lang.get("seafood");
-    return lang.get(name);
-  }
+  const CategoryList({super.key, required this.onCategorySelected, this.topCategories});
 
   @override
   Widget build(BuildContext context) {
     final lang = context.watch<LanguageProvider>();
     final double screenWidth = MediaQuery.of(context).size.width;
     final double maxGridWidth = screenWidth > 600 ? 600 : screenWidth;
-    final double itemWidth = (maxGridWidth - 32 - 16) / 3; // 16 padding on sides, 8 gap between items = 16 total gap
+    final double itemWidth = (maxGridWidth - 32 - 16) / 4; // 4 columns! 4x2 grid
+
+    List<Widget> gridItems = [];
+    
+    if (topCategories != null && topCategories!.isNotEmpty) {
+      for (var cat in topCategories!) {
+        gridItems.add(_buildDynamicCard(context, cat, itemWidth, onCategorySelected));
+      }
+    } else {
+      // Fallback if empty
+      for (int i = 1; i <= 8; i++) {
+        gridItems.add(_buildDefaultCard(context, i, itemWidth, lang, onCategorySelected));
+      }
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -31,145 +37,108 @@ class CategoryList extends StatelessWidget {
         child: SizedBox(
           width: maxGridWidth,
           child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: [
-          // 1. İN ARZANLAR
-          _buildCustomCard(
-            width: itemWidth,
-            backgroundColor: AppColors.primary,
-            child: Center(
-              child: Text(
-                lang.selectedLang == 'TR' ? "EN UCUZLAR" : (lang.selectedLang == 'TM' ? "IŇ ARZANLAR" : "САМЫЕ ДЕШЕВЫЕ"),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 16,
-                  height: 1.1,
-                ),
-              ),
-            ),
-            onTap: () {
-              // Navigate to cheapest
-            },
+            spacing: 5,
+            runSpacing: 16,
+            alignment: WrapAlignment.start,
+            children: gridItems,
           ),
-          
-          // 2. İNDİRİMLİ
-          _buildCustomCard(
-            width: itemWidth,
-            backgroundColor: Colors.white,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.asset(
-                'assets/images/indirimli_restoranlar.jpg',
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Center(
-                  child: Text(
-                    "%50\nİNDİRİM",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            ),
-            onTap: () {
-              // Navigate to discounts
-            },
-          ),
-
-          // 3. Kebap
-          _buildCategoryCard(dummyCategories.firstWhere((c) => c.name.contains("Kebap"), orElse: () => dummyCategories.first), itemWidth, lang),
-
-          // 4. Tatlı
-          _buildCategoryCard(dummyCategories.firstWhere((c) => c.name.contains("Tatli"), orElse: () => dummyCategories.first), itemWidth, lang),
-
-          // 5. Deniz Ürünü
-          _buildCategoryCard(dummyCategories.firstWhere((c) => c.name.contains("Deniz"), orElse: () => dummyCategories.first), itemWidth, lang),
-
-          // 6. Ählisi (Tümü)
-          _buildCustomCard(
-            width: itemWidth,
-            backgroundColor: AppColors.primary,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.grid_view_rounded, color: Colors.white, size: 28),
-                const SizedBox(height: 8),
-                Text(
-                  lang.get('all'),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-            onTap: () => onCategorySelected("Hepsi"),
-          ),
-        ],
-      ),
         ),
       ),
     );
   }
 
-  Widget _buildCustomCard({required double width, required Color backgroundColor, required Widget child, required VoidCallback onTap}) {
+  Widget _buildDynamicCard(BuildContext context, TopCategory cat, double width, Function(String) onCategorySelected) {
+    return _buildColumnCard(
+      width: width,
+      title: cat.title,
+      onTap: () {
+        onCategorySelected(cat.targetCategory);
+      },
+      imageWidget: Image.network(
+        cat.imageUrl,
+        height: width,
+        width: width,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.fastfood_rounded, size: 32, color: AppColors.primary)),
+      ),
+    );
+  }
+
+  Widget _buildDefaultCard(BuildContext context, int index, double width, LanguageProvider lang, Function(String) onCategorySelected) {
+    switch (index) {
+      case 7:
+        return _buildColumnCard(
+          width: width,
+          title: 'Burger',
+          onTap: () => onCategorySelected("Burger"),
+          imageWidget: Image.asset(
+            'assets/images/cat_burger.png',
+            height: width,
+            width: width,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.fastfood_rounded, size: 32, color: AppColors.primary)),
+          ),
+        );
+      case 8:
+      default:
+        return _buildColumnCard(
+          width: width,
+          title: 'Hepsi',
+          onTap: () => onCategorySelected("Hepsi"),
+          imageWidget: const Center(
+            child: Icon(Icons.grid_view_rounded, color: AppColors.primary, size: 36),
+          ),
+        );
+    }
+  }
+
+  Widget _buildColumnCard({
+    required double width,
+    required String title,
+    required VoidCallback onTap,
+    required Widget imageWidget,
+  }) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
         width: width,
-        height: width, // Square
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: child,
-      ),
-    );
-  }
-
-  Widget _buildCategoryCard(category, double width, LanguageProvider lang) {
-    return GestureDetector(
-      onTap: () => onCategorySelected(category.name),
-      child: Container(
-        width: width,
-        height: width, // Square
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(16),
-        ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Image.asset(
-              category.imageUrl,
-              height: 40,
-              width: 40,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) => const Icon(
-                Icons.fastfood_rounded,
-                size: 32,
-                color: AppColors.primary,
+            Container(
+              width: width * 0.9, // Slightly smaller than full width to leave room for shadow
+              height: width * 0.9,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white, width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: imageWidget,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Text(
-              _getTranslatedName(category.name, lang),
+              title,
               textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-                color: Colors.black87,
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
+                color: AppColors.textPrimary,
                 letterSpacing: -0.2,
+                height: 1.1,
               ),
             ),
           ],
@@ -178,4 +147,3 @@ class CategoryList extends StatelessWidget {
     );
   }
 }
-

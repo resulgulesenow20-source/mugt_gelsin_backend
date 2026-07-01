@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/restaurant_model.dart';
 import '../models/campaign_model.dart';
+import '../models/top_category_model.dart';
 
 class ApiService {
   // --- CONFIGURATION ---
@@ -12,6 +13,23 @@ class ApiService {
   static const String _productionBaseUrl = 'https://mugut-gelsin-backend.onrender.com';
   
   static String get baseUrl => _isLocal ? _localBaseUrl : _productionBaseUrl;
+
+  Future<List<TopCategory>> fetchTopCategories() async {
+    try {
+      debugPrint('ApiService: Fetching top categories...');
+      final snapshot = await FirebaseFirestore.instance
+          .collection('top_categories')
+          .where('is_active', isEqualTo: true)
+          .get();
+          
+      var list = snapshot.docs.map((doc) => TopCategory.fromFirestore(doc)).toList();
+      list.sort((a, b) => a.order.compareTo(b.order));
+      return list;
+    } catch (e) {
+      debugPrint('ApiService: Error fetching top categories: $e');
+      return [];
+    }
+  }
 
   Future<List<Restaurant>> fetchRestaurants() async {
     try {
@@ -287,6 +305,7 @@ class ApiService {
 
     final double? latitude = (data['latitude'] as num?)?.toDouble() ?? (data['lat'] as num?)?.toDouble();
     final double? longitude = (data['longitude'] as num?)?.toDouble() ?? (data['lng'] as num?)?.toDouble();
+    final String city = data['city']?.toString() ?? data['region']?.toString() ?? data['Bölge']?.toString() ?? 'Aşkabat';
 
     final List<String> deliveryDistricts = (data['deliveryDistricts'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
 
@@ -305,6 +324,7 @@ class ApiService {
       closingTime: closingTime,
       latitude: latitude,
       longitude: longitude,
+      city: city,
       deliveryDistricts: deliveryDistricts,
     );
   }
@@ -349,16 +369,17 @@ class ApiService {
 
   Future<List<Campaign>> fetchCampaigns() async {
     try {
-      debugPrint('ApiService: Fetching active campaigns from Firestore...');
+      debugPrint('ApiService: Fetching active campaigns from Kampanyalar collection...');
       final snapshot = await FirebaseFirestore.instance
           .collection('Kampanyalar')
+          .where('is_app_banner', isEqualTo: true)
           .where('isActive', isEqualTo: true)
           .get();
           
       return snapshot.docs.map((doc) => Campaign.fromFirestore(doc)).toList();
     } catch (e) {
       debugPrint('ApiService: fetchCampaigns error: $e');
-      return [];
+      rethrow;
     }
   }
 }

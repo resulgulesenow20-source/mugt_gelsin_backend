@@ -1,0 +1,79 @@
+{
+  "Description": "Dynamic Translations from Firestore",
+  "Instruction": "Add a function to LanguageProvider that fetches translations from Firestore and updates the static translations map.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 28,
+      "ReplacementContent": "  // Çeviri Metinleri\n  static Map<String, Map<String, String>> translations = {",
+      "StartLine": 28,
+      "TargetContent": "  // Çeviri Metinleri\n  static final Map<String, Map<String, String>> translations = {"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 602,
+      "ReplacementContent": "      'login_failed': 'Invalid phone or password',\n    }\n  };\n\n  // Veritabanından (Firestore) dinamik metinleri çek\n  Future<void> fetchDynamicTranslations() async {\n    try {\n      // Firebase'in düzgün çalıştığından emin olmak için try-catch içinde çağırıyoruz\n      // Firestore'u doğrudan çağırmak için cloud_firestore paketinin import edildiğinden emin olunmalıdır\n      // (Bunu bu dosyanın en üstüne ekleyeceğiz)\n    } catch (e) {\n      debugPrint(\"Dinamik metinler çekilirken hata: $e\");\n    }\n  }\n}",
+      "StartLine": 600,
+      "TargetContent": "      'login_failed': 'Invalid phone or password',\n    }\n  };\n}"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 3,
+      "ReplacementContent": "import 'package:flutter/material.dart';\nimport 'package:shared_preferences/shared_preferences.dart';\nimport 'package:cloud_firestore/cloud_firestore.dart';",
+      "StartLine": 1,
+      "TargetContent": "import 'package:flutter/material.dart';\nimport 'package:shared_preferences/shared_preferences.dart';"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\providers\\language_provider.dart",
+  "toolAction": "Preparing dynamic translations",
+  "toolSummary": "Edit language_provider.dart"
+}
+
+{
+  "Description": "Add dynamic translations fetching",
+  "Instruction": "Remove final from translations map, add firestore import, and add fetchDynamicTranslations method.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 3,
+      "ReplacementContent": "import 'package:flutter/material.dart';\nimport 'package:shared_preferences/shared_preferences.dart';\nimport 'package:cloud_firestore/cloud_firestore.dart';",
+      "StartLine": 1,
+      "TargetContent": "import 'package:flutter/material.dart';\nimport 'package:shared_preferences/shared_preferences.dart';"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 29,
+      "ReplacementContent": "  // Çeviri Metinleri\n  static Map<String, Map<String, String>> translations = {",
+      "StartLine": 28,
+      "TargetContent": "  // Çeviri Metinleri\n  static final Map<String, Map<String, String>> translations = {"
+    },
+    {
+      "AllowMultiple": false,
+      "EndLine": 591,
+      "ReplacementContent": "  // Alias for translate\n  String get(String key) => translate(key);\n\n  // Veritabanından (Firestore) dinamik metinleri çek\n  Future<void> fetchDynamicTranslations() async {\n    try {\n      final doc = await FirebaseFirestore.instance.collection('settings').doc('translations').get();\n      if (doc.exists) {\n        final data = doc.data() as Map<String, dynamic>;\n        \n        // Firestore'dan gelen her dil için metinleri yerel çevirilerin üzerine yaz\n        data.forEach((lang, newTranslations) {\n          if (newTranslations is Map && translations.containsKey(lang)) {\n            final newMap = Map<String, String>.from(newTranslations);\n            translations[lang]!.addAll(newMap);\n          }\n        });\n        \n        notifyListeners(); // Arayüzü yenile\n      }\n    } catch (e) {\n      debugPrint(\"Dinamik metinler çekilirken hata: \\$e\");\n    }\n  }\n}",
+      "StartLine": 589,
+      "TargetContent": "  // Alias for translate\n  String get(String key) => translate(key);\n}"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\providers\\language_provider.dart",
+  "toolAction": "Adding fetchDynamicTranslations to provider",
+  "toolSummary": "Edit language_provider.dart"
+}
+
+{
+  "Description": "Call fetchDynamicTranslations on init",
+  "Instruction": "Call fetchDynamicTranslations() inside the constructor.",
+  "ReplacementChunks": [
+    {
+      "AllowMultiple": false,
+      "EndLine": 11,
+      "ReplacementContent": "  LanguageProvider() {\n    _loadLanguage();\n    fetchDynamicTranslations();\n  }",
+      "StartLine": 9,
+      "TargetContent": "  LanguageProvider() {\n    _loadLanguage();\n  }"
+    }
+  ],
+  "TargetFile": "c:\\Users\\dell\\mugut_gelsin\\lib\\providers\\language_provider.dart",
+  "toolAction": "Fetching dynamic translations on init",
+  "toolSummary": "Edit language_provider.dart"
+}
+

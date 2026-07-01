@@ -28,4 +28,20 @@ class GeocodingHelper {
     }
     return null;
   }
+
+  static Future<List<Map<String, dynamic>>> searchAddress(String query) async {
+    try {
+      List<Location> locations = await locationFromAddress(query);
+      if (locations.isNotEmpty) {
+        return locations.map((loc) => {
+          'lat': loc.latitude,
+          'lon': loc.longitude,
+          'displayName': query, // geocoding doesn't return full address text for locationFromAddress easily, so we just use the query or we can reverse geocode it, but usually query is fine for mobile search result tap.
+        }).toList();
+      }
+    } catch (e) {
+      return [];
+    }
+    return [];
+  }
 }
