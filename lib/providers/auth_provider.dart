@@ -19,6 +19,12 @@ class AuthProvider with ChangeNotifier {
 
   User? get user => _user;
   Map<String, dynamic>? get userData => _userData;
+  
+  double get walletBalance {
+    if (_userData == null || !_userData!.containsKey('walletBalance')) return 0.0;
+    return double.tryParse(_userData!['walletBalance'].toString()) ?? 0.0;
+  }
+
   bool get isLoggedIn => _user != null;
   bool get isAutoLoggingIn => _isAutoLoggingIn;
   bool get isInitialized => _isInitialized;

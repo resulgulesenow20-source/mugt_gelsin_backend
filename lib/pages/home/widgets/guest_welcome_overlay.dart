@@ -4,6 +4,7 @@ import 'package:mugut_gelsin/providers/auth_provider.dart';
 import 'package:mugut_gelsin/providers/language_provider.dart';
 import 'package:mugut_gelsin/providers/region_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:mugut_gelsin/pages/auth/register_page.dart';
 
 class GuestWelcomeOverlay extends StatefulWidget {
   const GuestWelcomeOverlay({super.key});
@@ -34,6 +35,7 @@ class _GuestWelcomeOverlayState extends State<GuestWelcomeOverlay> {
   bool _isLoading = false;
   bool _codeSent = false;
   String _selectedRegion = "Aşkabat"; // Default region
+  String _countryCode = "+993";
 
   @override
   void initState() {
@@ -63,7 +65,7 @@ class _GuestWelcomeOverlayState extends State<GuestWelcomeOverlay> {
 
     setState(() => _isLoading = true);
 
-    String fullPhone = "+993${_phoneController.text.trim().replaceAll(' ', '')}";
+    String fullPhone = "$_countryCode${_phoneController.text.trim().replaceAll(' ', '')}";
 
     await authProvider.verifyPhoneNumber(
       phoneNumber: fullPhone,
@@ -130,7 +132,6 @@ class _GuestWelcomeOverlayState extends State<GuestWelcomeOverlay> {
     final regionProvider = context.watch<RegionProvider>();
 
     if (regionProvider.regions.isNotEmpty && _selectedRegion == "Aşkabat") {
-      // Ensure selected region matches the actual name if available
       final ashgabat = regionProvider.regions.where((r) => r.name.toLowerCase().contains("asgabat") || r.name.toLowerCase().contains("aşkabat")).firstOrNull;
       if (ashgabat != null) {
         _selectedRegion = ashgabat.name;
@@ -142,174 +143,257 @@ class _GuestWelcomeOverlayState extends State<GuestWelcomeOverlay> {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(32),
+          topRight: Radius.circular(32),
+        ),
       ),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Drag handle
-          Container(
-            width: 40,
-            height: 5,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          const SizedBox(height: 24),
-          
-          // Language Selection
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildLangButton(context, 'TM', 'Türkmen', '+993'),
-              const SizedBox(width: 12),
-              _buildLangButton(context, 'TR', 'Türkçe', '+90'),
-              const SizedBox(width: 12),
-              _buildLangButton(context, 'RU', 'Русский', '+7'),
-            ],
-          ),
-          const SizedBox(height: 32),
-
-          Text(
-            langProvider.translate('phone_login') ?? "Haýyş telefon nomeri bilen giriş ediň",
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w900,
-              color: Colors.black,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-
-          if (!_codeSent) ...[
-            // Region Selection Dropdown
-            if (regionProvider.regions.isNotEmpty)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    isExpanded: true,
-                    value: _selectedRegion,
-                    icon: const Icon(Icons.arrow_drop_down_rounded, color: AppColors.primary),
-                    items: regionProvider.regions.map((region) {
-                      return DropdownMenuItem<String>(
-                        value: region.name,
-                        child: Text(region.name, style: const TextStyle(fontWeight: FontWeight.w700)),
-                      );
-                    }).toList(),
-                    onChanged: (val) {
-                      if (val != null) setState(() => _selectedRegion = val);
-                    },
-                  ),
-                ),
-              ),
-            const SizedBox(height: 16),
-
-            // Phone Number Input
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag handle
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              width: 40,
+              height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              child: Row(
-                children: [
-                  const Text(
-                    "+993",
-                    style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Colors.black87),
-                  ),
-                  const SizedBox(width: 12),
-                  Container(width: 1, height: 24, color: Colors.grey.shade300),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      controller: _phoneController,
-                      keyboardType: TextInputType.phone,
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: langProvider.get('phone_hint'),
-                        hintStyle: TextStyle(color: Colors.grey.shade400, fontWeight: FontWeight.normal),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Login Button
-            SizedBox(
-              width: double.infinity,
-              height: 54,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _verifyPhone,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
-                ),
-                child: _isLoading
-                    ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : Text(
-                        langProvider.get('send_code'),
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-              ),
-            ),
-          ] else ...[
-            // SMS Code Input
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              child: TextField(
-                controller: _codeController,
-                keyboardType: TextInputType.number,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 24, letterSpacing: 8),
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: "000000",
-                  hintStyle: TextStyle(color: Colors.grey.shade400, letterSpacing: 8),
-                ),
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 24),
             
+            // Close Button Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.close, color: Colors.black54),
+                  onPressed: () => Navigator.pop(context),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                )
+              ],
+            ),
+            
+            // Language Toggle
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade200),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildLangButton(context, 'TM', 'TM', '+993'),
+                  _buildLangButton(context, 'RU', 'RU', '+7'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+            
+            // Title
+            Text(
+              _codeSent ? langProvider.get('verify_code') : "Hoş geldiňiz",
+              style: const TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF2E1A47),
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 8),
+            
+            // Subtitle
+            Text(
+              _codeSent 
+                ? langProvider.get('sms_sent_to').replaceAll('{phone}', "$_countryCode${_phoneController.text}") 
+                : "Sargytlaryňyz gapyňyza çalt we ýyly gelsin.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 14,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 32),
+            
+            // Input Field
+            if (!_codeSent) 
+              Container(
+                height: 56,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        _countryCode,
+                        style: const TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2E1A47),
+                        ),
+                      ),
+                    ),
+                    Container(width: 1, height: 24, color: Colors.grey.shade300),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 16, right: 8),
+                      child: Icon(Icons.phone_rounded, color: Color(0xFF6B528B), size: 20),
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: _phoneController,
+                        keyboardType: TextInputType.phone,
+                        style: const TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF2E1A47),
+                        ),
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: langProvider.translate('phone_hint') != 'phone_hint' ? langProvider.translate('phone_hint') : "Telefon belgiňiz",
+                          hintStyle: TextStyle(
+                            fontFamily: 'Inter',
+                            color: Colors.grey[400],
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else 
+              Container(
+                height: 56,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: TextField(
+                  controller: _codeController,
+                  keyboardType: TextInputType.number,
+                  textAlign: TextAlign.center,
+                  maxLength: 6,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2E1A47),
+                    letterSpacing: 8,
+                  ),
+                  decoration: InputDecoration(
+                    counterText: "",
+                    border: InputBorder.none,
+                    hintText: "******",
+                    hintStyle: TextStyle(
+                      color: Colors.grey[300],
+                      letterSpacing: 8,
+                    ),
+                  ),
+                ),
+              ),
+              
+            const SizedBox(height: 24),
+            
+            // Button
             SizedBox(
               width: double.infinity,
-              height: 54,
+              height: 56,
               child: ElevatedButton(
-                onPressed: _isLoading ? null : _submitCode,
+                onPressed: _isLoading ? null : (_codeSent ? _submitCode : _verifyPhone),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  backgroundColor: const Color(0xFFFFD500), // Yellow
+                  foregroundColor: const Color(0xFF2E1A47), // Dark Purple text
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   elevation: 0,
                 ),
                 child: _isLoading
-                    ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(color: Color(0xFF2E1A47), strokeWidth: 3),
+                      )
                     : Text(
-                        langProvider.get('verify'),
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        _codeSent ? langProvider.get('verify') : "Kod iber",
+                        style: const TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
               ),
             ),
+            
+            if (_codeSent) ...[
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () => setState(() => _codeSent = false),
+                child: Text(
+                  "Telefon belgisini üýtget", 
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+            
+            if (!_codeSent) ...[
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.verified_user_outlined, size: 16, color: Colors.grey[500]),
+                  const SizedBox(width: 6),
+                  RichText(
+                    text: TextSpan(
+                      style: TextStyle(fontFamily: 'Inter', fontSize: 12, color: Colors.grey[600]),
+                      children: const [
+                         TextSpan(text: "Dowam etmek bilen "),
+                         TextSpan(text: "şertleri", style: TextStyle(fontWeight: FontWeight.bold)),
+                         TextSpan(text: " kabul edýärsiňiz."),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 24),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context); // Close bottom sheet
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const RegisterPage()),
+                  );
+                },
+                child: RichText(
+                  text: const TextSpan(
+                    style: TextStyle(fontFamily: 'Inter', fontSize: 14, color: Color(0xFF6B7280)),
+                    children: [
+                      TextSpan(text: "Hasabyňyz ýokmy? "),
+                      TextSpan(text: "Hasap açyň", style: TextStyle(color: Color(0xFF2E1A47), fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+            const SizedBox(height: 32),
           ],
-        ],
+        ),
       ),
     );
   }
@@ -317,28 +401,26 @@ class _GuestWelcomeOverlayState extends State<GuestWelcomeOverlay> {
   Widget _buildLangButton(BuildContext context, String code, String label, String phonePrefix) {
     final langProvider = context.watch<LanguageProvider>();
     bool isSelected = langProvider.selectedLang == code;
-
     return InkWell(
-      onTap: () async {
-        await langProvider.setLanguage(code);
+      onTap: () {
+        langProvider.setLanguage(code);
+        setState(() {
+          _countryCode = phonePrefix;
+        });
       },
-      borderRadius: BorderRadius.circular(12),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.grey.shade200,
-            width: 1.5,
-          ),
+          color: isSelected ? const Color(0xFFFFD500) : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Text(
-          code,
+          label,
           style: TextStyle(
-            fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-            color: isSelected ? AppColors.primary : Colors.grey.shade600,
+            fontFamily: 'Inter',
+            color: isSelected ? const Color(0xFF2E1A47) : Colors.grey[500],
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+            fontSize: 14,
           ),
         ),
       ),

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mugut_gelsin/models/restaurant_model.dart';
 import 'package:mugut_gelsin/models/campaign_model.dart';
+import 'package:mugut_gelsin/providers/navigation_provider.dart';
 import 'package:mugut_gelsin/presentation/common/cards/food_card.dart';
 import 'package:mugut_gelsin/pages/restaurant/restaurant_detail_page.dart';
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
@@ -92,6 +93,20 @@ class CampaignMenusPage extends StatelessWidget {
             // TAB 2: Kampanyalı/İndirimli Menü ve Yemekler
             _buildFoodsTab(context, campaignFoods, langProvider),
           ],
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
+            // Fırsatlar sekmesine (index 0) yönlendir ve rotayı sıfırla
+            final navProvider = Provider.of<NavigationProvider>(context, listen: false);
+            Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
+            navProvider.setIndex(0);
+          },
+          backgroundColor: AppColors.accent,
+          icon: const Icon(Icons.dashboard, color: Colors.black),
+          label: const Text(
+            "Fırsatlara Dön",
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          ),
         ),
       ),
     );

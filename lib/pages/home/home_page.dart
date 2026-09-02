@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:mugut_gelsin/models/restaurant_model.dart';
 import 'package:mugut_gelsin/providers/navigation_provider.dart';
@@ -12,6 +13,10 @@ import 'package:mugut_gelsin/core/constants/app_colors.dart';
 import 'package:mugut_gelsin/providers/language_provider.dart';
 import 'package:mugut_gelsin/pages/home/widgets/banner_slider.dart';
 import 'package:mugut_gelsin/pages/home/widgets/category_list.dart';
+import 'package:mugut_gelsin/pages/home/widgets/daily_offer_widget.dart';
+import 'package:mugut_gelsin/pages/home/daily_offers_page.dart';
+import 'package:mugut_gelsin/pages/home/widgets/wallet_progress_widget.dart';
+import 'package:mugut_gelsin/pages/home/notifications_page.dart';
 import 'package:mugut_gelsin/pages/home/widgets/filter_chips.dart';
 import 'package:mugut_gelsin/pages/home/widgets/horizontal_restaurant_list.dart';
 import 'package:mugut_gelsin/pages/home/widgets/restaurant_grid.dart';
@@ -334,20 +339,13 @@ class _HomePageState extends State<HomePage> {
               children: [
                 // Pull-to-refresh sırasında tepede "bölünme" (boşluk) görünmemesi için arkaya beyaz zemin atıyoruz.
                 Positioned(
-                  top: 0,
+                  top: -500, // Extend way up for pull to refresh
                   left: 0,
                   right: 0,
-                  height: 300,
+                  height: 550, // 500 up + 50 down
                   child: Container(
                     decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topRight,
-                        end: Alignment.bottomLeft,
-                        colors: [
-                          Color(0xFFC4E193),
-                          Color(0xFF56AA86),
-                        ],
-                      ),
+                      color: Color(0xFF2B0F6B), // Same as header for seamless stretch
                     ),
                   ),
                 ),
@@ -362,120 +360,145 @@ class _HomePageState extends State<HomePage> {
 
                         // --- YENİ BEYAZ BAŞLIK (EKRAN GÖRÜNTÜSÜ BİREBİR) ---
                         Container(
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              begin: Alignment.topRight,
-                              end: Alignment.bottomLeft,
-                              colors: [
-                                Color(0xFFC4E193),
-                                Color(0xFF56AA86),
-                              ],
-                            ),
-                            boxShadow: [
-                              BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 5))
-                            ],
-                          ),
                           padding: EdgeInsets.only(
                             top: MediaQuery.of(context).padding.top + 8,
-                            bottom: 16,
+                            bottom: 24, // Padding at bottom of the purple header
                             left: 16,
                             right: 16,
                           ),
-                          child: Column(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2B0F6B), // Dark Purple
+                            borderRadius: BorderRadius.vertical(
+                              bottom: Radius.elliptical(MediaQuery.of(context).size.width, 20),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  // Sol: Mugut gelsin
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        "Mugut",
-                                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18, height: 1.0, letterSpacing: -0.5),
-                                      ),
-                                      const Text(
-                                        "gelsin",
-                                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18, height: 1.0, letterSpacing: -0.5),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(width: 12),
-                                  // Orta: Adres Çubuğu
-                                  Expanded(
-                                    child: Container(
-                                      height: 40,
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey.shade100,
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: const HomeAddressBar(),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  // Sağ: İkonlar
-                                  Row(
-                                    children: [
-                                      InkWell(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => const LiveSupportPage(),
-                                            ),
-                                          );
-                                        },
-                                        borderRadius: BorderRadius.circular(20),
-                                        child: Container(
-                                          width: 40,
-                                          height: 40,
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            shape: BoxShape.circle,
-                                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
-                                          ),
-                                          child: const Center(
-                                            child: Icon(Icons.support_agent_rounded, color: AppColors.primary, size: 22),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Container(
-                                        width: 40,
-                                        height: 40,
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          shape: BoxShape.circle,
-                                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
-                                        ),
-                                        child: Stack(
-                                          alignment: Alignment.center,
-                                          children: [
-                                            const Icon(Icons.notifications_none_rounded, color: AppColors.primary, size: 22),
-                                            Positioned(
-                                              top: 8,
-                                              right: 10,
-                                              child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle)),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-
+                              // Sol: Menü İkonu
+                              IconButton(
+                                icon: const Icon(Icons.menu, color: Colors.white, size: 30),
+                                onPressed: () {
+                                  Scaffold.of(context).openDrawer(); // If you have a drawer, else do nothing for now
+                                },
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
                               ),
-                              const SizedBox(height: 16),
-                              SizedBox(
-                                height: 40,
-                                child: HomeSearchBar(
-                                  onSearchChanged: _filterRestaurants,
-                                  onRefresh: _loadData,
+                              // Orta: Logo
+                              // Orta: Logo Çizimi
+                              Padding(
+                                padding: const EdgeInsets.only(left: 20.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Transform.translate(
+                                      offset: const Offset(-8.0, 0),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(right: 6.0, top: 10.0),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              crossAxisAlignment: CrossAxisAlignment.end,
+                                              children: [
+                                                Container(width: 12, height: 4, decoration: BoxDecoration(color: const Color(0xFFFFC824), borderRadius: BorderRadius.circular(2))),
+                                                const SizedBox(height: 4),
+                                                Container(width: 8, height: 4, decoration: BoxDecoration(color: const Color(0xFFFFC824), borderRadius: BorderRadius.circular(2))),
+                                                const SizedBox(height: 4),
+                                                Container(width: 16, height: 4, decoration: BoxDecoration(color: const Color(0xFFFFC824), borderRadius: BorderRadius.circular(2))),
+                                              ],
+                                            ),
+                                          ),
+                                          Text(
+                                            "m",
+                                            style: GoogleFonts.nunito(
+                                              color: const Color(0xFF6BCC5E),
+                                              fontWeight: FontWeight.w800,
+                                              fontSize: 52,
+                                              height: 0.9,
+                                              letterSpacing: -2.0,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    RichText(
+                                      text: TextSpan(
+                                        style: GoogleFonts.nunito(
+                                          fontWeight: FontWeight.w900,
+                                          fontSize: 34,
+                                          height: 0.85,
+                                          letterSpacing: -1.0,
+                                        ),
+                                        children: const [
+                                          TextSpan(text: "gels", style: TextStyle(color: Color(0xFF6BCC5E))),
+                                          TextSpan(text: "i", style: TextStyle(color: Color(0xFFFFC824))),
+                                          TextSpan(text: "n", style: TextStyle(color: Color(0xFF6BCC5E))),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              // Sağ: Bildirim
+                              InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const NotificationsPage(),
+                                    ),
+                                  );
+                                },
+                                borderRadius: BorderRadius.circular(24),
+                                child: Container(
+                                  width: 48,
+                                  height: 48,
+                                  alignment: Alignment.center,
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    clipBehavior: Clip.none,
+                                    children: [
+                                      const Icon(Icons.notifications_none_rounded, color: Colors.white, size: 34),
+                                      Positioned(
+                                        top: 2,
+                                        right: 2,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: const BoxDecoration(color: Color(0xFFFFD700), shape: BoxShape.circle),
+                                          child: const Text("3", style: TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.bold)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ),
+                        
+                        const SizedBox(height: 8),
+                        
+                        // Orta: Adres Çubuğu
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(28),
+                              boxShadow: [
+                                BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 15, offset: const Offset(0, 5))
+                              ],
+                            ),
+                            child: const HomeAddressBar(),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
                         Container(
                           color: AppColors.background,
                           constraints: BoxConstraints(minHeight: MediaQuery.of(context).size.height),
@@ -555,7 +578,7 @@ class _HomePageState extends State<HomePage> {
                                   onCategorySelected: (cat) => _filterByCategory(cat),
                                 ),
 
-                                const ActiveOrderWidget(),
+                                const SizedBox(height: 12),
 
                                 if (_currentDisplayedRestaurants.isEmpty)
                                   Padding(
@@ -657,4 +680,3 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-

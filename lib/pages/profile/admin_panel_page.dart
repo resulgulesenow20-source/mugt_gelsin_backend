@@ -275,9 +275,13 @@ class _AdminPanelPageState extends State<AdminPanelPage> with SingleTickerProvid
         icon: const Icon(Icons.add),
         label: const Text("Yeni Reklam Ekle", style: TextStyle(fontWeight: FontWeight.bold)),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _firestore.collection('Kampanyalar').snapshots(),
-        builder: (context, snapshot) {
+      body: Column(
+        children: [
+          _buildWalletTextEditor(),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _firestore.collection('Kampanyalar').snapshots(),
+              builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -309,8 +313,157 @@ class _AdminPanelPageState extends State<AdminPanelPage> with SingleTickerProvid
               return _buildCampaignCard(docId, data);
             },
           );
-        },
+          },
+        ),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildWalletTextEditor() {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: _firestore.collection('SystemSettings').doc('WalletConfig').snapshots(),
+      builder: (context, snapshot) {
+        String currentText = "";
+        if (snapshot.hasData && snapshot.data!.exists) {
+          final data = snapshot.data!.data() as Map<String, dynamic>;
+          currentText = data['tempMessage'] ?? "";
+        }
+        
+        final TextEditingController _walletTextController = TextEditingController(text: currentText);
+        
+        return Container(
+          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Cüzdan Geçici Mesajı (Gazanan TMT)",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _walletTextController,
+                      decoration: InputDecoration(
+                        hintText: "Örn: Bu ay sonuna kadar geçerlidir!",
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await _firestore.collection('SystemSettings').doc('WalletConfig').set({
+                        'tempMessage': _walletTextController.text.trim(),
+                      }, SetOptions(merge: true));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Geçici mesaj güncellendi!')),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                    ),
+                    child: const Text("Kaydet", style: TextStyle(color: Colors.white)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSearchTextEditor() {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: _firestore.collection('SystemSettings').doc('AppConfig').snapshots(),
+      builder: (context, snapshot) {
+        String currentText = "";
+        if (snapshot.hasData && snapshot.data!.exists) {
+          final data = snapshot.data!.data() as Map<String, dynamic>;
+          currentText = data['searchHint'] ?? "";
+        }
+        
+        final TextEditingController _searchTextController = TextEditingController(text: currentText);
+        
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Arama Çubuğu Metni (Ana Sayfa)",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _searchTextController,
+                      decoration: InputDecoration(
+                        hintText: "Örn: Restoran ýa-da tagam gözläň...",
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await _firestore.collection('SystemSettings').doc('AppConfig').set({
+                        'searchHint': _searchTextController.text.trim(),
+                      }, SetOptions(merge: true));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Arama metni güncellendi!')),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                    ),
+                    child: const Text("Kaydet", style: TextStyle(color: Colors.white)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LanguageProvider with ChangeNotifier {
-  String _selectedLang = 'TR'; // Varsayılan dil Türkçe
+  String _selectedLang = 'TM'; // Varsayılan dil Türkmence
   
   String get selectedLang => _selectedLang;
 
@@ -13,7 +13,7 @@ class LanguageProvider with ChangeNotifier {
   // Kalıcı hafızadan dili yükle
   Future<void> _loadLanguage() async {
     final prefs = await SharedPreferences.getInstance();
-    _selectedLang = prefs.getString('selected_lang') ?? 'TR';
+    _selectedLang = prefs.getString('selected_lang') ?? 'TM';
     notifyListeners();
   }
 

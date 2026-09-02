@@ -11,7 +11,7 @@ class HorizontalFoodList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 225, // Increased height for better shadow and spacing
+      height: 260, // Increased height to allow larger, identical images
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),

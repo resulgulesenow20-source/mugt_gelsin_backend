@@ -6,6 +6,7 @@ import 'package:mugut_gelsin/models/review_model.dart';
 import 'package:mugut_gelsin/core/constants/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mugut_gelsin/providers/language_provider.dart';
+import 'package:mugut_gelsin/pages/restaurant/all_reviews_page.dart';
 
 class ReviewSection extends StatefulWidget {
   final String restaurantId;
@@ -273,7 +274,7 @@ class _ReviewSectionState extends State<ReviewSection> with AutomaticKeepAliveCl
     return Column(
       children: [
         SizedBox(
-          height: 270,
+          height: 140,
           child: ListView.builder(
             controller: _scrollController,
             scrollDirection: Axis.horizontal,
@@ -322,86 +323,101 @@ class _ReviewSectionState extends State<ReviewSection> with AutomaticKeepAliveCl
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    
+    if (!_hasValidIds) {
+      return _buildSection(0, _buildEmptyState());
+    }
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: _reviewsStream,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          _cachedDocs = snapshot.data!.docs;
+        }
+
+        final count = _cachedDocs?.length ?? 0;
+
+        Widget content;
+        if (snapshot.hasError) {
+          content = Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              "Yorumlar yüklenirken hata oluştu: ${snapshot.error}",
+              style: const TextStyle(color: Colors.red, fontSize: 12),
+            ),
+          );
+        } else if (_cachedDocs == null && snapshot.connectionState == ConnectionState.waiting) {
+          content = const SizedBox(height: 100, child: Center(child: CircularProgressIndicator(color: Color(0xFF56AA86))));
+        } else if (count == 0) {
+          content = _buildEmptyState();
+        } else {
+          content = _buildReviewsList(_cachedDocs!);
+        }
+
+        return _buildSection(count, content);
+      },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Text(
+        "Henüz yorum yapılmamış. İlk yorumu sen yap!",
+        textAlign: TextAlign.center,
+        style: TextStyle(color: Colors.grey),
+      ),
+    );
+  }
+
+  Widget _buildSection(int reviewCount, Widget content) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Müşteri Yorumları",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              reviewCount > 0 ? "Müşteri Komentaryası ($reviewCount)" : "Müşteri Komentaryası",
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+            ),
+            if (reviewCount > 0)
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AllReviewsPage(
+                        restaurantId: widget.restaurantId,
+                        docId: widget.docId,
+                        restaurantName: "",
+                      ),
+                    ),
+                  );
+                },
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text(
+                  "Ählisini gör",
+                  style: TextStyle(
+                    color: Color(0xFF56AA86),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: 12),
-        if (!_hasValidIds)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            decoration: BoxDecoration(
-              color: Colors.grey[50],
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Text(
-              "Henüz yorum yapılmamış. İlk yorumu sen yap!",
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey),
-            ),
-          )
-        else
-          StreamBuilder<QuerySnapshot>(
-            stream: _reviewsStream,
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "Yorumlar yüklenirken hata oluştu: ${snapshot.error}",
-                    style: const TextStyle(color: Colors.red, fontSize: 12),
-                  ),
-                );
-              }
-
-              if (snapshot.hasData) {
-                _cachedDocs = snapshot.data!.docs;
-              }
-
-              if (_cachedDocs == null) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const SizedBox(height: 100, child: Center(child: CircularProgressIndicator()));
-                }
-                return Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[50],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Text(
-                    "Henüz yorum yapılmamış. İlk yorumu sen yap!",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                );
-              }
-
-              final docs = _cachedDocs!;
-
-              if (docs.isEmpty) {
-                return Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[50],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Text(
-                    "Henüz yorum yapılmamış. İlk yorumu sen yap!",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                );
-              }
-
-              return _buildReviewsList(docs);
-            },
-          ),
+        content,
       ],
     );
   }
@@ -409,10 +425,10 @@ class _ReviewSectionState extends State<ReviewSection> with AutomaticKeepAliveCl
   Widget _buildReviewCard(BuildContext context, Review review) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: AppColors.softShadow,
         border: Border.all(color: Colors.grey.withOpacity(0.08), width: 1),
       ),
@@ -428,7 +444,7 @@ class _ReviewSectionState extends State<ReviewSection> with AutomaticKeepAliveCl
                   children: [
                     Text(
                       review.userName,
-                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
+                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: Colors.black),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -458,7 +474,7 @@ class _ReviewSectionState extends State<ReviewSection> with AutomaticKeepAliveCl
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 6),
           
           // Detaylı Puanlar (Küçük)
           Row(
@@ -470,14 +486,14 @@ class _ReviewSectionState extends State<ReviewSection> with AutomaticKeepAliveCl
               _buildSmallRatingItem("Servis", review.serviceRating),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
 
           Expanded(
             child: Text(
               review.comment,
               maxLines: review.orderedItems.isNotEmpty ? 2 : 3,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.4),
+              style: const TextStyle(color: Colors.black87, fontSize: 13, height: 1.4, fontWeight: FontWeight.w500),
             ),
           ),
           

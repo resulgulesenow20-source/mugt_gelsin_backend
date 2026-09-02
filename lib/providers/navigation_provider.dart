@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 enum HomeMode { normal, allProducts }
 
 class NavigationProvider with ChangeNotifier {
-  int _selectedIndex = 0;
+  int _selectedIndex = 2; // Home is now at index 2
   HomeMode _homeMode = HomeMode.normal;
   int _resetHomeCounter = 0;
   String? _orderToTrack; // Takip edilecek aktif sipariÅŸ ID'si
@@ -32,7 +32,7 @@ class NavigationProvider with ChangeNotifier {
 
   // âœ… Ana sayfayÄ± sÄ±fÄ±rla (Arama ve modlarÄ± temizle)
   void triggerHomeReset() {
-    _selectedIndex = 0;
+    _selectedIndex = 2;
     _homeMode = HomeMode.normal;
     _resetHomeCounter++;
     notifyListeners();
@@ -40,14 +40,14 @@ class NavigationProvider with ChangeNotifier {
 
   // Ã–ze geÃ§iÅŸ fonksiyonu: Ana sayfaya dÃ¶n ve tÃ¼m Ã¼rÃ¼nleri gÃ¶ster
   void switchToHomeWithAllProducts() {
-    _selectedIndex = 0;
+    _selectedIndex = 2;
     _homeMode = HomeMode.allProducts;
     notifyListeners();
   }
 
   // Normal ana sayfaya dÃ¶n
   void switchToHomeNormal() {
-    _selectedIndex = 0;
+    _selectedIndex = 2;
     _homeMode = HomeMode.normal;
     notifyListeners();
   }

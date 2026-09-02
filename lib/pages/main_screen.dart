@@ -4,6 +4,7 @@ import 'package:mugut_gelsin/pages/home/home_page.dart';
 import 'package:mugut_gelsin/pages/cart/cart_page.dart';
 import 'package:mugut_gelsin/pages/profile/profile_page.dart';
 import 'package:mugut_gelsin/pages/profile/orders_page.dart';
+import 'package:mugut_gelsin/pages/dashboard/dashboard_page.dart'; // Added DashboardPage
 import 'package:mugut_gelsin/providers/navigation_provider.dart';
 import 'package:mugut_gelsin/providers/language_provider.dart';
 import 'package:mugut_gelsin/providers/cart_provider.dart';
@@ -21,9 +22,9 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  // ✅ Her tab için ayrı NavigatorKey tanımlıyoruz
-  final GlobalKey<NavigatorState> _homeNavKey = GlobalKey<NavigatorState>();
+  final GlobalKey<NavigatorState> _dashboardNavKey = GlobalKey<NavigatorState>();
   final GlobalKey<NavigatorState> _ordersNavKey = GlobalKey<NavigatorState>();
+  final GlobalKey<NavigatorState> _homeNavKey = GlobalKey<NavigatorState>();
   final GlobalKey<NavigatorState> _cartNavKey = GlobalKey<NavigatorState>();
   final GlobalKey<NavigatorState> _profileNavKey = GlobalKey<NavigatorState>();
 
@@ -55,7 +56,7 @@ class _MainScreenState extends State<MainScreen> {
           // Takip sinyalini hemen temizleyelim (tekrar tetiklenmesin)
           navProvider.clearOrderTrackingSignal();
           
-          // Siparişler sekmesinin (sekme 2) navigator'ına sayfayı bas
+          // Siparişler sekmesinin (sekme 1) navigator'ına sayfayı bas
           _ordersNavKey.currentState?.push(
             MaterialPageRoute(
               builder: (context) => OrderTrackingPage(orderId: orderId),
@@ -80,8 +81,8 @@ class _MainScreenState extends State<MainScreen> {
         final currentKey = _getSelectedNavigatorKey(selectedIndex);
         if (currentKey.currentState?.canPop() ?? false) {
           currentKey.currentState?.pop();
-        } else if (selectedIndex != 0) {
-          navProvider.setIndex(0);
+        } else if (selectedIndex != 2) {
+          navProvider.setIndex(2);
         }
       },
       child: AddToCartAnimation(
@@ -100,37 +101,44 @@ class _MainScreenState extends State<MainScreen> {
           });
         },
         child: Scaffold(
-        extendBody: false, // Body artık nav barın arkasına geçmez, çakışma önlenir
+        extendBody: true, // Allow body to scroll behind floating nav bar
         body: IndexedStack(
           index: selectedIndex,
           children: [
-            _buildTabNavigator(_homeNavKey, const HomePage()),
+            _buildTabNavigator(_dashboardNavKey, const DashboardPage()),
             _buildTabNavigator(_ordersNavKey, const OrdersPage()),
+            _buildTabNavigator(_homeNavKey, const HomePage()),
             _buildTabNavigator(_cartNavKey, const CartPage()),
             _buildTabNavigator(_profileNavKey, const ProfilePage()),
           ],
         ),
         bottomNavigationBar: Container(
-          height: 65,
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
                 blurRadius: 10,
-                offset: const Offset(0, -5),
+                offset: const Offset(0, -4),
               ),
             ],
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildNavItem(0, Icons.home_rounded, Icons.home_outlined, langProvider.translate('nav_home'), selectedIndex, navProvider),
-              _buildNavItem(1, Icons.assignment_rounded, Icons.assignment_outlined, langProvider.translate('nav_orders'), selectedIndex, navProvider),
-              _buildNavItem(2, Icons.shopping_basket_rounded, Icons.shopping_basket_outlined, langProvider.translate('nav_cart'), selectedIndex, navProvider),
-              _buildNavItem(3, Icons.person_rounded, Icons.person_outline_rounded, langProvider.translate('nav_profile'), selectedIndex, navProvider),
-            ],
+          child: SafeArea(
+            bottom: true,
+            child: SizedBox(
+              height: 75,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildNavItem(0, Icons.dashboard, Icons.dashboard_outlined, "Fırsatlar", selectedIndex, navProvider),
+                  _buildNavItem(1, Icons.receipt_long, Icons.receipt_long, langProvider.translate('nav_orders'), selectedIndex, navProvider),
+                  _buildCenterNavItem(2, selectedIndex, navProvider),
+                  _buildNavItem(3, Icons.shopping_cart, Icons.shopping_cart_outlined, langProvider.translate('nav_cart'), selectedIndex, navProvider),
+                  _buildNavItem(4, Icons.person, Icons.person_outline, langProvider.translate('nav_profile'), selectedIndex, navProvider),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -141,7 +149,7 @@ class _MainScreenState extends State<MainScreen> {
     bool isSelected = selectedIndex == index;
     return GestureDetector(
       onTap: () {
-        if (index == 0 && selectedIndex == 0) {
+        if (index == 2 && selectedIndex == 2) {
           _homeNavKey.currentState?.popUntil((route) => route.isFirst);
           navProvider.triggerHomeReset();
         } else {
@@ -159,34 +167,60 @@ class _MainScreenState extends State<MainScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             // Handle Cart Icon separately for animation
-            if (index == 2)
+            if (index == 3)
               Consumer<CartProvider>(
                 builder: (context, cart, child) {
                   final int itemCount = cart.items.fold(0, (sum, item) => sum + item.quantity);
-                  return Badge(
-                    label: Text(
-                      itemCount.toString(),
-                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                    ),
-                    isLabelVisible: itemCount > 0,
-                    backgroundColor: Colors.red,
-                    offset: const Offset(8, -8),
-                    child: AddToCartIcon(
-                      key: cartKey,
-                      icon: Icon(
-                        isSelected ? activeIcon : inactiveIcon,
-                        color: isSelected ? AppColors.primary : Colors.black54,
-                        size: 26,
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      AddToCartIcon(
+                        key: cartKey,
+                        icon: Icon(
+                          isSelected ? activeIcon : inactiveIcon,
+                          color: isSelected ? const Color(0xFFFFD500) : Colors.black87,
+                          size: 26,
+                        ),
+                        badgeOptions: const BadgeOptions(active: false),
                       ),
-                      badgeOptions: const BadgeOptions(active: false),
-                    ),
+                      if (itemCount > 0)
+                        Positioned(
+                          right: -4,
+                          top: -4,
+                          child: Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: const BoxDecoration(
+                              color: AppColors.accent,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(
+                              itemCount.toString(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   );
                 },
+              )
+            else if (index == 4)
+              CircleAvatar(
+                radius: 18,
+                backgroundColor: isSelected ? const Color(0xFFFFD500).withOpacity(0.15) : Colors.transparent,
+                child: Icon(
+                  isSelected ? activeIcon : inactiveIcon,
+                  color: isSelected ? const Color(0xFFFFD500) : Colors.black87,
+                  size: 24,
+                ),
               )
             else
               Icon(
                 isSelected ? activeIcon : inactiveIcon,
-                color: isSelected ? AppColors.primary : Colors.black54,
+                color: isSelected ? const Color(0xFFFFD500) : Colors.black87,
                 size: 26,
               ),
             const SizedBox(height: 4),
@@ -195,7 +229,7 @@ class _MainScreenState extends State<MainScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-                color: isSelected ? AppColors.primary : Colors.black54,
+                color: isSelected ? const Color(0xFFFFD500) : Colors.black54,
               ),
             ),
           ],
@@ -206,12 +240,56 @@ class _MainScreenState extends State<MainScreen> {
 
   GlobalKey<NavigatorState> _getSelectedNavigatorKey(int index) {
     switch (index) {
-      case 0: return _homeNavKey;
+      case 0: return _dashboardNavKey;
       case 1: return _ordersNavKey;
-      case 2: return _cartNavKey;
-      case 3: return _profileNavKey;
+      case 2: return _homeNavKey;
+      case 3: return _cartNavKey;
+      case 4: return _profileNavKey;
       default: return _homeNavKey;
     }
+  }
+
+  Widget _buildCenterNavItem(int index, int selectedIndex, NavigationProvider navProvider) {
+    return GestureDetector(
+      onTap: () {
+        if (selectedIndex == 2) {
+          _homeNavKey.currentState?.popUntil((route) => route.isFirst);
+          navProvider.triggerHomeReset();
+        } else {
+          navProvider.setIndex(2);
+        }
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFD700),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFFFD700).withOpacity(0.4),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: const Icon(Icons.delivery_dining, color: Colors.black, size: 30),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            "Sipariş Ver",
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFFFFD500),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildTabNavigator(GlobalKey<NavigatorState> key, Widget page) {

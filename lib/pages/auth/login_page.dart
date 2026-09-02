@@ -16,7 +16,7 @@ class _LoginPageState extends State<LoginPage> {
   final _codeController = TextEditingController();
   bool _isLoading = false;
   bool _codeSent = false;
-  String _countryCode = "+90"; 
+  String _countryCode = "+993"; 
 
   void _login() async {
     final langProvider = Provider.of<LanguageProvider>(context, listen: false);
@@ -82,220 +82,273 @@ class _LoginPageState extends State<LoginPage> {
     final langProvider = Provider.of<LanguageProvider>(context);
     
     return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: constraints.maxHeight,
-              ),
-              child: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color(0xFFFF6900), Color(0xFFFF8E53)],
-                  ),
+      backgroundColor: const Color(0xFF1F113D),
+      body: Stack(
+        children: [
+          // Background Image (Top Half)
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: MediaQuery.of(context).size.height * 0.55,
+            child: Image.asset(
+              'assets/images/splash_logo.png',
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+              errorBuilder: (context, error, stackTrace) {
+                 return const Center(child: Icon(Icons.broken_image, color: Colors.white, size: 50));
+              }
+            ),
+          ),
+          
+          // Bottom Sheet Content
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.55,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(32),
+                  topRight: Radius.circular(32),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: SafeArea(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(height: 20),
-                      TweenAnimationBuilder<double>(
-                        tween: Tween<double>(begin: 0.9, end: 1.0),
-                        duration: const Duration(seconds: 1),
-                        curve: Curves.easeInOutSine,
-                        builder: (context, value, child) {
-                          return Transform.scale(
-                            scale: value,
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              child: Image.asset(
-                                'assets/images/logo_m.png',
-                                height: _codeSent ? 100 : 180,
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                          );
-                        },
+              ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                child: Column(
+                  children: [
+                    // Drag handle
+                    Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
                       ),
-                      const SizedBox(height: 16),
-                      if (!_codeSent) ...[
-                        Text(
-                          langProvider.get('app_name').toUpperCase(),
-                          style: const TextStyle(
-                            fontSize: 36,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            letterSpacing: -1,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          langProvider.translate('tagline'),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                      SizedBox(height: _codeSent ? 10 : 30),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // Language Toggle
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade200),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          _buildLangButton(context, 'TR', 'Türkçe', '+90'),
-                          const SizedBox(width: 12),
-                          _buildLangButton(context, 'TM', 'Türkmen', '+993'),
-                          const SizedBox(width: 12),
-                          _buildLangButton(context, 'RU', 'Русский', '+7'),
+                          _buildLangButton(context, 'TM', 'TM', '+993'),
+                          _buildLangButton(context, 'RU', 'RU', '+7'),
                         ],
                       ),
-                      const SizedBox(height: 30),
-
-                      if (!_codeSent) ...[
-                        TextField(
-                          controller: _phoneController,
-                          keyboardType: TextInputType.phone,
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                          maxLength: _countryCode == '+993' ? 8 : 15,
-                          decoration: InputDecoration(
-                            counterText: "",
-                            labelText: langProvider.translate('phone_label'),
-                            labelStyle: const TextStyle(color: Colors.white70),
-                            hintText: langProvider.translate('phone_hint'),
-                            hintStyle: const TextStyle(color: Colors.white54),
-                            prefixIcon: Container(
-                              width: 60,
-                              alignment: Alignment.center,
+                    ),
+                    const SizedBox(height: 32),
+                    
+                    // Title
+                    Text(
+                      _codeSent ? langProvider.get('verify_code') : "Hoş geldiňiz",
+                      style: const TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF2E1A47),
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    
+                    // Subtitle
+                    Text(
+                      _codeSent 
+                        ? langProvider.get('sms_sent_to').replaceAll('{phone}', "$_countryCode${_phoneController.text}") 
+                        : "Sargytlaryňyz gapyňyza çalt we ýyly gelsin.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    
+                    // Input Field
+                    if (!_codeSent) 
+                      Container(
+                        height: 56,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
                               child: Text(
                                 _countryCode,
-                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                                style: const TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF2E1A47),
+                                ),
                               ),
                             ),
-                            fillColor: Colors.white.withOpacity(0.2),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide.none,
+                            Container(width: 1, height: 24, color: Colors.grey.shade300),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 16, right: 8),
+                              child: Icon(Icons.phone_rounded, color: const Color(0xFF6B528B), size: 20),
                             ),
-                          ),
-                        ),
-                      ] else ...[
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: Colors.white24),
-                          ),
-                          child: Column(
-                            children: [
-                              const Icon(Icons.mark_email_read_outlined, color: Colors.white, size: 48),
-                              const SizedBox(height: 16),
-                              Text(
-                                langProvider.get('verify_code'),
-                                style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                langProvider.get('sms_sent_to').replaceAll('{phone}', "$_countryCode${_phoneController.text}"),
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(color: Colors.white70, fontSize: 14),
-                              ),
-                              const SizedBox(height: 24),
-                              TextField(
-                                controller: _codeController,
-                                keyboardType: TextInputType.number,
-                                textAlign: TextAlign.center,
-                                maxLength: 6,
-                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 32, letterSpacing: 12),
+                            Expanded(
+                              child: TextField(
+                                controller: _phoneController,
+                                keyboardType: TextInputType.phone,
+                                style: const TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF2E1A47),
+                                ),
                                 decoration: InputDecoration(
-                                  counterText: "",
-                                  hintText: "******",
-                                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
-                                  filled: true,
-                                  fillColor: Colors.white.withOpacity(0.1),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide.none,
+                                  border: InputBorder.none,
+                                  hintText: langProvider.translate('phone_hint') != 'phone_hint' ? langProvider.translate('phone_hint') : "Telefon belgiňiz",
+                                  hintStyle: TextStyle(
+                                    fontFamily: 'Inter',
+                                    color: Colors.grey[400],
+                                    fontWeight: FontWeight.normal,
                                   ),
                                 ),
                               ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else 
+                      Container(
+                        height: 56,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: TextField(
+                          controller: _codeController,
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.center,
+                          maxLength: 6,
+                          style: const TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2E1A47),
+                            letterSpacing: 8,
+                          ),
+                          decoration: InputDecoration(
+                            counterText: "",
+                            border: InputBorder.none,
+                            hintText: "******",
+                            hintStyle: TextStyle(
+                              color: Colors.grey[300],
+                              letterSpacing: 8,
+                            ),
+                          ),
+                        ),
+                      ),
+                      
+                    const SizedBox(height: 24),
+                    
+                    // Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _login,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFFD500), // Yellow
+                          foregroundColor: const Color(0xFF2E1A47), // Dark Purple text
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(color: Color(0xFF2E1A47), strokeWidth: 3),
+                              )
+                            : Text(
+                                _codeSent ? langProvider.get('verify_code') : "Kod iber",
+                                style: const TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                      ),
+                    ),
+                    
+                    if (_codeSent) ...[
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: () => setState(() => _codeSent = false),
+                        child: Text(
+                          "Telefon belgisini üýtget", 
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                    
+                    if (!_codeSent) ...[
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.verified_user_outlined, size: 16, color: Colors.grey[500]),
+                          const SizedBox(width: 6),
+                          RichText(
+                            text: TextSpan(
+                              style: TextStyle(fontFamily: 'Inter', fontSize: 12, color: Colors.grey[600]),
+                              children: const [
+                                TextSpan(text: "Dowam etmek bilen "),
+                                TextSpan(text: "şertleri", style: TextStyle(fontWeight: FontWeight.bold)),
+                                TextSpan(text: " kabul edýärsiňiz."),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 24),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const RegisterPage()),
+                          );
+                        },
+                        child: RichText(
+                          text: const TextSpan(
+                            style: TextStyle(fontFamily: 'Inter', fontSize: 14, color: Color(0xFF6B7280)),
+                            children: [
+                              TextSpan(text: "Hasabyňyz ýokmy? "),
+                              TextSpan(text: "Hasap açyň", style: TextStyle(color: Color(0xFF2E1A47), fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),
-                      ],
-                      const SizedBox(height: 24),
-
-                      SizedBox(
-                        width: double.infinity,
-                        height: 60,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _login,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: const Color(0xFFFF6900),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            elevation: 8,
-                          ),
-                          child: _isLoading
-                              ? const CircularProgressIndicator(color: Color(0xFFFF6900))
-                              : Text(
-                                  _codeSent ? langProvider.get('verify_code').toUpperCase() : langProvider.translate('login_button'),
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 1,
-                                  ),
-                                ),
-                        ),
                       ),
-                      if (_codeSent)
-                        TextButton(
-                          onPressed: () => setState(() => _codeSent = false),
-                          child: Text(langProvider.get('update'), style: const TextStyle(color: Colors.white70)),
-                        ),
-                      const SizedBox(height: 24),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            langProvider.translate('no_account'),
-                            style: const TextStyle(color: Colors.white70, fontSize: 15),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const RegisterPage()),
-                              );
-                            },
-                            child: Text(
-                              langProvider.translate('signup'),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
                     ],
-                  ),
+                    const SizedBox(height: 32),
+                  ],
                 ),
               ),
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
@@ -311,22 +364,21 @@ class _LoginPageState extends State<LoginPage> {
         });
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white.withOpacity(0.3) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          border: isSelected ? Border.all(color: Colors.white, width: 1.5) : null,
+          color: isSelected ? const Color(0xFFFFD500) : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: Colors.white,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            fontSize: 13,
+            fontFamily: 'Inter',
+            color: isSelected ? const Color(0xFF2E1A47) : Colors.grey[500],
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+            fontSize: 14,
           ),
         ),
       ),
     );
   }
 }
-

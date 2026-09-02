@@ -40,4 +40,25 @@ class DistanceHelper {
       return '${distanceKm.toStringAsFixed(1)} km';
     }
   }
+
+  /// Ray-Casting algoritması: Verilen noktanın çokgenin içinde olup olmadığını kontrol eder.
+  /// [lat], [lng] -> Kontrol edilecek nokta (Kullanıcı konumu)
+  /// [polygon] -> Çokgenin köşe koordinatları listesi
+  static bool isPointInPolygon(double lat, double lng, List<Map<String, double>> polygon) {
+    if (polygon.isEmpty) return false;
+
+    bool isInside = false;
+    for (int i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      double xi = polygon[i]['lat'] ?? 0;
+      double yi = polygon[i]['lng'] ?? 0;
+      double xj = polygon[j]['lat'] ?? 0;
+      double yj = polygon[j]['lng'] ?? 0;
+
+      bool intersect = ((yi > lng) != (yj > lng)) &&
+          (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi);
+      if (intersect) isInside = !isInside;
+    }
+
+    return isInside;
+  }
 }

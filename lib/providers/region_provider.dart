@@ -14,10 +14,10 @@ class RegionProvider with ChangeNotifier {
   String? get selectedGuestRegion => _selectedGuestRegion;
 
   RegionProvider() {
-    _loadGuestRegion();
+    loadGuestRegion();
   }
 
-  Future<void> _loadGuestRegion() async {
+  Future<void> loadGuestRegion() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       _selectedGuestRegion = prefs.getString('selectedGuestRegion');
@@ -85,10 +85,13 @@ class RegionProvider with ChangeNotifier {
       'Ruhubelent',
     ]),
     Region(id: 'turkmenbasi', name: 'Türkmenbaşı', districts: [
-      'Kenar',
       'Awaza',
-      'Gumdag',
+      'Kenar',
       'Hazar',
+      'Şagadam',
+      'Garagum',
+      'Port (Liman) çevresi',
+      'Aeroport (Havalimanı)',
     ]),
   ];
 

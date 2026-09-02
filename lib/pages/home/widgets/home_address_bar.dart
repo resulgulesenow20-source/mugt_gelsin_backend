@@ -30,62 +30,47 @@ class HomeAddressBar extends StatelessWidget {
           RegionSelectionDialog.show(context);
         }
       },
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(22),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade100),
-          boxShadow: AppColors.softShadow,
+          borderRadius: BorderRadius.circular(22),
         ),
         child: Row(
           children: [
-            const Icon(Icons.location_on_rounded, color: AppColors.primary, size: 20),
+            const Icon(Icons.location_on, color: Color(0xFF2B0F6B), size: 24),
             const SizedBox(width: 8),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const Text(
+                    "Teslimat Adresi",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 10,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
                   Text(
                     authProvider.isLoggedIn
-                        ? (defaultAddress?.title ?? langProvider.translate('address_select'))
+                        ? ((defaultAddress?.title ?? "") + " " + (defaultAddress?.district ?? langProvider.translate('address_select')))
                         : (regionProvider.selectedGuestRegion ?? langProvider.translate('address_select')),
                     style: const TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 13,
-                      color: AppColors.textPrimary,
+                      color: Colors.black,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (authProvider.isLoggedIn && defaultAddress != null)
-                    Text(
-                      defaultAddress.district,
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: AppColors.textSecondary.withOpacity(0.7),
-                        fontWeight: FontWeight.w500,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  if (!authProvider.isLoggedIn && regionProvider.selectedGuestRegion != null)
-                    Text(
-                      langProvider.translate('select_region_title'), // Just a subtitle indicator
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: AppColors.textSecondary.withOpacity(0.7),
-                        fontWeight: FontWeight.w500,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
                 ],
               ),
             ),
-            const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textSecondary, size: 18),
+            const Icon(Icons.chevron_right_rounded, color: Colors.black87, size: 24),
           ],
         ),
       ),

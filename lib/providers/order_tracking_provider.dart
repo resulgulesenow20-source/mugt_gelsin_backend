@@ -23,13 +23,30 @@ class OrderTrackingProvider with ChangeNotifier {
     return _firestore
         .collection('Emirler')
         .where('customerUid', isEqualTo: uid)
-        .where('status', whereIn: ['pending', 'hazırlanıyor', 'yolda', 'onaylanıyor', 'on_the_way'])
+        // Removed whereIn to avoid composite index requirement
         .snapshots()
         .map((snapshot) {
+      final activeStatuses = ['pending', 'hazırlanıyor', 'yolda', 'onaylanıyor', 'on_the_way'];
       return snapshot.docs
+          .where((doc) {
+            final data = doc.data();
+            final status = (data['status'] ?? '').toString().toLowerCase();
+            return activeStatuses.contains(status);
+          })
           .map((doc) => OrderModel.fromFirestore(doc.data(), doc.id))
           .toList();
     });
+  }
+
+  // All orders for a user
+  Stream<List<OrderModel>> getAllUserOrders(String uid) {
+    return _firestore
+        .collection('Emirler')
+        .where('customerUid', isEqualTo: uid)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => OrderModel.fromFirestore(doc.data(), doc.id))
+            .toList());
   }
 
   Future<bool> submitReview({

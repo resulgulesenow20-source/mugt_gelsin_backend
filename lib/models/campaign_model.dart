@@ -14,6 +14,7 @@ class Campaign {
   final DateTime? startDate;
   final DateTime? endDate;
   final String? imageUrl; // ✅ Görsel URL desteği
+  final String? region; // ✅ Hedef bölge desteği
 
   Campaign({
     required this.id,
@@ -28,6 +29,7 @@ class Campaign {
     this.startDate,
     this.endDate,
     this.imageUrl,
+    this.region,
   });
 
   factory Campaign.fromFirestore(DocumentSnapshot doc) {
@@ -49,6 +51,7 @@ class Campaign {
       startDate: data['startDate'] is Timestamp ? (data['startDate'] as Timestamp).toDate() : null,
       endDate: data['endDate'] is Timestamp ? (data['endDate'] as Timestamp).toDate() : null,
       imageUrl: rawImageUrl,
+      region: data['region'],
     );
   }
 }

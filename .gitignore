@@ -56,3 +56,4 @@ backend/check_collections.py
 backend/check_doc.py
 backend/check_doc_v2.py
 backend/list_restaurants.py
+node_modules/

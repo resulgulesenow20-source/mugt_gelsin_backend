@@ -8,6 +8,7 @@ import 'package:mugut_gelsin/services/api_service.dart';
 import 'package:provider/provider.dart';
 import 'package:mugut_gelsin/providers/auth_provider.dart' as app_auth;
 import 'package:lottie/lottie.dart';
+import 'package:mugut_gelsin/core/constants/app_colors.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -62,8 +63,8 @@ class _SplashPageState extends State<SplashPage> {
       debugPrint("Dynamic splash fetch error: $e");
     }
     
-    // Fallback: Herhangi bir hata veya timeout durumunda yerel videoyu aç
-    await _initVideo('assets/videos/animasyon.mp4', isNetwork: false);
+    // Fallback: Herhangi bir hata veya timeout durumunda yerel resmi aç
+    _showMedia('assets/images/splash_logo.png', isImage: true);
   }
 
   void _showMedia(String url, {bool isImage = false, bool isLottie = false}) {
@@ -87,6 +88,9 @@ class _SplashPageState extends State<SplashPage> {
         return true;
       }),
     ]).then((_) {
+      _navigateToMain();
+    }).catchError((e) {
+      debugPrint("Splash data fetch error: $e");
       _navigateToMain();
     });
   }
@@ -150,14 +154,14 @@ class _SplashPageState extends State<SplashPage> {
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
-      backgroundColor: const Color(0xFFFF6B00), // Match the logo's orange
+      backgroundColor: const Color(0xFF1F113D), // Blend with dark image background
       body: Center(
         child: _isMediaInitialized
             ? _isLottie
                 ? SizedBox.expand(
                     child: Lottie.network(
                       _mediaUrl!,
-                      fit: BoxFit.cover,
+                      fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) {
                         if (mounted) {
                           Future.microtask(() => _navigateToMain());
@@ -168,16 +172,27 @@ class _SplashPageState extends State<SplashPage> {
                   )
                 : _isImage
                     ? SizedBox.expand(
-                        child: Image.network(
-                          _mediaUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            if (mounted) {
-                              Future.microtask(() => _navigateToMain());
-                            }
-                            return const SizedBox();
-                          },
-                        ),
+                        child: _mediaUrl!.startsWith('http') 
+                          ? Image.network(
+                              _mediaUrl!,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) {
+                                if (mounted) {
+                                  Future.microtask(() => _navigateToMain());
+                                }
+                                return const SizedBox();
+                              },
+                            )
+                          : Image.asset(
+                              _mediaUrl!,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) {
+                                if (mounted) {
+                                  Future.microtask(() => _navigateToMain());
+                                }
+                                return const SizedBox();
+                              },
+                            ),
                       )
                     : SizedBox.expand(
                         child: FittedBox(

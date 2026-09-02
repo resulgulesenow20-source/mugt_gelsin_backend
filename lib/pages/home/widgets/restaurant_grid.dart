@@ -8,6 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:mugut_gelsin/providers/language_provider.dart';
 import 'package:mugut_gelsin/providers/address_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mugut_gelsin/presentation/common/widgets/restaurant_rating_text.dart';
 import 'dart:math' as math;
 
 class RestaurantGrid extends StatelessWidget {
@@ -165,15 +167,12 @@ class _RestaurantListTile extends StatelessWidget {
                           const SizedBox(width: 4),
                           Row(
                             children: [
-                              const Icon(Icons.star_rounded, color: Color(0xFF5D3EBC), size: 16),
+                              const Icon(Icons.star_rounded, color: Colors.orange, size: 16),
                               const SizedBox(width: 2),
-                              Text(
-                                "${res.rating} (5000+)", // Mock reviews like screenshot
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF5D3EBC),
-                                ),
+                              RestaurantRatingText(
+                                restaurantId: res.id,
+                                docId: res.docId,
+                                rating: res.rating,
                               ),
                             ],
                           ),

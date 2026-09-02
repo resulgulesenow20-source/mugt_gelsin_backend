@@ -30,10 +30,12 @@ class CartProvider with ChangeNotifier {
   String? _restaurantId;
   String? _restaurantName;
   double _minOrderAmount = 50.0;
+  double _deliveryFee = 0.0;
 
   String? get restaurantId => _restaurantId;
   String? get restaurantName => _restaurantName;
   double get minOrderAmount => _minOrderAmount;
+  double get deliveryFee => _deliveryFee;
   List<CartItem> get items => _items.values.toList();
 
   CartProvider() {
@@ -51,6 +53,7 @@ class CartProvider with ChangeNotifier {
         _restaurantId = cartData['restaurantId'];
         _restaurantName = cartData['restaurantName'];
         _minOrderAmount = cartData['minOrderAmount'] ?? 50.0;
+        _deliveryFee = cartData['deliveryFee'] ?? 0.0;
         
         final List<dynamic> itemsList = cartData['items'] ?? [];
         _items.clear();
@@ -74,6 +77,7 @@ class CartProvider with ChangeNotifier {
         'restaurantId': _restaurantId,
         'restaurantName': _restaurantName,
         'minOrderAmount': _minOrderAmount,
+        'deliveryFee': _deliveryFee,
         'items': _items.values.map((item) => item.toJson()).toList(),
       };
       await prefs.setString('cart_data', jsonEncode(cartData));
@@ -87,21 +91,23 @@ class CartProvider with ChangeNotifier {
     return _restaurantId == newRestaurantId;
   }
 
-  void clearAndAddToCart(Food food, {String? restaurantId, String? restaurantName, double? minOrderAmount, String? note}) {
+  void clearAndAddToCart(Food food, {String? restaurantId, String? restaurantName, double? minOrderAmount, double? deliveryFee, String? note}) {
     clearCart();
     addToCart(food, 
       restaurantId: restaurantId, 
       restaurantName: restaurantName, 
-      minOrderAmount: minOrderAmount, 
+      minOrderAmount: minOrderAmount,
+        deliveryFee: deliveryFee, 
       note: note
     );
   }
 
-  void addToCart(Food food, {String? restaurantId, String? restaurantName, double? minOrderAmount, String? note}) {
+  void addToCart(Food food, {String? restaurantId, String? restaurantName, double? minOrderAmount, double? deliveryFee, String? note}) {
     if (_items.isEmpty) {
       _restaurantId = restaurantId;
       _restaurantName = restaurantName;
       if (minOrderAmount != null) _minOrderAmount = minOrderAmount;
+      if (deliveryFee != null) _deliveryFee = deliveryFee;
     } else if (_restaurantId != restaurantId) {
       // Different restaurant - in a strict implementation we might throw here, 
       // but we'll rely on the UI calling canAddToCart first.
@@ -147,6 +153,7 @@ class CartProvider with ChangeNotifier {
     _restaurantId = null;
     _restaurantName = null;
     _minOrderAmount = 50.0;
+    _deliveryFee = 0.0;
     _saveToPrefs();
     notifyListeners();
   }

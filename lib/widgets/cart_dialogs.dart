@@ -13,6 +13,7 @@ class CartDialogs {
     required String? restaurantId,
     required String? restaurantName,
     required double? minOrderAmount,
+    required double? deliveryFee,
     String? note,
     VoidCallback? onSuccess,
   }) async {
@@ -59,6 +60,7 @@ class CartDialogs {
                 restaurantId: restaurantId,
                 restaurantName: restaurantName,
                 minOrderAmount: minOrderAmount,
+                      deliveryFee: deliveryFee,
                 note: note,
               );
               Navigator.pop(context);

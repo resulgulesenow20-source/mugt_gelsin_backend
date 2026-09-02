@@ -11,7 +11,7 @@ class HelpSupportPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F7),
       appBar: AppBar(
-        title: const Text("Yardım & Destek", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("Kömek we Goldaw", style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
@@ -44,14 +44,14 @@ class HelpSupportPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            "Bize Ulaşın",
+            "Biziň bilen habarlaşyň",
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
           ),
           const SizedBox(height: 16),
           _buildContactItem(
             icon: Icons.support_agent_outlined,
-            title: "Canlı Destek",
-            subtitle: "Müşteri temsilcisi ile hemen görüşün",
+            title: "Gönüden-göni goldaw",
+            subtitle: "Müşderi wekili bilen derrew gürleşiň",
             color: AppColors.textPrimary,
             onTap: () {
               Navigator.push(
@@ -63,8 +63,8 @@ class HelpSupportPage extends StatelessWidget {
           const Divider(),
           _buildContactItem(
             icon: Icons.chat_bubble_outline,
-            title: "WhatsApp Destek Hattı",
-            subtitle: "Anında çözüm için bize yazın",
+            title: "WhatsApp Goldaw Liniýasy",
+            subtitle: "Derrew çözgüt üçin bize ýazyň",
             color: Colors.green,
             onTap: () {
               // WhatsApp yönlendirmesi eklenebilir
@@ -73,8 +73,8 @@ class HelpSupportPage extends StatelessWidget {
           const Divider(),
           _buildContactItem(
             icon: Icons.phone_in_talk_outlined,
-            title: "Müşteri Hizmetlerini Ara",
-            subtitle: "Hafta içi 09:00 - 18:00",
+            title: "Müşderi hyzmatyna jaň ediň",
+            subtitle: "Hepde içi 09:00 - 18:00",
             color: Colors.blue,
             onTap: () {
               // Arama yönlendirmesi eklenebilir
@@ -83,7 +83,7 @@ class HelpSupportPage extends StatelessWidget {
           const Divider(),
           _buildContactItem(
             icon: Icons.mail_outline,
-            title: "E-posta Gönder",
+            title: "E-poçta iberiň",
             subtitle: "destek@mugutgelsin.com",
             color: AppColors.textPrimary,
             onTap: () {
@@ -133,17 +133,17 @@ class HelpSupportPage extends StatelessWidget {
           const Padding(
             padding: EdgeInsets.all(20),
             child: Text(
-              "Sıkça Sorulan Sorular",
+              "Köp soralýan soraglar",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
             ),
           ),
-          _buildFAQItem("Siparişim ne zaman gelir?", "Siparişleriniz dükkanın yoğunluğuna göre ortalama 30-45 dakika içerisinde teslim edilir."),
+          _buildFAQItem("Sargydym haçan geler?", "Sargytlaryňyz dükanyň işjeňligine görä ortaça 30-45 minudyň dowamynda gowşurylýar."),
           const Divider(height: 1),
-          _buildFAQItem("Ödeme yöntemleri nelerdir?", "Şu an için kapıda nakit veya kredi kartı ile ödeme yapabilirsiniz."),
+          _buildFAQItem("Töleg görnüşleri nämeler?", "Häzirki wagtda gapyda nagt ýa-da bank karty bilen töläp bilersiňiz."),
           const Divider(height: 1),
-          _buildFAQItem("Siparişi nasıl iptal ederim?", "Siparişiniz hazırlanmaya başlamadan önce 'Yardım' hattı üzerinden ulaşarak iptal edebilirsiniz."),
+          _buildFAQItem("Sargydy nähili bes edip bilerin?", "Sargydyňyz taýýarlanyp başlamazdan öň 'Kömek' liniýasy arkaly habarlaşyp bes edip bilersiňiz."),
           const Divider(height: 1),
-          _buildFAQItem("Adresimi nasıl değiştiririm?", "Profil sekmesindeki 'Adreslerim' bölümünden yeni adres ekleyebilir veya düzenleyebilirsiniz."),
+          _buildFAQItem("Adresimi nähili üýtgedip bilerin?", "Profil bölümindäki 'Adreslerim' ýerinden täze adres goşup ýa-da üýtgedip bilersiňiz."),
         ],
       ),
     );

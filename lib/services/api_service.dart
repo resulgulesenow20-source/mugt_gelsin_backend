@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/restaurant_model.dart';
 import '../models/campaign_model.dart';
 import '../models/top_category_model.dart';
+import '../models/delivery_zone_model.dart';
 
 class ApiService {
   // --- CONFIGURATION ---
@@ -35,41 +36,37 @@ class ApiService {
     try {
       debugPrint('ApiService: Fetching restaurants and menus from Firestore...');
       
-      // 1. Dükkanları Çek (Cache-First)
+      // 1. Dükkanları Çek
       QuerySnapshot shopSnapshot;
       try {
-        shopSnapshot = await FirebaseFirestore.instance
-            .collection('Dukkanlar')
-            .get(const GetOptions(source: Source.cache));
-        if (shopSnapshot.docs.isEmpty) {
-          shopSnapshot = await FirebaseFirestore.instance
-              .collection('Dukkanlar')
-              .get(const GetOptions(source: Source.serverAndCache));
-        }
+        shopSnapshot = await FirebaseFirestore.instance.collection('Dukkanlar').get();
       } catch (e) {
-        shopSnapshot = await FirebaseFirestore.instance
-            .collection('Dukkanlar')
-            .get();
+        debugPrint('Dükkanlar serverdan çekilemedi, cache deneniyor: $e');
+        shopSnapshot = await FirebaseFirestore.instance.collection('Dukkanlar').get(const GetOptions(source: Source.cache));
       }
           
-      // 2. Menüleri Çek (Cache-First)
+      // 2. Menüleri Çek
       QuerySnapshot menuSnapshot;
       try {
         menuSnapshot = await FirebaseFirestore.instance
             .collection('Menuler')
             .where('deleted', isEqualTo: false)
-            .get(const GetOptions(source: Source.cache));
-        if (menuSnapshot.docs.isEmpty) {
-          menuSnapshot = await FirebaseFirestore.instance
-              .collection('Menuler')
-              .where('deleted', isEqualTo: false)
-              .get(const GetOptions(source: Source.serverAndCache));
-        }
+            .get();
       } catch (e) {
+        debugPrint('Menuler serverdan çekilemedi, cache deneniyor: $e');
         menuSnapshot = await FirebaseFirestore.instance
             .collection('Menuler')
             .where('deleted', isEqualTo: false)
-            .get();
+            .get(const GetOptions(source: Source.cache));
+      }
+
+      // 3. Bölgeleri Çek
+      QuerySnapshot zoneSnapshot;
+      try {
+        zoneSnapshot = await FirebaseFirestore.instance.collection('Bolgeler').get();
+      } catch (e) {
+        debugPrint('Bolgeler serverdan çekilemedi, cache deneniyor: $e');
+        zoneSnapshot = await FirebaseFirestore.instance.collection('Bolgeler').get(const GetOptions(source: Source.cache));
       }
 
       // Menüleri shop_id'ye göre grupla
@@ -83,6 +80,20 @@ class ApiService {
             menuMap[shopId] = [];
           }
           menuMap[shopId]!.add(data);
+        }
+      }
+
+      // Bölgeleri shop_id'ye göre grupla
+      Map<String, List<Map<String, dynamic>>> zoneMap = {};
+      for (var doc in zoneSnapshot.docs) {
+        var data = doc.data() as Map<String, dynamic>;
+        String shopId = data['shop_id']?.toString() ?? '';
+        if (shopId.isNotEmpty) {
+          data['id'] = doc.id; // Bölge ID'si
+          if (!zoneMap.containsKey(shopId)) {
+            zoneMap[shopId] = [];
+          }
+          zoneMap[shopId]!.add(data);
         }
       }
       
@@ -108,6 +119,13 @@ class ApiService {
            existingList.addAll(shopMenus);
            data['menu'] = existingList;
 
+           // Bölgeleri ekle
+           List<Map<String, dynamic>> shopZones = [];
+           if (zoneMap.containsKey(phone) && phone.isNotEmpty) shopZones.addAll(zoneMap[phone]!);
+           if (zoneMap.containsKey(mugutId) && mugutId != phone && mugutId.isNotEmpty) shopZones.addAll(zoneMap[mugutId]!);
+           if (zoneMap.containsKey(doc.id) && doc.id != mugutId && doc.id != phone) shopZones.addAll(zoneMap[doc.id]!);
+           data['deliveryZones'] = shopZones;
+
            return mapFirestoreToRestaurant(data, doc.id);
         }).toList();
       }
@@ -124,22 +142,22 @@ class ApiService {
         .asyncMap((shopSnapshot) async {
           QuerySnapshot menuSnapshot;
           try {
-            // Try to load menus from cache first to avoid blocking on slow connections
-            menuSnapshot = await FirebaseFirestore.instance
-                .collection('Menuler')
-                .where('deleted', isEqualTo: false)
-                .get(const GetOptions(source: Source.cache));
-            if (menuSnapshot.docs.isEmpty) {
-              menuSnapshot = await FirebaseFirestore.instance
-                  .collection('Menuler')
-                  .where('deleted', isEqualTo: false)
-                  .get(const GetOptions(source: Source.serverAndCache));
-            }
-          } catch (e) {
             menuSnapshot = await FirebaseFirestore.instance
                 .collection('Menuler')
                 .where('deleted', isEqualTo: false)
                 .get();
+          } catch (e) {
+            menuSnapshot = await FirebaseFirestore.instance
+                .collection('Menuler')
+                .where('deleted', isEqualTo: false)
+                .get(const GetOptions(source: Source.cache));
+          }
+
+          QuerySnapshot zoneSnapshot;
+          try {
+            zoneSnapshot = await FirebaseFirestore.instance.collection('Bolgeler').get();
+          } catch (e) {
+            zoneSnapshot = await FirebaseFirestore.instance.collection('Bolgeler').get(const GetOptions(source: Source.cache));
           }
 
           Map<String, List<Map<String, dynamic>>> menuMap = {};
@@ -152,6 +170,19 @@ class ApiService {
                 menuMap[shopId] = [];
               }
               menuMap[shopId]!.add(data);
+            }
+          }
+
+          Map<String, List<Map<String, dynamic>>> zoneMap = {};
+          for (var doc in zoneSnapshot.docs) {
+            var data = doc.data() as Map<String, dynamic>;
+            String shopId = data['shop_id']?.toString() ?? '';
+            if (shopId.isNotEmpty) {
+              data['id'] = doc.id;
+              if (!zoneMap.containsKey(shopId)) {
+                zoneMap[shopId] = [];
+              }
+              zoneMap[shopId]!.add(data);
             }
           }
 
@@ -173,6 +204,12 @@ class ApiService {
              }
              existingList.addAll(shopMenus);
              data['menu'] = existingList;
+
+             List<Map<String, dynamic>> shopZones = [];
+             if (zoneMap.containsKey(phone) && phone.isNotEmpty) shopZones.addAll(zoneMap[phone]!);
+             if (zoneMap.containsKey(mugutId) && mugutId != phone && mugutId.isNotEmpty) shopZones.addAll(zoneMap[mugutId]!);
+             if (zoneMap.containsKey(doc.id) && doc.id != mugutId && doc.id != phone) shopZones.addAll(zoneMap[doc.id]!);
+             data['deliveryZones'] = shopZones;
 
              return mapFirestoreToRestaurant(data, doc.id);
           }).toList();
@@ -305,9 +342,27 @@ class ApiService {
 
     final double? latitude = (data['latitude'] as num?)?.toDouble() ?? (data['lat'] as num?)?.toDouble();
     final double? longitude = (data['longitude'] as num?)?.toDouble() ?? (data['lng'] as num?)?.toDouble();
-    final String city = data['city']?.toString() ?? data['region']?.toString() ?? data['Bölge']?.toString() ?? 'Aşkabat';
+    String city = data['city']?.toString() ?? data['region']?.toString() ?? data['Bölge']?.toString() ?? 'Aşkabat';
+    String address = data['address']?.toString() ?? data['adres']?.toString() ?? city;
+
+    String rawCityLower = city.toLowerCase().replaceAll('ş', 's').replaceAll('ý', 'y').replaceAll('ı', 'i');
+    String rawAddressLower = address.toLowerCase().replaceAll('ş', 's').replaceAll('ý', 'y').replaceAll('ı', 'i');
+    
+    if (rawCityLower.contains('turkmenbasi') || rawCityLower.contains('turkmenbasy') || rawCityLower.contains('turkmenbashy') ||
+        rawAddressLower.contains('turkmenbasi') || rawAddressLower.contains('turkmenbasy') || rawAddressLower.contains('turkmenbashy')) {
+      city = 'Türkmenbaşı';
+    }
 
     final List<String> deliveryDistricts = (data['deliveryDistricts'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
+
+    final List<DeliveryZone> parsedDeliveryZones = [];
+    if (data['deliveryZones'] != null && data['deliveryZones'] is List) {
+      for (var z in data['deliveryZones']) {
+        if (z is Map<String, dynamic>) {
+          parsedDeliveryZones.add(DeliveryZone.fromMap(z, z['id']?.toString() ?? ''));
+        }
+      }
+    }
 
     return Restaurant(
       id: data['id']?.toString() ?? data['mugut_id']?.toString() ?? docId,
@@ -325,7 +380,9 @@ class ApiService {
       latitude: latitude,
       longitude: longitude,
       city: city,
+      address: address,
       deliveryDistricts: deliveryDistricts,
+      deliveryZones: parsedDeliveryZones,
     );
   }
 

@@ -8,6 +8,17 @@ class AddressProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  AddressProvider() {
+    _auth.authStateChanges().listen((user) {
+      if (user != null) {
+        fetchAddresses();
+      } else {
+        _addresses.clear();
+        notifyListeners();
+      }
+    });
+  }
+
   List<Address> get addresses => _addresses;
 
   Address? get defaultAddress {

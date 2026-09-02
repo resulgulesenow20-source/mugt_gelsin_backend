@@ -7,6 +7,8 @@ import 'package:mugut_gelsin/core/constants/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import 'package:mugut_gelsin/providers/language_provider.dart';
+import 'package:mugut_gelsin/utils/distance_calculator.dart';
+import 'package:mugut_gelsin/providers/address_provider.dart';
 
 class ActiveOrderWidget extends StatefulWidget {
   const ActiveOrderWidget({super.key});
@@ -36,7 +38,7 @@ class _ActiveOrderWidgetState extends State<ActiveOrderWidget> {
       stream: FirebaseFirestore.instance
           .collection('Emirler')
           .where('customerUid', isEqualTo: user.uid)
-          .where('status', whereIn: ['pending', 'hazırlanıyor', 'yolda', 'yola çıktı', 'onay bekliyor', 'onaylanıyor', 'on_the_way'])
+          // Removed whereIn to avoid composite index requirement
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
@@ -48,7 +50,17 @@ class _ActiveOrderWidgetState extends State<ActiveOrderWidget> {
           return const SizedBox.shrink();
         }
 
-        final docs = snapshot.data!.docs.toList();
+        final activeStatuses = ['pending', 'hazırlanıyor', 'yolda', 'yola çıktı', 'onay bekliyor', 'onaylanıyor', 'on_the_way'];
+        var docs = snapshot.data!.docs.where((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final status = (data['status'] ?? '').toString().toLowerCase();
+          return activeStatuses.contains(status);
+        }).toList();
+
+        if (docs.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
         docs.sort((a, b) {
           final aTime = (a.data() as Map<String, dynamic>)['timestamp'];
           final bTime = (b.data() as Map<String, dynamic>)['timestamp'];
@@ -63,37 +75,24 @@ class _ActiveOrderWidgetState extends State<ActiveOrderWidget> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     docs.length > 1 ? "${langProvider.translate('orders')} (${docs.length})" : langProvider.translate('orders'),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 17,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF5D3EBC), // Dark Green
                     ),
                   ),
-                  if (docs.length > 1)
-                    Row(
-                      children: List.generate(docs.length, (index) {
-                        return Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 2),
-                          width: _currentPage == index ? 12 : 6,
-                          height: 6,
-                          decoration: BoxDecoration(
-                            color: _currentPage == index ? AppColors.primary : Colors.grey[300],
-                            borderRadius: BorderRadius.circular(3),
-                          ),
-                        );
-                      }),
-                    ),
                 ],
               ),
             ),
             
             SizedBox(
-              height: 155, 
+              height: 250, 
               child: PageView.builder(
                 controller: _pageController,
                 itemCount: docs.length,
@@ -107,6 +106,7 @@ class _ActiveOrderWidgetState extends State<ActiveOrderWidget> {
                   final orderData = orderDoc.data() as Map<String, dynamic>;
                   final String status = orderData['status'] ?? 'hazırlanıyor';
                   final String shopName = orderData['shop_name'] ?? 'Restoran';
+                  final double totalPrice = (orderData['total_price'] ?? 0).toDouble();
 
                   return GestureDetector(
                     onTap: () {
@@ -118,82 +118,216 @@ class _ActiveOrderWidgetState extends State<ActiveOrderWidget> {
                       );
                     },
                     child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      padding: const EdgeInsets.all(16),
+                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withOpacity(0.08),
-                            blurRadius: 15,
-                            offset: const Offset(0, 8),
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
                           ),
                         ],
-                        border: Border.all(color: AppColors.primary.withOpacity(0.1), width: 1.5),
                       ),
                       child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // Top Header Section
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
+                              _buildAvatar(orderData),
+                              const SizedBox(width: 16),
                               Expanded(
-                                child: Row(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    _buildOrderImage(orderData, status),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        shopName,
-                                  style: GoogleFonts.inter(
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 16,
-                                    color: AppColors.textPrimary,
-                                    letterSpacing: -0.3,
+                                    Text(
+                                      shopName,
+                                      style: const TextStyle(
+                                        fontFamily: 'Inter',
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 20,
+                                        color: Color(0xFF2E1A47),
+                                        letterSpacing: -0.5,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                  ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      "Sipariş içeriği",
+                                      style: TextStyle(
+                                        fontFamily: 'Inter',
+                                        color: Colors.grey[600],
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    FutureBuilder<DocumentSnapshot>(
+                                      future: FirebaseFirestore.instance.collection('Restoranlar').doc(orderData['shop_id']).get(),
+                                      builder: (context, resSnap) {
+                                        String prepTime = "20-30 dk";
+                                        String distanceStr = "1.5 km";
+                                        
+                                        if (resSnap.hasData && resSnap.data!.exists) {
+                                          final resData = resSnap.data!.data() as Map<String, dynamic>;
+                                          if (resData['preparation_time'] != null) {
+                                            prepTime = "${resData['preparation_time']} dk";
+                                          }
+                                          final userLat = context.read<AddressProvider>().defaultAddress?.latitude;
+                                          final userLng = context.read<AddressProvider>().defaultAddress?.longitude;
+                                          final resLat = resData['latitude'];
+                                          final resLng = resData['longitude'];
+                                          
+                                          if (userLat != null && userLng != null && resLat != null && resLng != null) {
+                                            double dist = DistanceCalculator.calculateDistanceKm(userLat, userLng, resLat, resLng);
+                                            distanceStr = dist < 1.0 ? "${(dist * 1000).toStringAsFixed(0)} m" : "${dist.toStringAsFixed(1)} km";
+                                          }
+                                        }
+
+                                        return Row(
+                                          children: [
+                                            _buildPill(Icons.access_time_rounded, prepTime),
+                                            const SizedBox(width: 8),
+                                            _buildPill(Icons.location_on_rounded, distanceStr),
+                                          ],
+                                        );
+                                      }
+                                    ),
                                   ],
                                 ),
                               ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: AppColors.surfaceSubtle,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      langProvider.translate('order_detail'),
-                                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    const Icon(Icons.arrow_forward_ios_rounded, size: 10, color: AppColors.primary),
-                                  ],
+                              Text(
+                                "${totalPrice.toStringAsFixed(0)} TMT",
+                                style: const TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                  color: Color(0xFF2E1A47),
                                 ),
                               ),
                             ],
                           ),
+                          
                           const SizedBox(height: 16),
-                          _buildTimeline(status, langProvider),
+                          const Divider(height: 1, thickness: 1, color: Color(0xFFE2E8F0)),
+                          const SizedBox(height: 16),
+                          
+                          // Timeline Section
+                          _buildTimeline(status, orderData, langProvider),
                         ],
                       ),
                     ),
                   );
-                },
-              ),
-            ),
-          ],
-        );
-      },
+            },
+          ),
+        ),
+      ],
+    );
+  },
+);
+  }
+
+  String _formatDate(dynamic timestamp) {
+    if (timestamp == null) return "--:--";
+    DateTime date;
+    if (timestamp is Timestamp) {
+      date = timestamp.toDate();
+    } else {
+      date = DateTime.now();
+    }
+    return "${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}";
+  }
+
+  Widget _buildAvatar(Map<String, dynamic> orderData) {
+    final items = orderData['items'] as List? ?? [];
+    String imageUrl = '';
+    if (items.isNotEmpty) {
+      final firstItem = items[0] as Map<String, dynamic>?;
+      if (firstItem != null) {
+        imageUrl = (firstItem['imageUrl'] ?? firstItem['image_url'] ?? firstItem['Resim'] ?? '') as String;
+      }
+    }
+
+    return Container(
+      width: 64,
+      height: 64,
+      decoration: BoxDecoration(
+        color: const Color(0xFF2E1A47),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: imageUrl.isNotEmpty
+            ? CachedNetworkImage(
+                imageUrl: imageUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => const Center(child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
+                errorWidget: (context, url, error) => const Icon(Icons.fastfood, color: Colors.white, size: 32),
+              )
+            : const Icon(Icons.fastfood, color: Colors.white, size: 32),
+      ),
     );
   }
 
-  Widget _buildTimeline(String status, LanguageProvider langProvider) {
+  Widget _buildPill(IconData icon, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3EEF9),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: const Color(0xFF2E1A47)),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: const TextStyle(
+              fontSize: 12, 
+              color: Color(0xFF2E1A47), 
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Inter',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildDottedLine() {
+    return Expanded(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final boxWidth = constraints.constrainWidth();
+          const dashWidth = 3.0;
+          const dashSpace = 3.0;
+          final dashCount = (boxWidth / (dashWidth + dashSpace)).floor();
+          return Flex(
+            direction: Axis.horizontal,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(dashCount, (_) {
+              return SizedBox(
+                width: dashWidth,
+                height: 2,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(color: Colors.grey[400]),
+                ),
+              );
+            }),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildTimeline(String status, Map<String, dynamic> orderData, LanguageProvider langProvider) {
     int currentStep = 0;
     final s = status.toLowerCase();
     if (s.contains('onay') || s.contains('pending')) {
@@ -209,204 +343,145 @@ class _ActiveOrderWidgetState extends State<ActiveOrderWidget> {
     }
 
     final steps = [
-      langProvider.translate('order_received'),
-      langProvider.translate('preparing'),
-      langProvider.translate('on_the_way'),
-      langProvider.translate('delivered'),
+      {'title': 'Sipariş alındı', 'icon': Icons.check, 'time': _formatDate(orderData['timestamp'])},
+      {'title': 'Hazırlanıyor', 'icon': Icons.restaurant, 'time': _formatDate(orderData['preparing_time'])},
+      {'title': 'Yolda', 'icon': Icons.moped_rounded, 'time': _formatDate(orderData['on_way_time'])},
+      {'title': 'Teslim edildi', 'icon': Icons.home_outlined, 'time': _formatDate(orderData['delivered_time'])},
     ];
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: List.generate(steps.length * 2 - 1, (index) {
-        if (index % 2 != 0) {
-          int stepIndex = index ~/ 2;
-          bool isCompleted = currentStep > stepIndex;
-          return Expanded(
-            child: Container(
-              margin: const EdgeInsets.only(top: 10),
-              height: 3,
-              decoration: BoxDecoration(
-                color: isCompleted ? Colors.green : Colors.grey[200],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          );
-        } else {
-          int stepIndex = index ~/ 2;
-          bool isActive = currentStep >= stepIndex;
-          bool isCurrent = currentStep == stepIndex;
-          
-          return Column(
-            children: [
-              Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isActive ? Colors.green : Colors.grey[200],
-                  border: isCurrent ? Border.all(color: Colors.green.withOpacity(0.3), width: 4) : null,
-                  boxShadow: isCurrent ? [BoxShadow(color: Colors.green.withOpacity(0.3), blurRadius: 6)] : null,
-                ),
-                child: isActive 
-                    ? const Icon(Icons.check, size: 14, color: Colors.white) 
-                    : null,
-              ),
-              const SizedBox(height: 6),
-              SizedBox(
-                width: 55,
-                child: Text(
-                  steps[stepIndex],
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
-                    color: isActive ? Colors.green : Colors.grey[500],
-                    height: 1.1,
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(steps.length * 2 - 1, (index) {
+            if (index % 2 != 0) {
+              int stepIndex = index ~/ 2;
+              bool isLineActive = currentStep > stepIndex;
+              if (isLineActive) {
+                return Expanded(
+                  child: Container(
+                    height: 2,
+                    color: const Color(0xFFFFD500), // Solid Yellow line
+                  ),
+                );
+              } else {
+                return _buildDottedLine();
+              }
+            } else {
+              int stepIndex = index ~/ 2;
+              bool isCompleted = currentStep > stepIndex;
+              bool isActive = currentStep == stepIndex;
+              bool isPending = currentStep < stepIndex;
+
+              return SizedBox(
+                width: 60,
+                child: Center(
+                  child: Builder(
+                    builder: (context) {
+                      if (isCompleted) {
+                        return Container(
+                          width: 36,
+                          height: 36,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFFFD500),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(steps[stepIndex]['icon'] as IconData, color: const Color(0xFF2E1A47), size: 20),
+                        );
+                      } else if (isActive) {
+                        return Stack(
+                          clipBehavior: Clip.none,
+                          alignment: Alignment.center,
+                          children: [
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFF3EEF9),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            Container(
+                              width: 38,
+                              height: 38,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF2E1A47),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(steps[stepIndex]['icon'] as IconData, color: Colors.white, size: 20),
+                            ),
+                            Positioned(
+                              top: 2,
+                              right: 2,
+                              child: Container(
+                                width: 10,
+                                height: 10,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFFFD500),
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      } else {
+                        // Pending
+                        return Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.grey.shade300, width: 2),
+                          ),
+                          child: Icon(steps[stepIndex]['icon'] as IconData, color: Colors.grey.shade400, size: 20),
+                        );
+                      }
+                    }
                   ),
                 ),
-              ),
-            ],
-          );
-        }
-      }),
-    );
-  }
-
-  Widget _buildStatusIcon(String status) {
-    IconData icon;
-    Color color;
-
-    switch (status.toLowerCase()) {
-      case 'onay bekliyor':
-        icon = Icons.access_time_rounded;
-        color = AppColors.warning;
-        break;
-      case 'hazırlanıyor':
-        icon = Icons.restaurant_rounded;
-        color = AppColors.primary;
-        break;
-      case 'yolda':
-      case 'yola çıktı':
-        icon = Icons.delivery_dining_rounded;
-        color = Colors.blueAccent;
-        break;
-      default:
-        icon = Icons.shopping_bag_rounded;
-        color = AppColors.primary;
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Icon(icon, color: color, size: 24),
-    );
-  }
-
-  Widget _buildOrderImage(Map<String, dynamic> orderData, String status) {
-    final items = orderData['items'] as List? ?? [];
-    String imageUrl = '';
-    if (items.isNotEmpty) {
-      final firstItem = items[0] as Map<String, dynamic>?;
-      if (firstItem != null) {
-        imageUrl = (firstItem['imageUrl'] ?? firstItem['image_url'] ?? firstItem['Resim'] ?? '') as String;
-      }
-    }
-
-    // Get status configurations (color and icon)
-    IconData icon;
-    Color color;
-    switch (status.toLowerCase()) {
-      case 'onay bekliyor':
-        icon = Icons.access_time_rounded;
-        color = AppColors.warning;
-        break;
-      case 'hazırlanıyor':
-        icon = Icons.restaurant_rounded;
-        color = AppColors.primary;
-        break;
-      case 'yolda':
-      case 'yola çıktı':
-        icon = Icons.delivery_dining_rounded;
-        color = Colors.blueAccent;
-        break;
-      default:
-        icon = Icons.shopping_bag_rounded;
-        color = AppColors.primary;
-    }
-
-    Widget imageWidget;
-    if (imageUrl.isNotEmpty) {
-      imageWidget = CachedNetworkImage(
-        imageUrl: imageUrl,
-        width: 50,
-        height: 50,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => Container(
-          width: 50,
-          height: 50,
-          color: AppColors.surfaceSubtle,
-          child: const Center(
-            child: SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
-            ),
-          ),
+              );
+            }
+          }),
         ),
-        errorWidget: (context, url, error) => Container(
-          width: 50,
-          height: 50,
-          color: color.withOpacity(0.1),
-          child: Icon(icon, color: color, size: 22),
-        ),
-      );
-    } else {
-      imageWidget = Container(
-        width: 50,
-        height: 50,
-        color: color.withOpacity(0.1),
-        child: Icon(icon, color: color, size: 22),
-      );
-    }
-
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: imageWidget,
-        ),
-        // Tiny status badge overlay in the bottom-right corner
-        Positioned(
-          bottom: -4,
-          right: -4,
-          child: Container(
-            padding: const EdgeInsets.all(3),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: const [
-                BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
-              ],
-              border: Border.all(color: Colors.white, width: 1.5),
-            ),
-            child: Container(
-              padding: const EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: List.generate(steps.length, (index) {
+            final isActive = index == currentStep;
+            final isCompleted = index < currentStep;
+            
+            return SizedBox(
+              width: 70,
+              child: Column(
+                children: [
+                  Text(
+                    steps[index]['title'] as String,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 10,
+                      fontWeight: (isActive || isCompleted) ? FontWeight.bold : FontWeight.w500,
+                      color: (isActive || isCompleted) ? const Color(0xFF2E1A47) : Colors.grey[600],
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    steps[index]['time'] as String,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 10,
+                      color: Colors.grey[500],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
-              child: Icon(
-                icon,
-                color: Colors.white,
-                size: 10,
-              ),
-            ),
-          ),
+            );
+          }),
         ),
       ],
     );
@@ -415,14 +490,14 @@ class _ActiveOrderWidgetState extends State<ActiveOrderWidget> {
   String _getStatusText(String status) {
     switch (status.toLowerCase()) {
       case 'onay bekliyor':
-        return "Sipariş onay bekliyor...";
+        return "Garaşylýar";
       case 'hazırlanıyor':
-        return "Siparişiniz hazırlanıyor...";
+        return "Taýýarlanýar";
       case 'yolda':
       case 'yola çıktı':
-        return "Kurye yola çıktı!";
+        return "Yolda";
       default:
-        return "Siparişiniz işleniyor";
+        return "Taýýar";
     }
   }
 

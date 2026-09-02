@@ -17,8 +17,9 @@ import 'package:mugut_gelsin/providers/coupon_provider.dart';
 import 'package:mugut_gelsin/providers/navigation_provider.dart';
 import 'package:mugut_gelsin/providers/language_provider.dart';
 import 'package:mugut_gelsin/providers/region_provider.dart';
-import 'package:mugut_gelsin/pages/splash/splash_screen.dart';
+import 'package:mugut_gelsin/pages/splash_page.dart';
 import 'package:mugut_gelsin/providers/order_tracking_provider.dart';
+import 'package:mugut_gelsin/services/notification_service.dart';
 import 'firebase_options.dart';
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
@@ -28,16 +29,19 @@ void main() async {
   
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
-      statusBarColor: AppColors.primary,
-      statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: AppColors.primary,
-      systemNavigationBarIconBrightness: Brightness.light,
+      statusBarColor: Colors.transparent, // Mavi başlıklı tasarım için şeffaf
+      statusBarIconBrightness: Brightness.light, // Mavi zemin üzerinde açık ikonlar
+      systemNavigationBarColor: Colors.white,
+      systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Initialize notification service
+  await NotificationService.initialize();
 
   // Enable offline persistence and unlimited cache for fast load times on slow internet
   try {
@@ -89,7 +93,7 @@ class MugutGelsinApp extends StatelessWidget {
       title: 'mugut Gelsin',
       theme: AppTheme.lightTheme,
       scrollBehavior: const AppScrollBehavior(),
-      home: const AuthWrapper(),
+      home: const SplashPage(),
     );
   }
 }

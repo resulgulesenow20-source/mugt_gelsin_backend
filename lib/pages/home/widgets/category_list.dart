@@ -15,49 +15,51 @@ class CategoryList extends StatelessWidget {
   Widget build(BuildContext context) {
     final lang = context.watch<LanguageProvider>();
     final double screenWidth = MediaQuery.of(context).size.width;
-    final double maxGridWidth = screenWidth > 600 ? 600 : screenWidth;
-    final double itemWidth = (maxGridWidth - 32 - 16) / 4; // 4 columns! 4x2 grid
+    
+    // We want about 5.6 items visible so it's horizontally scrollable and slightly smaller
+    final double itemWidth = screenWidth > 600 ? 75 : (screenWidth - 32) / 5.6;
 
-    List<Widget> gridItems = [];
+    List<Widget> listItems = [];
     
     if (topCategories != null && topCategories!.isNotEmpty) {
-      for (var cat in topCategories!) {
-        gridItems.add(_buildDynamicCard(context, cat, itemWidth, onCategorySelected));
+      for (int i = 0; i < topCategories!.length; i++) {
+        listItems.add(_buildDynamicCard(context, topCategories![i], i, itemWidth, onCategorySelected));
+        if (i < topCategories!.length - 1) {
+          listItems.add(const SizedBox(width: 6));
+        }
       }
     } else {
       // Fallback if empty
       for (int i = 1; i <= 8; i++) {
-        gridItems.add(_buildDefaultCard(context, i, itemWidth, lang, onCategorySelected));
+        listItems.add(_buildDefaultCard(context, i, itemWidth, lang, onCategorySelected));
+        if (i < 8) {
+          listItems.add(const SizedBox(width: 6));
+        }
       }
     }
 
-    return Padding(
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Center(
-        child: SizedBox(
-          width: maxGridWidth,
-          child: Wrap(
-            spacing: 5,
-            runSpacing: 16,
-            alignment: WrapAlignment.start,
-            children: gridItems,
-          ),
-        ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: listItems,
       ),
     );
   }
 
-  Widget _buildDynamicCard(BuildContext context, TopCategory cat, double width, Function(String) onCategorySelected) {
+  Widget _buildDynamicCard(BuildContext context, TopCategory cat, int index, double width, Function(String) onCategorySelected) {
     return _buildColumnCard(
       width: width,
+      index: index,
       title: cat.title,
       onTap: () {
         onCategorySelected(cat.targetCategory);
       },
       imageWidget: Image.network(
         cat.imageUrl,
-        height: width,
-        width: width,
+        height: width * 0.85, // Made larger to reduce empty space
+        width: width * 0.85,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.fastfood_rounded, size: 32, color: AppColors.primary)),
       ),
@@ -69,12 +71,13 @@ class CategoryList extends StatelessWidget {
       case 7:
         return _buildColumnCard(
           width: width,
+          index: index,
           title: 'Burger',
           onTap: () => onCategorySelected("Burger"),
           imageWidget: Image.asset(
             'assets/images/cat_burger.png',
-            height: width,
-            width: width,
+            height: width * 0.85,
+            width: width * 0.85,
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.fastfood_rounded, size: 32, color: AppColors.primary)),
           ),
@@ -83,6 +86,7 @@ class CategoryList extends StatelessWidget {
       default:
         return _buildColumnCard(
           width: width,
+          index: index,
           title: 'Hepsi',
           onTap: () => onCategorySelected("Hepsi"),
           imageWidget: const Center(
@@ -94,10 +98,12 @@ class CategoryList extends StatelessWidget {
 
   Widget _buildColumnCard({
     required double width,
+    required int index,
     required String title,
     required VoidCallback onTap,
     required Widget imageWidget,
   }) {
+    final color = const Color(0xFF5D3EBC); // Purple border
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -108,23 +114,20 @@ class CategoryList extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-              width: width * 0.9, // Slightly smaller than full width to leave room for shadow
-              height: width * 0.9,
+              width: width, 
+              height: width,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: Colors.white,
+                border: Border.all(color: color.withOpacity(0.6), width: 1.5),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white, width: 2),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(14),
-                child: imageWidget,
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: imageWidget,
+                ),
               ),
             ),
             const SizedBox(height: 10),

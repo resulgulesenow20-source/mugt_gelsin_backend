@@ -15,6 +15,7 @@ class CompactFoodCard extends StatelessWidget {
   final String? restaurantId;
   final String? restaurantName;
   final double? minOrderAmount;
+  final double? deliveryFee;
   final bool restaurantIsOpen;
   final VoidCallback? onTap;
 
@@ -26,6 +27,7 @@ class CompactFoodCard extends StatelessWidget {
     this.restaurantId,
     this.restaurantName,
     this.minOrderAmount,
+    this.deliveryFee,
     this.restaurantIsOpen = true,
     this.onTap,
   });
@@ -57,7 +59,8 @@ class CompactFoodCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
+              SizedBox(
+                height: 155, // Sabit yükseklik, daha büyük resimler
                 child: Stack(
                   children: [
                     ClipRRect(
@@ -65,6 +68,7 @@ class CompactFoodCard extends StatelessWidget {
                       child: SizedBox(
                         key: _imageKey,
                         width: double.infinity,
+                        height: 155, // Resmin kutuyu tam doldurması için yüksekliği zorluyoruz
                         child: restaurantIsOpen
                             ? CachedNetworkImage(
                                 imageUrl: food.imageUrl,
@@ -102,7 +106,7 @@ class CompactFoodCard extends StatelessWidget {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: Colors.redAccent,
+                            color: const Color(0xFF5D3EBC), // Getir Blue
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
@@ -122,8 +126,9 @@ class CompactFoodCard extends StatelessWidget {
                 ),
               ),
               // WHITE TITLE AREA
-              Container(
-                width: double.infinity,
+              Expanded(
+                child: Container(
+                  width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 decoration: const BoxDecoration(
                   color: Colors.white,
@@ -131,6 +136,19 @@ class CompactFoodCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (restaurantName != null) ...[
+                      Text(
+                        restaurantName!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                    ],
                     Text(
                       food.name,
                       maxLines: 1,
@@ -142,22 +160,10 @@ class CompactFoodCard extends StatelessWidget {
                         letterSpacing: 0,
                       ),
                     ),
-                    if (restaurantName != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        restaurantName!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
-                          color: AppColors.textSecondary,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
 
                   ],
                 ),
+              ),
               ),
               // CLEAN ACTION AREA
               Padding(
@@ -172,7 +178,7 @@ class CompactFoodCard extends StatelessWidget {
                         Text(
                           "${food.price} TMT",
                           style: GoogleFonts.inter(
-                            color: Colors.black,
+                            color: const Color(0xFF22B573),
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
                           ),
@@ -210,6 +216,7 @@ class CompactFoodCard extends StatelessWidget {
                             restaurantId: restaurantId,
                             restaurantName: restaurantName,
                             minOrderAmount: minOrderAmount,
+                              deliveryFee: deliveryFee,
                           );
 
                           final navProvider = context.read<NavigationProvider>();
@@ -217,14 +224,7 @@ class CompactFoodCard extends StatelessWidget {
                             navProvider.runAddToCartAnimation!(_imageKey);
                           }
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text("${food.name} eklendi!"),
-                              duration: const Duration(seconds: 1),
-                              behavior: SnackBarBehavior.floating,
-                              backgroundColor: AppColors.primary,
-                            ),
-                          );
+                          // Snackbar kaldırıldı
                         } else {
                           CartDialogs.showDifferentRestaurantDialog(
                             context: context,
@@ -232,19 +232,13 @@ class CompactFoodCard extends StatelessWidget {
                             restaurantId: restaurantId,
                             restaurantName: restaurantName,
                             minOrderAmount: minOrderAmount,
+                              deliveryFee: deliveryFee,
                             onSuccess: () {
                               final navProvider = context.read<NavigationProvider>();
                               if (navProvider.runAddToCartAnimation != null) {
                                 navProvider.runAddToCartAnimation!(_imageKey);
                               }
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text("Sepet boşaltıldı ve ${food.name} eklendi!"),
-                                  duration: const Duration(seconds: 1),
-                                  behavior: SnackBarBehavior.floating,
-                                  backgroundColor: AppColors.primary,
-                                ),
-                              );
+                              // Snackbar kaldırıldı
                             },
                           );
                         }
@@ -254,12 +248,15 @@ class CompactFoodCard extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: restaurantIsOpen ? Colors.white : Colors.grey.shade300,
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey.shade200, width: 1.5),
+                          border: Border.all(
+                            color: restaurantIsOpen ? const Color(0xFF22C55E) : Colors.grey.shade200, 
+                            width: 1.5
+                          ),
                         ),
                         child: Icon(
                           restaurantIsOpen ? Icons.add_rounded : Icons.lock_outline_rounded,
                           size: 20,
-                          color: restaurantIsOpen ? const Color(0xFFFF6600) : Colors.grey.shade600,
+                          color: restaurantIsOpen ? const Color(0xFF5D3EBC) : Colors.grey.shade600,
                         ),
                       ),
                     ),

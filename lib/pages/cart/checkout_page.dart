@@ -13,7 +13,8 @@ import 'package:mugut_gelsin/services/api_service.dart';
 import 'package:mugut_gelsin/pages/profile/my_addresses_page.dart';
 import 'package:mugut_gelsin/models/campaign_model.dart';
 import 'package:mugut_gelsin/providers/language_provider.dart';
-
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
 
@@ -31,8 +32,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
   final TextEditingController _couponController = TextEditingController();
   
   Campaign? _appliedCampaign;
-  double _discountAmount = 0.0;
   bool _isCheckingCoupon = false;
+  bool _useWalletBalance = false;
 
   @override
   void dispose() {
@@ -69,6 +70,47 @@ class _CheckoutPageState extends State<CheckoutPage> {
     setState(() => _isCheckingCoupon = true);
 
     try {
+      final authProvider = context.read<app_auth.AuthProvider>();
+      final customerUid = authProvider.user?.uid;
+
+      if (code == 'MUGUT5' || code == 'ILK5') {
+        if (customerUid != null) {
+          final pastOrders = await FirebaseFirestore.instance.collection('Emirler').where('customerUid', isEqualTo: customerUid).get();
+          if (pastOrders.docs.isNotEmpty) {
+            throw "Bu kupon sadece ilk siparişinizde geçerlidir!";
+          }
+        }
+        
+        if (cart.totalPrice < 5) {
+          throw "${lang.get('below_min_amount')}: 5 TMT";
+        }
+
+        setState(() {
+          _appliedCampaign = Campaign(
+            id: 'ilk_siparis',
+            shopId: cart.restaurantId ?? '',
+            title: 'İlk Sipariş İndirimi',
+            description: 'İlk siparişinize özel 5 TMT indirim',
+            type: 'fixed',
+            value: 5.0,
+            code: code,
+            minAmount: 5.0,
+            isActive: true,
+          );
+          _discountAmount = 5.0;
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("${lang.get('coupon_applied')} 5.00 TMT"),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+        return;
+      }
+
       final apiService = ApiService();
       final campaigns = await apiService.fetchCampaigns();
       
@@ -171,6 +213,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
         await authProvider.updateUserData({'phone': customerPhone});
       }
 
+      double walletDiscount = 0.0;
+      if (_useWalletBalance) {
+        final double availableWallet = authProvider.walletBalance;
+        final double remainingTotal = cart.totalPrice - _discountAmount;
+        if (availableWallet > 0) {
+          walletDiscount = availableWallet >= remainingTotal ? remainingTotal : availableWallet;
+        }
+      }
+
       final orderRef = FirebaseFirestore.instance.collection('Emirler').doc();
       final firestoreId = orderRef.id;
 
@@ -188,10 +239,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
             .map((item) => "${item.quantity}x ${item.food.name}${item.note != null ? " (${item.note})" : ""}")
             .join(", "),
         'note': orderNote,
-        'total': (cart.totalPrice - _discountAmount).toStringAsFixed(2),
-        'totalPrice': cart.totalPrice - _discountAmount,
+        'total': (cart.totalPrice - _discountAmount - walletDiscount).toStringAsFixed(2),
+        'totalPrice': cart.totalPrice - _discountAmount - walletDiscount,
         'originalPrice': cart.totalPrice,
         'discountAmount': _discountAmount,
+        'walletDiscountAmount': walletDiscount,
         'couponCode': _appliedCampaign?.code,
         'status': 'onay bekliyor',
         'payment': _paymentMethod == 'online_kart' ? lang.get('online_payment') : (_paymentMethod == 'kapida_nakit' ? lang.get('cash_on_delivery') : lang.get('card_on_delivery')),
@@ -213,12 +265,62 @@ class _CheckoutPageState extends State<CheckoutPage> {
       };
 
       await orderRef.set(orderData);
+      
+      final double orderFinalPrice = cart.totalPrice - _discountAmount;
+      final double earnedReward = orderFinalPrice >= 60.0 ? 2.0 : 0.0;
+
+      if (customerUid != null) {
+        final userRef = FirebaseFirestore.instance.collection('users').doc(customerUid);
+        // Kazanılan miktar eklenirken, eğer cüzdandan harcanan varsa o da düşülüyor (net değişim)
+        final double netChange = earnedReward - walletDiscount;
+        if (netChange != 0.0) {
+          await userRef.set({
+            'walletBalance': FieldValue.increment(netChange),
+          }, SetOptions(merge: true));
+        }
+      }
 
       cart.clearCart();
       if (mounted) {
         final navProvider = context.read<NavigationProvider>();
+        final rootContext = Navigator.of(context, rootNavigator: true).context;
+        
         Navigator.pop(context);
         navProvider.switchToOrdersWithTracking(firestoreId);
+
+        Future.delayed(const Duration(milliseconds: 400), () {
+          showDialog(
+            context: rootContext,
+            barrierDismissible: false,
+            builder: (BuildContext dialogContext) {
+              return AlertDialog(
+                backgroundColor: Colors.grey.shade200,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                title: Row(
+                  children: [
+                    Icon(earnedReward > 0 ? Icons.stars : Icons.check_circle, 
+                         color: earnedReward > 0 ? Colors.amber : AppColors.primary, size: 28),
+                    const SizedBox(width: 8),
+                    Text(earnedReward > 0 ? "Tebrikler!" : "Sargyt Alyndy", 
+                         style: const TextStyle(color: Colors.black)),
+                  ],
+                ),
+                content: Text(
+                  earnedReward > 0 
+                    ? "Bizi saýlanyňyz üçin minnetdar, gazanan 2 TMT bol-bol üýşüriň!"
+                    : "Sargydyňyz üstünlikli alyndy. Bizi saýlanyňyz üçin minnetdar!",
+                  style: const TextStyle(fontSize: 16, color: Colors.black),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    child: const Text("Tamam", style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              );
+            },
+          );
+        });
       }
 
     } catch (e) {
@@ -237,6 +339,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
     }
   }
 
+  double _discountAmount = 0.0;
+
   @override
   Widget build(BuildContext context) {
     final cartProvider = context.watch<CartProvider>();
@@ -252,9 +356,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(langProvider.get('complete_order')),
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textPrimary,
+        title: Text(langProvider.get('complete_order'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18, letterSpacing: -0.5, color: Colors.black)),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+        centerTitle: true,
       ),
       body: Stack(
         children: [
@@ -269,45 +375,47 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       Text(
                         langProvider.get('delivery_address'),
                         style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                            fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
                       ),
                       const SizedBox(height: 10),
                       _buildAddressCard(selectedAddress, langProvider),
                       const SizedBox(height: 25),
                       Text(
                         langProvider.get('payment_methods'),
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
                       ),
                       const SizedBox(height: 10),
                       _buildPaymentMethods(context, langProvider),
                       const SizedBox(height: 25),
                       Text(
                         langProvider.get('full_name'),
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
                       ),
                       const SizedBox(height: 10),
                       _buildTextField(_nameController, langProvider.get('full_name'), Icons.person, TextInputType.name),
                       const SizedBox(height: 20),
                       Text(
                         langProvider.get('phone_label'),
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
                       ),
                       const SizedBox(height: 10),
                       _buildTextField(_phoneController, langProvider.get('phone_label'), Icons.phone, TextInputType.phone, maxLength: 8),
                       const SizedBox(height: 20),
                       Text(
                         langProvider.get('order_note'),
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
                       ),
                       const SizedBox(height: 10),
                       _buildTextField(_noteController, "...", Icons.note_add, TextInputType.text),
                       const SizedBox(height: 10),
                       _buildCouponInput(cartProvider, langProvider),
+                      const SizedBox(height: 15),
+                      _buildWalletToggle(context.read<app_auth.AuthProvider>()),
                       const SizedBox(height: 25),
                       Text(
                         langProvider.get('order_summary'),
                         style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                            fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
                       ),
                       const SizedBox(height: 10),
                       ListView.builder(
@@ -380,37 +488,79 @@ class _CheckoutPageState extends State<CheckoutPage> {
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.black.withOpacity(0.1)),
         ),
-        child: Row(
+        child: Column(
           children: [
-            const Icon(Icons.location_on, color: AppColors.primary),
-            const SizedBox(width: 12),
-            Expanded(
-              child: selectedAddress != null
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+            if (selectedAddress != null && selectedAddress.latitude != null && selectedAddress.longitude != null)
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(11)),
+                child: SizedBox(
+                  height: 120,
+                  width: double.infinity,
+                  child: IgnorePointer(
+                    child: FlutterMap(
+                      options: MapOptions(
+                        initialCenter: LatLng(selectedAddress.latitude!, selectedAddress.longitude!),
+                        initialZoom: 15.0,
+                      ),
                       children: [
-                        Text(
-                          selectedAddress.title,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        TileLayer(
+                          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                          userAgentPackageName: 'com.mugut.gelsin',
                         ),
-                        Text(
-                          selectedAddress.fullAddress,
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 13,
-                          ),
+                        MarkerLayer(
+                          markers: [
+                            Marker(
+                              point: LatLng(selectedAddress.latitude!, selectedAddress.longitude!),
+                              width: 40,
+                              height: 40,
+                              child: const Icon(
+                                Icons.location_on,
+                                color: AppColors.primary,
+                                size: 40,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
-                    )
-                  : Text(lang.get('please_add_address')),
+                    ),
+                  ),
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  const Icon(Icons.location_on, color: AppColors.primary),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: selectedAddress != null
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                selectedAddress.title,
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                selectedAddress.fullAddress,
+                                style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          )
+                        : Text(lang.get('please_add_address')),
+                  ),
+                  const Icon(Icons.chevron_right, color: Colors.grey),
+                ],
+              ),
             ),
-            const Icon(Icons.chevron_right, color: Colors.grey),
           ],
         ),
       ),
@@ -435,7 +585,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isSelected ? AppColors.primary : Colors.black.withOpacity(0.1),
+          color: isSelected ? const Color(0xFF56AA86) : Colors.black.withOpacity(0.1),
           width: isSelected ? 2 : 1,
         ),
       ),
@@ -444,8 +594,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
         groupValue: _paymentMethod,
         onChanged: (val) => setState(() => _paymentMethod = val!),
         title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-        secondary: Icon(icon, color: isSelected ? AppColors.textPrimary : Colors.grey),
-        activeColor: AppColors.textPrimary,
+        secondary: Icon(icon, color: isSelected ? const Color(0xFF56AA86) : Colors.grey),
+        activeColor: const Color(0xFF56AA86),
       ),
     );
   }
@@ -456,8 +606,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
     Address? address,
     LanguageProvider lang,
   ) {
+    double walletDiscount = 0.0;
+    if (_useWalletBalance) {
+      final authProvider = context.read<app_auth.AuthProvider>();
+      final double availableWallet = authProvider.walletBalance;
+      final double remainingTotal = cart.totalPrice - _discountAmount;
+      if (availableWallet > 0) {
+        walletDiscount = availableWallet >= remainingTotal ? remainingTotal : availableWallet;
+      }
+    }
+
     final double minOrderAmount = cart.minOrderAmount;
-    final bool isBelowMinOrder = cart.totalPrice < minOrderAmount;
+    final bool isBelowMinOrder = (cart.totalPrice - _discountAmount - walletDiscount) < minOrderAmount;
     final paymentProvider = context.read<PaymentProvider>();
     return Container(
       padding: const EdgeInsets.all(20),
@@ -475,7 +635,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
               children: [
                 Text(lang.get('total_price'), style: const TextStyle(fontSize: 16)),
                 Text(
-                  "${(cart.totalPrice - _discountAmount).toStringAsFixed(2)} TMT",
+                  "${(cart.totalPrice - _discountAmount - walletDiscount).toStringAsFixed(2)} TMT",
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -506,13 +666,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 decoration: BoxDecoration(
                   gradient: isBelowMinOrder
                       ? LinearGradient(colors: [Colors.grey.shade300, Colors.grey.shade400])
-                      : AppColors.orangeGradient,
+                      : const LinearGradient(colors: [Color(0xFFC4E193), Color(0xFF56AA86)]),
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: isBelowMinOrder
                       ? []
                       : [
                           BoxShadow(
-                            color: AppColors.primary.withOpacity(0.3),
+                            color: const Color(0xFF56AA86).withOpacity(0.3),
                             blurRadius: 12,
                             offset: const Offset(0, 6),
                           ),
@@ -579,6 +739,49 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWalletToggle(app_auth.AuthProvider auth) {
+    final double balance = auth.walletBalance;
+    if (balance <= 0) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Cüzdan Bakiyesini Kullan',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                ),
+                Text(
+                  'Kullanılabilir Bakiye: ${balance.toStringAsFixed(2)} TMT',
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: _useWalletBalance,
+            activeColor: AppColors.primary,
+            onChanged: (val) {
+              setState(() {
+                _useWalletBalance = val;
+              });
+            },
+          ),
         ],
       ),
     );

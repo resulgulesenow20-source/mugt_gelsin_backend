@@ -1,3 +1,6 @@
+import 'delivery_zone_model.dart';
+import '../utils/distance_helper.dart';
+
 // ✅ FOOD MODELİ
 class Food {
   final String id; // ✅ Ürünleri tekil saptamak için ID eklendi
@@ -7,6 +10,7 @@ class Food {
   final String imageUrl;
   final bool isCampaign; // ✅ Kampanyalı mı
   final double? oldPrice; // ✅ Eski fiyatı
+  final bool isDailyOffer; // ✅ Günün teklifi mi
 
   Food({
     required this.id,
@@ -16,6 +20,7 @@ class Food {
     required this.imageUrl,
     this.isCampaign = false,
     this.oldPrice,
+    this.isDailyOffer = false,
   });
 
   Map<String, dynamic> toJson() => {
@@ -26,6 +31,7 @@ class Food {
     'imageUrl': imageUrl,
     'isCampaign': isCampaign,
     'oldPrice': oldPrice,
+    'isDailyOffer': isDailyOffer,
   };
 
   factory Food.fromJson(Map<String, dynamic> json) => Food(
@@ -36,6 +42,7 @@ class Food {
     imageUrl: json['imageUrl'] ?? '',
     isCampaign: json['isCampaign'] == true,
     oldPrice: (json['oldPrice'] as num?)?.toDouble(),
+    isDailyOffer: json['isDailyOffer'] == true,
   );
 
   @override
@@ -54,6 +61,7 @@ class FoodWithRestaurant {
   final String restaurantName;
   final double? minOrderAmount;
   final bool restaurantIsOpen;
+  final String? deliveryTime;
 
   FoodWithRestaurant({
     required this.food,
@@ -61,6 +69,7 @@ class FoodWithRestaurant {
     required this.restaurantName,
     this.minOrderAmount,
     this.restaurantIsOpen = true,
+    this.deliveryTime,
   });
 
   Map<String, dynamic> toJson() => {
@@ -69,6 +78,7 @@ class FoodWithRestaurant {
     'restaurantName': restaurantName,
     'minOrderAmount': minOrderAmount,
     'restaurantIsOpen': restaurantIsOpen,
+    'deliveryTime': deliveryTime,
   };
 
   factory FoodWithRestaurant.fromJson(Map<String, dynamic> json) => FoodWithRestaurant(
@@ -77,6 +87,7 @@ class FoodWithRestaurant {
     restaurantName: json['restaurantName'] ?? '',
     minOrderAmount: (json['minOrderAmount'] as num?)?.toDouble(),
     restaurantIsOpen: json['restaurantIsOpen'] ?? true,
+    deliveryTime: json['deliveryTime'],
   );
 }
 
@@ -98,7 +109,9 @@ class Restaurant {
   final double? latitude;
   final double? longitude;
   final String city;
+  final String address;
   final List<String> deliveryDistricts;
+  final List<DeliveryZone> deliveryZones;
 
   Restaurant({
     required this.id,
@@ -116,8 +129,10 @@ class Restaurant {
     this.closingTime,
     this.latitude,
     this.longitude,
-    this.city = 'Aşkabat',
+    this.city = 'Aşgabat',
+    this.address = '',
     this.deliveryDistricts = const [],
+    this.deliveryZones = const [],
   });
 
   Map<String, dynamic> toJson() => {
@@ -137,28 +152,97 @@ class Restaurant {
     'latitude': latitude,
     'longitude': longitude,
     'city': city,
+    'address': address,
     'deliveryDistricts': deliveryDistricts,
+    'deliveryZones': deliveryZones.map((z) => z.toMap()).toList(),
   };
 
-  factory Restaurant.fromJson(Map<String, dynamic> json) => Restaurant(
-    id: json['id'] ?? '',
-    docId: json['docId'],
-    name: json['name'] ?? '',
-    imageUrl: json['imageUrl'] ?? '',
-    rating: json['rating'] ?? '0.0',
-    deliveryTime: json['deliveryTime'] ?? '',
-    category: json['category'] ?? '',
-    minOrderAmount: (json['minOrderAmount'] as num?)?.toDouble() ?? 0.0,
-    isFavorite: json['isFavorite'] ?? false,
-    menu: (json['menu'] as List<dynamic>?)?.map((f) => Food.fromJson(f)).toList() ?? [],
-    isOpen: json['isOpen'] != false,
-    openingTime: json['openingTime'],
-    closingTime: json['closingTime'],
-    latitude: (json['latitude'] as num?)?.toDouble(),
-    longitude: (json['longitude'] as num?)?.toDouble(),
-    city: json['city']?.toString() ?? json['region']?.toString() ?? json['Bölge']?.toString() ?? 'Aşkabat',
-    deliveryDistricts: (json['deliveryDistricts'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
-  );
+  factory Restaurant.fromJson(Map<String, dynamic> json) {
+    String rawCity = json['city']?.toString() ?? json['region']?.toString() ?? json['Bölge']?.toString() ?? 'Aşkabat';
+    String rawAddress = json['address']?.toString() ?? json['adres']?.toString() ?? rawCity;
+    String rawCityLower = rawCity.toLowerCase().replaceAll('ş', 's').replaceAll('ý', 'y').replaceAll('ı', 'i');
+    String rawAddressLower = rawAddress.toLowerCase().replaceAll('ş', 's').replaceAll('ý', 'y').replaceAll('ı', 'i');
+    
+    if (rawCityLower.contains('turkmenbasi') || rawCityLower.contains('turkmenbasy') || rawCityLower.contains('turkmenbashy') ||
+        rawAddressLower.contains('turkmenbasi') || rawAddressLower.contains('turkmenbasy') || rawAddressLower.contains('turkmenbashy')) {
+      rawCity = 'Türkmenbaşı';
+    }
+
+    return Restaurant(
+      id: json['id'] ?? '',
+      docId: json['docId'],
+      name: json['name'] ?? json['isim'] ?? 'İsimsiz Restoran',
+      imageUrl: json['imageUrl'] ?? '',
+      rating: json['rating'] ?? '0.0',
+      deliveryTime: json['deliveryTime'] ?? '',
+      category: json['category'] ?? '',
+      minOrderAmount: (json['minOrderAmount'] as num?)?.toDouble() ?? 0.0,
+      isFavorite: json['isFavorite'] ?? false,
+      menu: (json['menu'] as List<dynamic>?)?.map((f) => Food.fromJson(f)).toList() ?? [],
+      isOpen: json['isOpen'] != false,
+      openingTime: json['openingTime'],
+      closingTime: json['closingTime'],
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
+      city: rawCity,
+      address: rawAddress,
+      deliveryDistricts: (json['deliveryDistricts'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+    );
+  }
+  DeliveryZone? getActiveZone(double? userLat, double? userLng, {String? userRegion, String? userDistrict}) {
+    if (deliveryZones.isEmpty) return null;
+    
+    bool hasValidUserCoords = userLat != null && userLng != null;
+    bool hasValidResCoords = latitude != null && longitude != null;
+
+    String targetRegion = (userDistrict != null && userDistrict.isNotEmpty) ? userDistrict : (userRegion ?? '');
+
+    if ((!hasValidUserCoords || !hasValidResCoords) && targetRegion.isNotEmpty) {
+      String normCurrent = targetRegion.toLowerCase().trim().replaceAll(RegExp(r'\s+'), '');
+      for (var zone in deliveryZones) {
+        String normZone = zone.name.toLowerCase().trim().replaceAll(RegExp(r'\s+'), '');
+        if (normZone.contains(normCurrent) || normCurrent.contains(normZone)) {
+          return zone;
+        }
+      }
+    }
+
+    double uLat = userLat ?? 37.935;
+    double uLng = userLng ?? 58.390;
+    
+    double resLat = latitude ?? (37.935 + (id.hashCode % 100) / 1000.0 - 0.05);
+    double resLng = longitude ?? (58.390 + ((id.hashCode ~/ 100) % 100) / 1000.0 - 0.05);
+    double distance = DistanceHelper.calculateDistance(uLat, uLng, resLat, resLng);
+
+    for (var zone in deliveryZones) {
+      if (zone.polygonPoints.isNotEmpty) {
+        if (DistanceHelper.isPointInPolygon(uLat, uLng, zone.polygonPoints)) {
+          return zone;
+        }
+      }
+    }
+    
+    for (var zone in deliveryZones) {
+      if (zone.polygonPoints.isEmpty) {
+        if (distance <= zone.radius) {
+          return zone;
+        }
+      }
+    }
+    
+    // Fallback: Name matching if polygon/radius didn't match, or if coords were invalid earlier
+    if (targetRegion.isNotEmpty) {
+      String normCurrent = targetRegion.toLowerCase().trim().replaceAll(RegExp(r'\s+'), '');
+      for (var zone in deliveryZones) {
+         String normZone = zone.name.toLowerCase().trim().replaceAll(RegExp(r'\s+'), '');
+         if (normZone.contains(normCurrent) || normCurrent.contains(normZone)) {
+           return zone;
+         }
+      }
+    }
+
+    return null;
+  }
 
   @override
   bool operator ==(Object other) =>

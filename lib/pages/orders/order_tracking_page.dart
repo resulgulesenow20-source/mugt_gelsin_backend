@@ -7,6 +7,7 @@ import 'package:mugut_gelsin/pages/orders/widgets/premium_review_dialog.dart';
 import 'package:mugut_gelsin/pages/profile/live_support_page.dart';
 import 'package:mugut_gelsin/providers/language_provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:intl/intl.dart';
 
 class OrderTrackingPage extends StatefulWidget {
   final String orderId;
@@ -23,18 +24,13 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
   void _showReviewDialogIfNeeded(OrderModel order) {
     if (order.status == OrderStatus.delivered && !order.isRated && !_dialogShown) {
       _dialogShown = true;
-      
-      // Build tamamlandıktan sonra dialog'u göster
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!mounted) return;
-        
         await showDialog(
           context: context,
-          barrierDismissible: false, // Değerlendirme yapmadan geçmesin (veya çıkınca pop olsun)
+          barrierDismissible: false,
           builder: (context) => PremiumReviewDialog(order: order),
         );
-        
-        // Dialog kapandığında (puan verildikten veya vazgeçildikten sonra) takip sayfasından çık
         if (mounted) {
           Navigator.of(context).pop();
         }
@@ -47,14 +43,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
     final langProvider = context.watch<LanguageProvider>();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(langProvider.translate('order_tracking')),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
-        elevation: 0,
-        centerTitle: true,
-      ),
+      backgroundColor: const Color(0xFFF8F9FB), // Light background for contrast
       body: StreamBuilder<OrderModel?>(
         stream: context.read<OrderTrackingProvider>().trackOrder(widget.orderId),
         builder: (context, snapshot) {
@@ -66,314 +55,457 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
           }
           final order = snapshot.data!;
           
-          // Otomatik değerlendirme kontrolü
           if (order.status == OrderStatus.delivered && !order.isRated) {
             _showReviewDialogIfNeeded(order);
           }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                _buildHeader(order, langProvider),
-                const SizedBox(height: 24),
-                _buildStatusTimeline(order, langProvider),
-                const SizedBox(height: 24),
-                _buildOrderDetails(order, langProvider),
-                if (order.status == OrderStatus.delivered && !order.isRated) ...[
-                  const SizedBox(height: 24),
-                  _buildRateButton(context, order, langProvider),
-                ],
-                const SizedBox(height: 40),
-                _buildSupportButton(context, langProvider),
-              ],
-            ),
+          return Stack(
+            children: [
+              // 1. Top 3D Banner
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.45,
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: Image.asset(
+                          'assets/images/delivery_map_banner.png',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      // Gradient overlay at bottom to blend smoothly
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: 100,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                const Color(0xFFF8F9FB).withOpacity(0.5),
+                                const Color(0xFFF8F9FB),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Status Chip Overlay
+                      Positioned(
+                        bottom: 60,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primary.withOpacity(0.3),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 5),
+                                )
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  _getStatusTitle(order.status, langProvider),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _getStatusSubtitle(order.status, langProvider, order.courierName),
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Back button & Support button
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 10,
+                left: 16,
+                right: 16,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    InkWell(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.arrow_back, color: Colors.black, size: 20),
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const LiveSupportPage()),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.headset_mic_rounded, color: Colors.black, size: 16),
+                            const SizedBox(width: 8),
+                            Text(
+                              langProvider.get('support') ?? "Destek",
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // 2. White Card (Order details & Timeline)
+              Positioned(
+                top: MediaQuery.of(context).size.height * 0.40,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                  ),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: const Icon(Icons.shopping_bag_outlined, color: AppColors.primary),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Sipariş No #${order.id.length >= 5 ? order.id.substring(0, 5).toUpperCase() : order.id.toUpperCase()}",
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    DateFormat('dd/MM/yyyy • HH:mm').format(order.timestamp),
+                                    style: const TextStyle(
+                                      color: Colors.black54,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFDF73), // Yellow button
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Row(
+                                children: [
+                                  Text(
+                                    "Detaylar",
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  Icon(Icons.chevron_right, size: 18),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        
+                        const SizedBox(height: 32),
+                        
+                        // Horizontal Timeline
+                        _buildHorizontalTimeline(order, langProvider),
+
+                        const SizedBox(height: 40),
+
+                        // Courier Card
+                        if (order.status.index >= OrderStatus.onWay.index && order.courierName != null)
+                          _buildCourierCard(order, langProvider),
+                          
+                        const SizedBox(height: 100),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           );
         },
       ),
     );
   }
 
-  Widget _buildHeader(OrderModel order, LanguageProvider langProvider) {
+  Widget _buildHorizontalTimeline(OrderModel order, LanguageProvider langProvider) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double width = constraints.maxWidth;
+        final double stepWidth = (width - 48) / 3; // 4 nodes -> 3 lines
+
+        return Column(
+          children: [
+            SizedBox(
+              height: 50,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Connecting lines
+                  Positioned(
+                    left: 24,
+                    right: 24,
+                    child: Row(
+                      children: [
+                        _buildTimelineLine(stepWidth, order.status.index >= OrderStatus.preparing.index),
+                        _buildTimelineLine(stepWidth, order.status.index >= OrderStatus.onWay.index),
+                        _buildTimelineLine(stepWidth, order.status.index >= OrderStatus.delivered.index),
+                      ],
+                    ),
+                  ),
+                  // Nodes
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildTimelineNode(true, true, Icons.check),
+                      _buildTimelineNode(order.status.index >= OrderStatus.preparing.index, order.status.index >= OrderStatus.preparing.index, Icons.check),
+                      _buildTimelineNode(order.status.index >= OrderStatus.onWay.index, false, Icons.pedal_bike),
+                      _buildTimelineNode(order.status.index >= OrderStatus.delivered.index, false, Icons.home_outlined),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            // Text labels
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildTimelineText("Sipariş Alındı", "09:30", true, 60),
+                _buildTimelineText("Hazırlanıyor", "09:35", order.status.index >= OrderStatus.preparing.index, 70),
+                _buildTimelineText("Yolda", "09:45", order.status.index >= OrderStatus.onWay.index, 60),
+                _buildTimelineText("Teslim Edildi", "--:--", order.status.index >= OrderStatus.delivered.index, 70),
+              ],
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildTimelineLine(double width, bool isCompleted) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      width: width,
+      height: 3,
+      color: isCompleted ? const Color(0xFFFFDF73) : Colors.grey.shade300,
+    );
+  }
+
+  Widget _buildTimelineNode(bool isActive, bool isCheck, IconData icon) {
+    if (isActive && isCheck) {
+      return Container(
+        width: 48,
+        height: 48,
+        decoration: const BoxDecoration(
+          color: Color(0xFFFFDF73),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(Icons.check, color: Colors.black, size: 24),
+      );
+    } else if (isActive && !isCheck) {
+      return Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.primary, width: 2),
+        ),
+        child: Container(
+          margin: const EdgeInsets.all(4),
+          decoration: const BoxDecoration(
+            color: AppColors.primary,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: Colors.white, size: 20),
+        ),
+      );
+    } else {
+      return Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.grey.shade300, width: 2),
+        ),
+        child: Icon(icon, color: Colors.grey.shade400, size: 20),
+      );
+    }
+  }
+
+  Widget _buildTimelineText(String title, String time, bool isActive, double width) {
+    return SizedBox(
+      width: width,
+      child: Column(
+        children: [
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+              color: isActive ? Colors.black87 : Colors.grey.shade500,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            time,
+            style: TextStyle(
+              fontSize: 11,
+              color: isActive ? Colors.black54 : Colors.grey.shade400,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCourierCard(OrderModel order, LanguageProvider langProvider) {
+    return Container(
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: AppColors.softShadow,
+        color: const Color(0xFFF8F9FB),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: Row(
         children: [
+          // Avatar
           Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+            width: 50,
+            height: 50,
+            decoration: const BoxDecoration(
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.shopping_bag_rounded, color: AppColors.primary),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(25),
+              child: Image.asset('assets/images/courier_avatar.png', fit: BoxFit.cover),
+            ),
           ),
           const SizedBox(width: 16),
+          // Info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  order.shopName,
-                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
+                const Text(
+                  "Kurye",
+                  style: TextStyle(fontSize: 12, color: Colors.black54),
                 ),
+                const SizedBox(height: 2),
                 Text(
-                  "${langProvider.translate('order_no')}: ${order.id.substring(0, 8).toUpperCase()}",
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                  order.courierName ?? "Kurye",
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(Icons.star, color: Colors.amber, size: 16),
+                    const SizedBox(width: 4),
+                    const Text(
+                      "4.9",
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                "${order.totalPrice.toStringAsFixed(2)} TMT",
-                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: AppColors.primary),
-              ),
-              Text(langProvider.translate('total_price'), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-            ],
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildStatusTimeline(OrderModel order, LanguageProvider langProvider) {
-    final status = order.status;
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: AppColors.softShadow,
-      ),
-      child: Column(
-        children: [
-          _buildTimelineStep(
-            langProvider.translate('order_received'),
-            langProvider.translate('order_received_desc'),
-            Icons.check_circle_rounded,
-            status.index >= OrderStatus.pending.index,
-            status.index == OrderStatus.pending.index,
-            langProvider,
-          ),
-          _buildTimelineDivider(status.index > OrderStatus.pending.index),
-          _buildTimelineStep(
-            langProvider.translate('preparing'),
-            langProvider.translate('preparing_desc'),
-            Icons.restaurant_rounded,
-            status.index >= OrderStatus.preparing.index,
-            status.index == OrderStatus.preparing.index,
-            langProvider,
-          ),
-          _buildTimelineDivider(status.index > OrderStatus.preparing.index),
-          _buildTimelineStep(
-            langProvider.translate('on_the_way'),
-            order.status == OrderStatus.onWay && order.courierName != null
-                ? "${order.shopName} ${langProvider.get('courier') ?? 'kuryesi'} ${order.courierName} ${langProvider.get('on_the_way_desc')}"
-                : langProvider.get('on_the_way_desc'),
-            Icons.delivery_dining_rounded,
-            status.index >= OrderStatus.onWay.index,
-            status.index == OrderStatus.onWay.index,
-            langProvider,
-          ),
-          _buildTimelineDivider(status.index > OrderStatus.onWay.index),
-          _buildTimelineStep(
-            langProvider.translate('delivered'),
-            langProvider.translate('enjoy_meal'),
-            Icons.home_rounded,
-            status.index >= OrderStatus.delivered.index,
-            status.index == OrderStatus.delivered.index,
-            langProvider,
-          ),
-        ],
-      ),
-    );
+  String _getStatusTitle(OrderStatus status, LanguageProvider langProvider) {
+    switch (status) {
+      case OrderStatus.pending:
+        return "Sipariş Alındı";
+      case OrderStatus.preparing:
+        return "Hazırlanıyor";
+      case OrderStatus.onWay:
+        return "Yolda";
+      case OrderStatus.delivered:
+        return "Teslim Edildi";
+      case OrderStatus.cancelled:
+        return "İptal Edildi";
+    }
   }
 
-  Widget _buildTimelineStep(String title, String desc, IconData icon, bool isCompleted, bool isActive, LanguageProvider langProvider) {
-    Color color = isCompleted ? AppColors.primary : Colors.grey.shade300;
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: color, size: 24),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 15,
-                  color: isCompleted ? AppColors.textPrimary : Colors.grey,
-                ),
-              ),
-              Text(
-                desc,
-                style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
-              ),
-            ],
-          ),
-        ),
-        if (isActive)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(langProvider.translate('now'), style: const TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold)),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildTimelineDivider(bool isCompleted) {
-    return Container(
-      margin: const EdgeInsets.only(left: 20),
-      height: 30,
-      width: 2,
-      color: isCompleted ? AppColors.primary : Colors.grey.shade200,
-    );
-  }
-
-  Widget _buildOrderDetails(OrderModel order, LanguageProvider langProvider) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: AppColors.softShadow,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(langProvider.translate('order_summary'), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
-          const SizedBox(height: 16),
-          ...order.items.map((item) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: CachedNetworkImage(
-                    imageUrl: item.imageUrl ?? '',
-                    width: 40,
-                    height: 40,
-                    fit: BoxFit.cover,
-                    errorWidget: (context, url, error) => Container(
-                      width: 40,
-                      height: 40,
-                      color: Colors.grey[200],
-                      child: const Icon(Icons.fastfood, color: Colors.grey, size: 16),
-                    ),
-                    placeholder: (context, url) => Container(
-                      width: 40,
-                      height: 40,
-                      color: Colors.grey[100],
-                      child: const Center(
-                        child: SizedBox(
-                          width: 12,
-                          height: 12,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 1.5,
-                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    "${item.quantity}x ${item.name}",
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                ),
-                Text(
-                  "${item.price.toStringAsFixed(2)} TMT",
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-              ],
-            ),
-          )),
-          const Divider(height: 32),
-          Text(langProvider.translate('delivery_address'), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(Icons.location_on_rounded, color: Colors.grey, size: 18),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  order.deliveryAddress,
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSupportButton(BuildContext context, LanguageProvider langProvider) {
-    return SizedBox(
-      width: double.infinity,
-      height: 60,
-      child: ElevatedButton.icon(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const LiveSupportPage()),
-          );
-        },
-        icon: const Icon(Icons.support_agent_rounded, color: Colors.white),
-        label: Text(langProvider.translate('connect_support'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.textPrimary,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          elevation: 0,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRateButton(BuildContext context, OrderModel order, LanguageProvider langProvider) {
-    return SizedBox(
-      width: double.infinity,
-      height: 60,
-      child: ElevatedButton.icon(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) => PremiumReviewDialog(order: order),
-          ).then((_) {
-            // Dialog elle kapatıldığında da çıkmak gerekirse eklenebilir
-          });
-        },
-        icon: const Icon(Icons.star_rate_rounded, color: Colors.amber),
-        label: Text(langProvider.translate('rate_order'), style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.amber.withOpacity(0.2),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          elevation: 0,
-        ),
-      ),
-    );
+  String _getStatusSubtitle(OrderStatus status, LanguageProvider langProvider, String? courier) {
+    switch (status) {
+      case OrderStatus.pending:
+        return "Restoran siparişi onayladı.";
+      case OrderStatus.preparing:
+        return "Siparişiniz hazırlanıyor.";
+      case OrderStatus.onWay:
+        return "Siparişiniz adresinize doğru yolda.";
+      case OrderStatus.delivered:
+        return "Siparişiniz teslim edildi. Afiyet olsun!";
+      case OrderStatus.cancelled:
+        return "Bu sipariş iptal edilmiştir.";
+    }
   }
 }

@@ -7,9 +7,12 @@ import 'package:mugut_gelsin/providers/language_provider.dart';
 import 'package:mugut_gelsin/providers/address_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mugut_gelsin/presentation/common/widgets/hover_wrapper.dart';
+import 'package:mugut_gelsin/presentation/common/widgets/restaurant_rating_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:math' as math;
 import 'package:mugut_gelsin/models/campaign_model.dart';
+import 'package:mugut_gelsin/providers/auth_provider.dart';
+import 'package:mugut_gelsin/providers/region_provider.dart';
 
 class RestaurantCard extends StatelessWidget {
   final Restaurant res;
@@ -89,12 +92,12 @@ class RestaurantCard extends StatelessWidget {
           ),
         );
       },
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(8),
       child: HoverWrapper(
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.04),
@@ -112,7 +115,7 @@ class RestaurantCard extends StatelessWidget {
                 child: Stack(
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(6),
                       child: res.isOpen
                         ? CachedNetworkImage(
                             imageUrl: res.imageUrl,
@@ -266,15 +269,12 @@ class RestaurantCard extends StatelessWidget {
                         const SizedBox(width: 8),
                         Row(
                           children: [
-                            const Icon(Icons.star_rounded, color: Color(0xFF5D3EBC), size: 16), // Purple star
+                            const Icon(Icons.star_rounded, color: Colors.orange, size: 16), // Orange star
                             const SizedBox(width: 2),
-                            Text(
-                              "${res.rating} (1500+)", // Mocked review count for UI fidelity
-                              style: GoogleFonts.inter(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF5D3EBC), // Purple text
-                              ),
+                            RestaurantRatingText(
+                              restaurantId: res.id,
+                              docId: res.docId,
+                              rating: res.rating,
                             ),
                           ],
                         ),
@@ -301,13 +301,39 @@ class RestaurantCard extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 4),
-                            Text(
-                              "${res.deliveryTime} • Min ${res.minOrderAmount.toStringAsFixed(0)} TMT",
-                              style: GoogleFonts.inter(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFF757D8A), // Gray text
-                              ),
+                            Builder(
+                              builder: (context) {
+                                final addressProvider = Provider.of<AddressProvider>(context, listen: false);
+                                final defaultAddress = addressProvider.defaultAddress;
+                                double? userLat = defaultAddress?.latitude;
+                                double? userLng = defaultAddress?.longitude;
+                                
+                                final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                                final regionProvider = Provider.of<RegionProvider>(context, listen: false);
+                                String? currentRegion;
+                                String? currentDistrict;
+                                if (authProvider.isLoggedIn && defaultAddress != null) {
+                                  currentRegion = defaultAddress.city;
+                                  currentDistrict = defaultAddress.district;
+                                } else {
+                                  currentRegion = regionProvider.selectedGuestRegion;
+                                }
+
+                                final activeZone = res.getActiveZone(userLat, userLng, userRegion: currentRegion, userDistrict: currentDistrict);
+                                double displayMinOrder = activeZone != null ? activeZone.minOrder : res.minOrderAmount;
+                                String displayDeliveryTime = activeZone != null && activeZone.deliveryTime.isNotEmpty
+                                    ? activeZone.deliveryTime 
+                                    : res.deliveryTime;
+                                
+                                return Text(
+                                  "$displayDeliveryTime • Min ${displayMinOrder.toStringAsFixed(0)} TMT",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                    color: const Color(0xFF757D8A),
+                                  ),
+                                );
+                              }
                             ),
                           ],
                         ),

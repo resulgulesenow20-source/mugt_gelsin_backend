@@ -104,6 +104,7 @@ class OrderModel {
       case 'onway':
         return OrderStatus.onWay;
       case 'iptal_edildi':
+      case 'iptal edildi':
       case 'cancelled':
         return OrderStatus.cancelled;
       case 'teslim_edildi':
